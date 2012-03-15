@@ -131,7 +131,7 @@ enum eHiraSnowdawn
     SPELL_COLD_WEATHER_FLYING                   = 54197
 };
 
-#define GOSSIP_TEXT_TRAIN_HIRA "I seek training to ride a steed."
+#define GOSSIP_TEXT_TRAIN_HIRA "Je cherche une formation de monte."
 
 class npc_hira_snowdawn : public CreatureScript
 {
@@ -166,8 +166,52 @@ public:
     }
 };
 
+/*######
+
+## go_memorial_lich_king_movie
+
+######*/
+
+enum GOSSIPS
+
+{
+        FALL_OF_THE_LICH_KING,
+};
+
+#define GOSSIP_TEXT_SEE_FALL_OF_THE_LICH_KING "Regarder la chute du Roi-Liche."
+#define GOSSIP_MESSAGE_MEMORIAL 15921
+
+class go_memorial_lich_king_movie : public GameObjectScript
+{
+public:
+        go_memorial_lich_king_movie() : GameObjectScript("go_memorial_lich_king_movie") { }
+        
+        bool OnGossipHello(Player *player, GameObject *go)
+        {
+                player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_TEXT_SEE_FALL_OF_THE_LICH_KING, GOSSIP_SENDER_MAIN, FALL_OF_THE_LICH_KING);
+                player->SEND_GOSSIP_MENU(GOSSIP_MESSAGE_MEMORIAL, go->GetGUID());
+                return true;
+        }
+
+        bool OnGossipSelect(Player *player, GameObject *go, uint32 /*uiSender*/, uint32 uiAction)
+        {
+                player->PlayerTalkClass->ClearMenus();
+                switch(uiAction)
+                {
+                        case FALL_OF_THE_LICH_KING:
+                                player->SendMovieStart(16);
+                                player->CLOSE_GOSSIP_MENU();
+                                break;
+
+                }
+                return true;
+        }
+
+};
+
 void AddSC_dalaran()
 {
     new npc_mageguard_dalaran;
     new npc_hira_snowdawn;
+    new go_memorial_lich_king_movie;
 }
