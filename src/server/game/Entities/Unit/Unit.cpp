@@ -14591,9 +14591,9 @@ Player* Unit::GetSpellModOwner() const
 }
 
 ///----------Pet responses methods-----------------
-void Unit::SendPetCastFail(uint32 spellid, SpellCastResult msg)
+void Unit::SendPetCastFail(uint32 spellid, SpellCastResult result)
 {
-    if (msg == SPELL_CAST_OK)
+    if (result == SPELL_CAST_OK)
         return;
 
     Unit* owner = GetCharmerOrOwner();
@@ -14601,15 +14601,13 @@ void Unit::SendPetCastFail(uint32 spellid, SpellCastResult msg)
         return;
 
     WorldPacket data(SMSG_PET_CAST_FAILED, 1 + 4 + 1);
-    data << uint8(0);                                       // cast count?
+    data << uint8(0);                                       // cast count
     data << uint32(spellid);
-    data << uint8(msg);
-    // uint32 for some reason
-    // uint32 for some reason
+    data << uint8(result);
     owner->ToPlayer()->GetSession()->SendPacket(&data);
 }
 
-void Unit::SendPetActionFeedback (uint8 msg)
+void Unit::SendPetActionFeedback(uint8 msg)
 {
     Unit* owner = GetOwner();
     if (!owner || owner->GetTypeId() != TYPEID_PLAYER)
@@ -14620,7 +14618,7 @@ void Unit::SendPetActionFeedback (uint8 msg)
     owner->ToPlayer()->GetSession()->SendPacket(&data);
 }
 
-void Unit::SendPetTalk (uint32 pettalk)
+void Unit::SendPetTalk(uint32 pettalk)
 {
     Unit* owner = GetOwner();
     if (!owner || owner->GetTypeId() != TYPEID_PLAYER)
@@ -17541,6 +17539,39 @@ void Unit::SendMovementWaterWalking()
 void Unit::SendMovementFeatherFall()
 {
     WorldPacket data(MSG_MOVE_FEATHER_FALL, 64);
+    data.append(GetPackGUID());
+    BuildMovementPacket(&data);
+    SendMessageToSet(&data, true);
+}
+    
+void Unit::SendMovementGravityChange()
+{
+    WorldPacket data(MSG_MOVE_GRAVITY_CHNG, 64);
+    data.append(GetPackGUID());
+    BuildMovementPacket(&data);
+    SendMessageToSet(&data, true);
+}
+
+void Unit::SendMovementCanFlyChange()
+{
+    /*!
+        if ( a3->MoveFlags & MOVEMENTFLAG_CAN_FLY )
+        {
+            v4->MoveFlags |= 0x1000000u;
+            result = 1;
+        }
+        else
+        {
+            if ( v4->MoveFlags & MOVEMENTFLAG_FLYING )
+                CMovement::DisableFlying(v4);
+            v4->MoveFlags &= 0xFEFFFFFFu;
+            result = 1;
+        }
+    */
+    if (GetTypeId() == TYPEID_PLAYER)
+        ToPlayer()->SendMovementSetCanFly(CanFly());
+
+    WorldPacket data(MSG_MOVE_UPDATE_CAN_FLY, 64);
     data.append(GetPackGUID());
     BuildMovementPacket(&data);
     SendMessageToSet(&data, true);
