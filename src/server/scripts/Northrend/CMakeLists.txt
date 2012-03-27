@@ -18,23 +18,24 @@ set(scripts_STAT_SRCS
   Northrend/Ulduar/HallsOfLightning/boss_ionar.cpp
   Northrend/Ulduar/HallsOfLightning/boss_volkhan.cpp
   Northrend/Ulduar/HallsOfLightning/boss_loken.cpp
-  Northrend/Ulduar/Ulduar/boss_general_vezax.cpp
-  Northrend/Ulduar/Ulduar/ulduar_teleporter.cpp
-  Northrend/Ulduar/Ulduar/boss_thorim.cpp
-  Northrend/Ulduar/Ulduar/boss_ignis.cpp
-  Northrend/Ulduar/Ulduar/boss_algalon.cpp
-  Northrend/Ulduar/Ulduar/instance_ulduar.cpp
-  Northrend/Ulduar/Ulduar/boss_auriaya.cpp
-  Northrend/Ulduar/Ulduar/boss_yoggsaron.cpp
-  Northrend/Ulduar/Ulduar/boss_hodir.cpp
-  Northrend/Ulduar/Ulduar/boss_assembly_of_iron.cpp
   Northrend/Ulduar/Ulduar/boss_flame_leviathan.cpp
-  Northrend/Ulduar/Ulduar/boss_xt002.cpp
-  Northrend/Ulduar/Ulduar/boss_mimiron.cpp
-  Northrend/Ulduar/Ulduar/ulduar.h
-  Northrend/Ulduar/Ulduar/boss_freya.cpp
+  Northrend/Ulduar/Ulduar/boss_ignis.cpp
   Northrend/Ulduar/Ulduar/boss_razorscale.cpp
+  Northrend/Ulduar/Ulduar/boss_xt002.cpp
+  Northrend/Ulduar/Ulduar/boss_assembly_of_iron.cpp
   Northrend/Ulduar/Ulduar/boss_kologarn.cpp
+  Northrend/Ulduar/Ulduar/boss_auriaya.cpp
+  Northrend/Ulduar/Ulduar/boss_hodir.cpp
+  Northrend/Ulduar/Ulduar/boss_freya.cpp
+  Northrend/Ulduar/Ulduar/boss_mimiron.cpp
+  Northrend/Ulduar/Ulduar/boss_thorim.cpp
+  Northrend/Ulduar/Ulduar/boss_general_vezax.cpp
+  Northrend/Ulduar/Ulduar/boss_yoggsaron.cpp
+  Northrend/Ulduar/Ulduar/boss_algalon.cpp
+  Northrend/Ulduar/Ulduar/ulduar.cpp
+  Northrend/Ulduar/Ulduar/ulduar_teleporter.cpp
+  Northrend/Ulduar/Ulduar/instance_ulduar.cpp
+  Northrend/Ulduar/Ulduar/ulduar.h
   Northrend/Ulduar/HallsOfStone/boss_krystallus.cpp
   Northrend/Ulduar/HallsOfStone/halls_of_stone.h
   Northrend/Ulduar/HallsOfStone/instance_halls_of_stone.cpp
