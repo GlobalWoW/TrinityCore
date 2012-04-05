@@ -44,19 +44,6 @@ enum Yells
     SAY_YS_HELP                                 = -1603259
 };
 
-#define SAY_TIME_1                              "This zone will be destroyed in 10 minutes!"
-#define SAY_TIME_2                              "This zone will be destroyed in 9 minutes!"         //soundid 15416  and below
-#define SAY_TIME_3                              "This zone will be destroyed in 8 minutes!"
-#define SAY_TIME_4                              "This zone will be destroyed in 7 minutes!"
-#define SAY_TIME_5                              "This zone will be destroyed in 6 minutes!"
-#define SAY_TIME_6                              "This zone will be destroyed in 5 minutes!"
-#define SAY_TIME_7                              "This zone will be destroyed in 4 minutes!"
-#define SAY_TIME_8                              "This zone will be destroyed in 3 minutes!"
-#define SAY_TIME_9                              "This zone will be destroyed in 2 minutes!"
-#define SAY_TIME_10                             "This zone will be destroyed in 1 minute!"
-#define SAY_TIME_UP                             "End of the self-destruction-frequence. Have a nice day!"
-#define SAY_TIME_CANCEL                         "Self-destruction-frequence abborded. Transmitter code A905."
-#define SAY_ALARM_HARD_MODE                     "Self-destruction-frequence initalized!"
 #define EMOTE_LEVIATHAN                         "Leviathan MK II begins to cast Plasma Blast!"
 
 enum Spells
@@ -112,18 +99,6 @@ enum Spells
 
 enum Events
 {
-    //Hardmode announcing
-    EVENT_9MINS,
-    EVENT_8MINS,
-    EVENT_7MINS,
-    EVENT_6MINS,
-    EVENT_5MINS,
-    EVENT_4MINS,
-    EVENT_3MINS,
-    EVENT_2MINS,
-    EVENT_1MINS,
-    EVENT_TIMEUP,
-    EVENT_CANCEL,
     // Leviathan MK II
     EVENT_PROXIMITY_MINE = 1,
     EVENT_NAPALM_SHELL,
@@ -264,7 +239,7 @@ class boss_mimiron : public CreatureScript
 
                 _Reset();
                 me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_ATTACKABLE_1);
-                me->SetUInt32Value(UNIT_NPC_EMOTESTATE, EMOTE_ONESHOT_USE_STANDING);
+                me->SetUInt32Value(UNIT_NPC_EMOTESTATE, EMOTE_STATE_USE_STANDING);
                 me->SetVisible(true);
                 me->ExitVehicle();
                 me->GetMotionMaster()->MoveTargetedHome();
@@ -353,78 +328,8 @@ class boss_mimiron : public CreatureScript
                 if (!UpdateVictim())
                     return;
 
-            events.Update(diff);
-
-            if (_mimironHardMode)
-            {
-                while (uint32 eventId = events.ExecuteEvent())
-                {
-                    switch (eventId)
-                    {
-                        case EVENT_9MINS:
-                            me->SetName("Computer");
-                            me->PlayDirectSound(15416);
-                            me->MonsterYell(SAY_TIME_2, LANG_UNIVERSAL, 0);
-//                            events.ScheduleEvent(EVENT_8MINS, 60000);
-                            break;
-                        case EVENT_8MINS:
-                            me->SetName("Computer");
-                            me->PlayDirectSound(15417);
-                            me->MonsterYell(SAY_TIME_3, LANG_UNIVERSAL, 0);
-//                            events.ScheduleEvent(EVENT_7MINS, 60000);
-                            break;
-                        case EVENT_7MINS:
-                            me->SetName("Computer");
-                            me->PlayDirectSound(15418);
-                            me->MonsterYell(SAY_TIME_4, LANG_UNIVERSAL, 0);
-//                            events.ScheduleEvent(EVENT_6MINS, 60000);
-                            break;
-                        case EVENT_6MINS:
-                            me->SetName("Computer");
-                            me->PlayDirectSound(15419);
-                            me->MonsterYell(SAY_TIME_5, LANG_UNIVERSAL, 0);
-//                            events.ScheduleEvent(EVENT_5MINS, 60000);
-                            break;
-                        case EVENT_5MINS:
-                            me->SetName("Computer");
-                            me->PlayDirectSound(15420);
-                            me->MonsterYell(SAY_TIME_6, LANG_UNIVERSAL, 0);
-//                            events.ScheduleEvent(EVENT_4MINS, 60000);
-                            break;
-                        case EVENT_4MINS:
-                            me->SetName("Computer");
-                            me->PlayDirectSound(15421);
-                            me->MonsterYell(SAY_TIME_7, LANG_UNIVERSAL, 0);
-//                            events.ScheduleEvent(EVENT_3MINS, 60000);
-                            break;
-                        case EVENT_3MINS:
-                            me->SetName("Computer");
-                            me->PlayDirectSound(15422);
-                            me->MonsterYell(SAY_TIME_8, LANG_UNIVERSAL, 0);
-//                            events.ScheduleEvent(EVENT_2MINS, 60000);
-                            break;
-                        case EVENT_2MINS:
-                            me->SetName("Computer");
-                            me->PlayDirectSound(15423);
-                            me->MonsterYell(SAY_TIME_9, LANG_UNIVERSAL, 0);
-//                            events.ScheduleEvent(EVENT_1MINS, 60000);
-                            break;
-                        case EVENT_1MINS:
-                            me->SetName("Computer");
-                            me->PlayDirectSound(15424);
-                            me->MonsterYell(SAY_TIME_10, LANG_UNIVERSAL, 0);
-//                            events.ScheduleEvent(EVENT_TIMEUP, 60000);
-                            break;
-                        case EVENT_TIMEUP:
-                            me->SetName("Computer");
-                            me->PlayDirectSound(15425);
-                            me->MonsterYell(SAY_TIME_UP, LANG_UNIVERSAL, 0);
-                            break;
-                    }
-                }
-            }
-
-
+                // prevent mimiron staying infight with leviathan introduced in rev #b40bf69
+                // TODO: find out why this happens
                 if (_checkTargetTimer < diff)
                 {
                     if (!SelectTarget(SELECT_TARGET_RANDOM, 0, 200.0f, true))
@@ -519,71 +424,36 @@ class boss_mimiron : public CreatureScript
                         switch (_step)
                         {
                             case 1:
-                                if (_mimironHardMode)
-                                {
-                                    me->SetName("Computer");
-                                    me->MonsterYell(SAY_ALARM_HARD_MODE, LANG_UNIVERSAL, 0);
-                                    me->PlayDirectSound(15413);
-                                    JumpToNextStep(2000);
-                                }
-                                else
-                                {
-                                    JumpToNextStep(1);
-                                }
+                                DoScriptText(_mimironHardMode ? SAY_HARDMODE_ON : SAY_AGGRO, me);
+                                JumpToNextStep(10000);
                                 break;
                             case 2:
-                                if(_mimironHardMode)
-                                {
-                                    me->SetName("Mimiron");
-                                    DoScriptText(SAY_HARDMODE_ON, me);
-                                    JumpToNextStep(15000);
-                                }
-                                else
-                                {
-                                    me->SetName("Mimiron");
-                                    DoScriptText(SAY_AGGRO, me);
-                                    JumpToNextStep(10000);
-                                }
-                                break;
-                            case 3:
                                 if (instance)
                                 {
                                     if (Creature* Leviathan = me->GetCreature(*me, instance->GetData64(DATA_LEVIATHAN_MK_II)))
                                         me->EnterVehicle(Leviathan, 4);
                                 }
-                                me->SetName("Computer");
+                                JumpToNextStep(2000);
+                                break;
+                            case 3:
+                                me->ChangeSeat(2);
                                 JumpToNextStep(2000);
                                 break;
                             case 4:
-                                if(_mimironHardMode)
-                                {
-                                    me->PlayDirectSound(15415);
-                                    me->MonsterYell(SAY_TIME_1, LANG_UNIVERSAL, 0);
-                                    me->ChangeSeat(2);
-                                    JumpToNextStep(3000);
-                                }
-                                else
-                                {
-                                    me->ChangeSeat(2);
-                                    JumpToNextStep(2000);
-                                }
-                                break;
-                            case 5:
-                                me->SetName("Mimiron");
                                 me->ChangeSeat(5);
                                 me->SetUInt32Value(UNIT_NPC_EMOTESTATE, EMOTE_STATE_STAND);
-                                JumpToNextStep(3000);
+                                JumpToNextStep(2500);
                                 break;
-                            case 6:
+                            case 5:
                                 DoScriptText(SAY_MKII_ACTIVATE, me);
                                 me->SetUInt32Value(UNIT_NPC_EMOTESTATE, EMOTE_STATE_TALK);
                                 JumpToNextStep(6000);
                                 break;
-                            case 7:
+                            case 6:
                                 me->ChangeSeat(6);
                                 JumpToNextStep(2000);
                                 break;
-                            case 8:
+                            case 7:
                                 if (instance)
                                 {
                                     if (Creature* Leviathan = me->GetCreature(*me, instance->GetData64(DATA_LEVIATHAN_MK_II)))
@@ -591,21 +461,9 @@ class boss_mimiron : public CreatureScript
                                         me->SetUInt32Value(UNIT_NPC_EMOTESTATE, EMOTE_STATE_STAND);
                                         Leviathan->AI()->DoAction(DO_START_ENCOUNTER);
                                         _phase = PHASE_COMBAT;
-                                        me->SetName("Computer");
-                                        events.ScheduleEvent(EVENT_9MINS, 60000);
-                                        events.ScheduleEvent(EVENT_8MINS, 120000);
-                                        events.ScheduleEvent(EVENT_7MINS, 180000);
-                                        events.ScheduleEvent(EVENT_6MINS, 240000);
-                                        events.ScheduleEvent(EVENT_5MINS, 300000);
-                                        events.ScheduleEvent(EVENT_4MINS, 360000);
-                                        events.ScheduleEvent(EVENT_3MINS, 420000);
-                                        events.ScheduleEvent(EVENT_2MINS, 480000);
-                                        events.ScheduleEvent(EVENT_1MINS, 540000);
-                                        events.ScheduleEvent(EVENT_TIMEUP, 600000);
-
                                     }
                                 }
-                                break;                                 
+                                break;
                             default:
                                 break;
                         }
@@ -1015,7 +873,7 @@ public:
             switch (action)
             {
                 case DO_START_ENCOUNTER:
-                    me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_ATTACKABLE_1 | UNIT_FLAG_IMMUNE_TO_NPC);
+                    me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_ATTACKABLE_1 | UNIT_FLAG_IMMUNE_TO_PC);
                     me->SetReactState(REACT_AGGRESSIVE);
                     phase = PHASE_LEVIATHAN_SOLO;
                     events.SetPhase(PHASE_LEVIATHAN_SOLO);
@@ -1304,7 +1162,7 @@ public:
             switch (action)
             {
                 case DO_START_VX001:
-                    me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_ATTACKABLE_1 | UNIT_FLAG_IMMUNE_TO_NPC);
+                    me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_ATTACKABLE_1 | UNIT_FLAG_IMMUNE_TO_PC);
                     phase = PHASE_VX001_SOLO;
                     events.SetPhase(PHASE_VX001_SOLO);
                     DoZoneInCombat();
@@ -1623,7 +1481,7 @@ public:
             switch (action)
             {
                 case DO_START_AERIAL:
-                    me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_ATTACKABLE_1 | UNIT_FLAG_IMMUNE_TO_NPC);
+                    me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_ATTACKABLE_1 | UNIT_FLAG_IMMUNE_TO_PC);
                     me->SetReactState(REACT_AGGRESSIVE);
                     phase = PHASE_AERIAL_SOLO;
                     events.SetPhase(PHASE_AERIAL_SOLO);
@@ -2000,7 +1858,7 @@ class npc_mimiron_flame_trigger : public CreatureScript
             {
                 _instance = creature->GetInstanceScript();
                 _flameTimer = 2000;
-                me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC);
+                me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
                 me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_ATTACKABLE_1 | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_PACIFIED);
                 me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_TAUNT, true);
                 me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_ATTACK_ME, true);

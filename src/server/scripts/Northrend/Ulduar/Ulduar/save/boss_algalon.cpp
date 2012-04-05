@@ -368,7 +368,7 @@ class boss_algalon : public CreatureScript
                 switch(Summon->GetEntry())
                 {
                 case CREATURE_AZEROTH_MODEL:
-                    Summon->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_IMMUNE_TO_NPC);
+                    Summon->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
                     break;
                 case CREATURE_BLACK_HOLE:
                     --staramount;
@@ -1041,7 +1041,7 @@ class mob_living_constellation : public CreatureScript
             void InitializeAI()
             {
                 active = false;
-                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_IMMUNE_TO_NPC);
+                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
                 me->SetCanFly(true);
                 me->SendMovementFlagUpdate();
                 me->SetReactState(REACT_PASSIVE);
@@ -1062,7 +1062,7 @@ class mob_living_constellation : public CreatureScript
                 case ACTION_ACTIVATE_CONSTELLATION:
                     active = true;
                     me->SetReactState(REACT_AGGRESSIVE);
-                    me->RemoveFlag( UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE |  UNIT_FLAG_IMMUNE_TO_NPC);
+                    me->RemoveFlag( UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE |  UNIT_FLAG_NOT_SELECTABLE);
                     DoZoneInCombat();
                     if (Unit* Target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0.0f, true))
                         AttackStart(Target);
@@ -1422,6 +1422,7 @@ class spell_algalon_cosmic_smash_initial : public SpellScriptLoader
                 OnUnitTargetSelect += SpellUnitTargetFn(spell_algalon_cosmic_smash_initial_SpellScript::FilterTargetsInitial, EFFECT_0, TARGET_UNIT_SRC_AREA_ENEMY);
                 OnUnitTargetSelect += SpellUnitTargetFn(spell_algalon_cosmic_smash_initial_SpellScript::FillTargetsSubsequential, EFFECT_1, TARGET_UNIT_SRC_AREA_ENEMY);
                 OnEffectHitTarget += SpellEffectFn(spell_algalon_cosmic_smash_initial_SpellScript::HandleForceCast, EFFECT_0, SPELL_EFFECT_FORCE_CAST);
+                OnEffectHitTarget += SpellEffectFn(spell_algalon_cosmic_smash_initial_SpellScript::HandleForceCast, EFFECT_1, SPELL_EFFECT_FORCE_CAST);
             }
 
             std::list<Unit*> m_unitList; 

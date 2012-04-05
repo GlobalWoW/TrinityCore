@@ -49,14 +49,14 @@ EndScriptData */
 #define SPELL_FOCUSED_EYEBEAM_VISUAL_RIGHT  63702
 
 // Passive
-#define SPELL_KOLOGARN_REDUCE_PARRY     64651
-#define SPELL_KOLOGARN_PACIFY           63726
-#define SPELL_KOLOGARN_UNK_0            65219   // Not found in DBC
+#define SPELL_KOLOGARN_REDUCE_PARRY 64651
+#define SPELL_KOLOGARN_PACIFY       63726
+#define SPELL_KOLOGARN_UNK_0        65219   // Not found in DBC
 
-#define SPELL_BERSERK                   47008 // guess
+#define SPELL_BERSERK           47008 // guess
 
-#define NPC_RUBBLE_STALKER              33809
-#define NPC_ARM_SWEEP_STALKER           33661
+#define NPC_RUBBLE_STALKER      33809
+#define NPC_ARM_SWEEP_STALKER   33661
 
 enum Events
 {
@@ -98,32 +98,17 @@ class boss_kologarn : public CreatureScript
             {
                 ASSERT(vehicle);
 
-                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
                 me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
-                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_STUNNED);
-                me->SetStandState(UNIT_STAND_STATE_SUBMERGED);
 
                 DoCast(SPELL_KOLOGARN_REDUCE_PARRY);
                 SetCombatMovement(false);
-                emerged = false;
+                Reset();
             }
 
             Vehicle* vehicle;
             bool left, right;
-            bool emerged;
             uint64 eyebeamTarget;
-
-            void MoveInLineOfSight(Unit* who)
-            {
-                // Birth animation
-                if (!emerged && me->IsWithinDistInMap(who, 30.0f) && who->GetTypeId() == TYPEID_PLAYER && !who->ToPlayer()->isGameMaster())
-                {
-                    me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-                    me->SetStandState(UNIT_STAND_STATE_STAND);
-                    me->HandleEmoteCommand(EMOTE_ONESHOT_EMERGE);
-                    emerged = true;
-                }
-            }
 
             void EnterCombat(Unit* /*who*/)
             {
@@ -146,10 +131,11 @@ class boss_kologarn : public CreatureScript
             void Reset()
             {
                 _Reset();
+                me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
                 eyebeamTarget = 0;
             }
 
-            void JustDied(Unit* /*victim*/)
+            void JustDied(Unit* /*killer*/)
             {
                 DoScriptText(SAY_DEATH, me);
                 DoCast(SPELL_KOLOGARN_PACIFY);
@@ -198,8 +184,11 @@ class boss_kologarn : public CreatureScript
 
                     if (Creature* rubbleStalker = who->FindNearestCreature(NPC_RUBBLE_STALKER, 70.0f))
                     {
-                        rubbleStalker->CastSpell(rubbleStalker, SPELL_FALLING_RUBBLE, true);
-                        rubbleStalker->CastSpell(rubbleStalker, SPELL_SUMMON_RUBBLE, true);
+                        if (rubbleStalker)
+                        {
+                            rubbleStalker->CastSpell(rubbleStalker, SPELL_FALLING_RUBBLE, true);
+                            rubbleStalker->CastSpell(rubbleStalker, SPELL_SUMMON_RUBBLE, true);
+                        }
                     }
 
                     if (!right && !left)
@@ -496,8 +485,6 @@ class spell_ulduar_squeezed_lifeless : public SpellScriptLoader
                 if (!GetHitPlayer() || !GetHitPlayer()->GetVehicle())
                     return;
 
-                //! Proper exit position does not work currently,
-                //! See documentation in void Unit::ExitVehicle(Position const* exitPosition)
                 Position pos;
                 pos.m_positionX = 1756.25f + irand(-3, 3);
                 pos.m_positionY = -8.3f + irand(-3, 3);

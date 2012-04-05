@@ -206,7 +206,7 @@ class boss_razorscale_controller : public CreatureScript
                 }
             }
 
-            void JustDied(Unit* /*who*/)
+            void JustDied(Unit* /*killer*/)
             {
                 _JustDied();
             }
@@ -345,7 +345,6 @@ class boss_razorscale : public CreatureScript
                 summons.DoAction(MOLE_MACHINE_TRIGGER, ACTION_DESPAWN_ADDS);
                 _Reset();
                 me->SetCanFly(true);
-                me->SetDisableGravity(true);
                 me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
                 me->SetReactState(REACT_PASSIVE);
                 PermaGround = false;
@@ -361,8 +360,6 @@ class boss_razorscale : public CreatureScript
                     controller->AI()->DoAction(ACTION_HARPOON_BUILD);
                 me->SetSpeed(MOVE_FLIGHT, 3.0f, true);
                 me->SetReactState(REACT_PASSIVE);
-                me->SetCanFly(true);
-                me->SetDisableGravity(true);
                 phase = PHASE_GROUND;
                 events.SetPhase(PHASE_GROUND);
                 FlyCount = 0;
@@ -371,7 +368,7 @@ class boss_razorscale : public CreatureScript
                 events.ScheduleEvent(EVENT_FLIGHT, 0, 0, PHASE_GROUND);
             }
 
-            void JustDied(Unit* /*who*/)
+            void JustDied(Unit* /*killer*/)
             {
                 _JustDied();
                 if (Creature* controller = ObjectAccessor::GetCreature(*me, instance ? instance->GetData64(DATA_RAZORSCALE_CONTROL) : 0))
@@ -665,7 +662,7 @@ class npc_expedition_commander : public CreatureScript
                             for (uint8 n = 0; n < RAID_MODE<uint8>(2, 4); ++n)
                             {
                                 Engineer[n] = me->SummonCreature(NPC_ENGINEER, PosEngSpawn, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 3000);
-                                Engineer[n]->SetWalk(false);
+                                Engineer[n]->RemoveUnitMovementFlag(MOVEMENTFLAG_WALKING);
                                 Engineer[n]->SetSpeed(MOVE_RUN, 0.5f);
                                 Engineer[n]->SetHomePosition(PosEngRepair[n]);
                                 Engineer[n]->GetMotionMaster()->MoveTargetedHome();
@@ -678,7 +675,7 @@ class npc_expedition_commander : public CreatureScript
                             for (uint8 n = 0; n < 4; ++n)
                             {
                                 Defender[n] = me->SummonCreature(NPC_DEFENDER, PosDefSpawn[n], TEMPSUMMON_CORPSE_TIMED_DESPAWN, 3000);
-                                Defender[n]->SetWalk(false);
+                                Defender[n]->RemoveUnitMovementFlag(MOVEMENTFLAG_WALKING);
                                 Defender[n]->SetHomePosition(PosDefCombat[n]);
                                 Defender[n]->GetMotionMaster()->MoveTargetedHome();
                             }
