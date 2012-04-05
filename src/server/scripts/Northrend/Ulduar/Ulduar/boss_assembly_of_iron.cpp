@@ -272,7 +272,11 @@ class boss_steelbreaker : public CreatureScript
                 }
             }
 
+<<<<<<< HEAD
             void DamageTaken(Unit* /*attacker*/, uint32 &damage)
+=======
+            void JustDied(Unit* /*killer*/)
+>>>>>>> TrinityCore/master
             {
                 if (damage >= me->GetHealth())
                 {
@@ -556,7 +560,11 @@ class boss_runemaster_molgeim : public CreatureScript
                 }
             }
 
+<<<<<<< HEAD
             void DamageTaken(Unit* /*attacker*/, uint32 &damage)
+=======
+            void JustDied(Unit* /*killer*/)
+>>>>>>> TrinityCore/master
             {
                 if (damage >= me->GetHealth())
                 {
@@ -880,7 +888,11 @@ class boss_stormcaller_brundir : public CreatureScript
                 }
             }
 
+<<<<<<< HEAD
             void DamageTaken(Unit* /*attacker*/, uint32 &damage)
+=======
+            void JustDied(Unit* /*killer*/)
+>>>>>>> TrinityCore/master
             {
                 if (damage >= me->GetHealth())
                 {

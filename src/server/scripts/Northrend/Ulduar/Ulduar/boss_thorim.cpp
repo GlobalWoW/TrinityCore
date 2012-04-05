@@ -350,7 +350,11 @@ public:
                 DoScriptText(RAND(SAY_SLAY_1, SAY_SLAY_2), me);
         }
 
+<<<<<<< HEAD
         void EncounterIsDone()
+=======
+        void JustDied(Unit* /*killer*/)
+>>>>>>> TrinityCore/master
         {
             if (EncounterFinished)
                 return;

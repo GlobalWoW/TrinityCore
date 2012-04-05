@@ -329,7 +329,7 @@ class boss_flame_leviathan : public CreatureScript
                     DoScriptText(SAY_AGGRO, me);
             }
 
-            void JustDied(Unit* /*victim*/)
+            void JustDied(Unit* /*killer*/)
             {
                 _JustDied();
                 // Set Field Flags 67108928 = 64 | 67108864 = UNIT_FLAG_UNK_6 | UNIT_FLAG_SKINNABLE
@@ -913,7 +913,11 @@ class npc_colossus : public CreatureScript
                 _groundSlamTimer = urand(8, 10) *IN_MILLISECONDS;
             }
 
+<<<<<<< HEAD
             void JustDied(Unit* /*who*/)
+=======
+            void JustDied(Unit* /*killer*/)
+>>>>>>> TrinityCore/master
             {
                 if (me->GetHomePosition().IsInDist(Center, 50.f))
                     _instance->SetData(DATA_COLOSSUS, _instance->GetData(DATA_COLOSSUS) + 1);
@@ -1013,6 +1017,7 @@ class npc_mimirons_inferno : public CreatureScript
     public:
         npc_mimirons_inferno() : CreatureScript("npc_mimirons_inferno") { }
 
+<<<<<<< HEAD
         struct npc_mimirons_infernoAI : public ScriptedAI
         {
             npc_mimirons_infernoAI(Creature* creature) : ScriptedAI(creature)
@@ -1023,6 +1028,12 @@ class npc_mimirons_inferno : public CreatureScript
                 me->AddAura(SPELL_RED_SKYBEAM, me);
                 me->SetReactState(REACT_PASSIVE);
             }
+=======
+        void WaypointReached(uint32 /*waypointId*/)
+        {
+
+        }
+>>>>>>> TrinityCore/master
 
             void Reset()
             {
@@ -1952,8 +1963,14 @@ class spell_freyas_ward_summon : public SpellScriptLoader
 
             void Register()
             {
+<<<<<<< HEAD
                 OnEffectHit += SpellEffectFn(spell_freyas_ward_summon_SpellScript::HandleDummy, EFFECT_1, SPELL_EFFECT_DUMMY);
                 OnEffectHit += SpellEffectFn(spell_freyas_ward_summon_SpellScript::HandleSummon, EFFECT_2, SPELL_EFFECT_SUMMON);
+=======
+                targets.clear();
+                if (_target)
+                    targets.push_back(_target);
+>>>>>>> TrinityCore/master
             }
         };
 
