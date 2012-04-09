@@ -1131,7 +1131,7 @@ class boss_leviathan_mk_turret : public CreatureScript
                     if (playerList.empty())
                         return NULL;
 
-                    return SelectRandomContainerElement(playerList);
+                    return Trinity::Containers::SelectRandomContainerElement(playerList);
                 }
                 else
                     return NULL;
@@ -1469,7 +1469,7 @@ public:
                             me->GetCreatureListWithEntryInGrid(_flames, NPC_FLAME_SPREAD, 150.0f);
                             if (!_flames.empty())
                             {
-                                if (Creature* flame = SelectRandomContainerElement(_flames))
+                                if (Creature* flame = Trinity::Containers::SelectRandomContainerElement(_flames))
                                     me->SummonCreature(NPC_FROST_BOMB, *flame, TEMPSUMMON_TIMED_DESPAWN, 11000);
                             }
                             else
