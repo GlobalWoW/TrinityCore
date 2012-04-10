@@ -784,8 +784,8 @@ void Battleground::EndBattleground(uint32 winner)
                             ratingChange = loser_change;
                         }
                         std::ostringstream sql_query;
-                        // gameid, teamid, guid, changeType, ratingChange, teamRating, damageDone, deaths, healingDone, damageTaken,, healingTaken, killingBlows, mapId, start, end
-                        sql_query << "INSERT INTO armory_game_chart VALUES ('" << gameID << "', '" << resultTeamID << "', '" << player->GetGUID() << "', '" << changeType << "', '" << ratingChange << "', '" << resultRating << "', '" << itr->second->DamageDone << "', '" << itr->second->Deaths << "', '" << itr->second->HealingDone << "', '" << itr->second->DamageTaken << "', '" << itr->second->HealingTaken << "', '" << itr->second->KillingBlows << "', '" << m_MapId << "', '" << m_StartTime << "', '" << m_EndTime << "')";
+                        //                                                        gameid,              teamid,                     guid,                    changeType,             ratingChange,               teamRating,                  damageDone,                          deaths,                          healingDone,                           damageTaken,,                           healingTaken,                         killingBlows,                      mapId,                 start,                   end
+                        sql_query << "INSERT INTO armory_game_chart VALUES ('" << gameID << "', '" << resultTeamID << "', '" << player->GetGUID() << "', '" << changeType << "', '" << ratingChange  << "', '" << resultRating << "', '" << itr->second->DamageDone << "', '" << itr->second->Deaths << "', '" << itr->second->HealingDone << "', '" << itr->second->DamageTaken << "', '" << itr->second->HealingTaken << "', '" << itr->second->KillingBlows << "', '" << m_MapId << "', '" << m_StartTime << "', '" << m_EndTime << "')";
                         CharacterDatabase.Execute(sql_query.str().c_str());
                     }
                 }
@@ -1405,12 +1405,12 @@ void Battleground::UpdatePlayerScore(Player* Source, uint32 type, uint32 value, 
         case SCORE_HEALING_DONE:                            // Healing Done
             itr->second->HealingDone += value;
             break;
-        /** World of Warcraft Armory **/
+			        /** World of Warcraft Armory **/
         case SCORE_DAMAGE_TAKEN:
-            itr->second->DamageTaken += value; // Damage Taken
+            itr->second->DamageTaken += value;              // Damage Taken
             break;
         case SCORE_HEALING_TAKEN:
-            itr->second->HealingTaken += value; // Healing Taken
+            itr->second->HealingTaken += value;             // Healing Taken
             break;
         /** World of Warcraft Armory **/
         default:

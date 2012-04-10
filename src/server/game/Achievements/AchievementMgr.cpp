@@ -2040,7 +2040,7 @@ void AchievementMgr::CompletedAchievement(AchievementEntry const* achievement)
 
     SendAchievementEarned(achievement);
 
-	 /** World of Warcraft Armory **/
+	/** World of Warcraft Armory **/
     if (sWorld->getBoolConfig(CONFIG_ARMORY_ENABLE))
         GetPlayer()->CreateWowarmoryFeed(1, achievement->ID, 0, 0);
     /** World of Warcraft Armory **/

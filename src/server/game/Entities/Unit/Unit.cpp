@@ -701,9 +701,9 @@ uint32 Unit::DealDamage(Unit* victim, uint32 damage, CleanDamage const* cleanDam
         if (victim->GetTypeId() == TYPEID_PLAYER)
 		{
             if (Battleground* bg = killer->GetBattleground())
-            {
+			{
                 bg->UpdatePlayerScore(killer, SCORE_DAMAGE_DONE, damage);
-                /** World of Warcraft Armory **/
+		/** World of Warcraft Armory **/
                 if (sWorld->getBoolConfig(CONFIG_ARMORY_ENABLE))
                     if (Battleground *bgV = ((Player*)victim)->GetBattleground())
                         bgV->UpdatePlayerScore(((Player*)victim), SCORE_DAMAGE_TAKEN, damage);
@@ -10112,7 +10112,7 @@ int32 Unit::DealHeal(Unit* victim, uint32 addhealth)
     {
         player->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_TOTAL_HEALING_RECEIVED, gain);
         player->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_HIGHEST_HEALING_RECEIVED, addhealth);
-        /** World of Warcraft Armory **/
+		/** World of Warcraft Armory **/
         if (sWorld->getBoolConfig(CONFIG_ARMORY_ENABLE))
             if (Battleground *bgV = victim->ToPlayer()->GetBattleground())
                 bgV->UpdatePlayerScore((Player*)victim, SCORE_HEALING_TAKEN, gain);
@@ -15660,9 +15660,9 @@ void Unit::Kill(Unit* victim, bool durabilityLoss)
                 if (instanceMap->IsRaidOrHeroicDungeon())
                 {
                     if (creature->GetCreatureTemplate()->flags_extra & CREATURE_FLAG_EXTRA_INSTANCE_BIND)
-                    {
+					{
                         ((InstanceMap*)instanceMap)->PermBindAllPlayers(creditedPlayer);
-                        /** World of Warcraft Armory **/
+					/** World of Warcraft Armory **/
                         if (sWorld->getBoolConfig(CONFIG_ARMORY_ENABLE))
                             creditedPlayer->CreateWowarmoryFeed(3, creature->GetCreatureTemplate()->Entry, 0, 0);
                         /** World of Warcraft Armory **/

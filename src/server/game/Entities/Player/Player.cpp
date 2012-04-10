@@ -5067,10 +5067,11 @@ void Player::DeleteFromDB(uint64 playerguid, uint32 accountId, bool updateRealmC
             stmt->setUInt32(0, guid);
             trans->Append(stmt);
 
-            /* World of Warcraft Armory */
+			/* World of Warcraft Armory */
             trans->PAppend("DELETE FROM armory_character_stats WHERE guid = '%u'",guid);
             trans->PAppend("DELETE FROM character_feed_log WHERE guid = '%u'",guid);
             /* World of Warcraft Armory */
+
 
             CharacterDatabase.CommitTransaction(trans);
             break;
@@ -16809,8 +16810,8 @@ bool Player::LoadFromDB(uint32 guid, SQLQueryHolder *holder)
 
         return false;
     }
-		// Cleanup old Wowarmory feeds
-   InitWowarmoryFeeds();
+	// Cleanup old Wowarmory feeds
+    InitWowarmoryFeeds();
 
     // overwrite possible wrong/corrupted guid
     SetUInt64Value(OBJECT_FIELD_GUID, MAKE_NEW_GUID(guid, 0, HIGHGUID_PLAYER));
@@ -18928,7 +18929,7 @@ void Player::SaveToDB(bool create /*=false*/)
 
     CharacterDatabase.CommitTransaction(trans);
 
-    /* World of Warcraft Armory */
+	    /* World of Warcraft Armory */
     // Place this code AFTER CharacterDatabase.CommitTransaction(); to avoid some character saving errors.
     // Wowarmory feeds
     if (sWorld->getBoolConfig(CONFIG_ARMORY_ENABLE))
@@ -18936,8 +18937,8 @@ void Player::SaveToDB(bool create /*=false*/)
         std::ostringstream sWowarmory;
         for (WowarmoryFeeds::iterator iter = m_wowarmory_feeds.begin(); iter < m_wowarmory_feeds.end(); ++iter) {
             sWowarmory << "INSERT IGNORE INTO character_feed_log (guid,type,data,date,counter,difficulty,item_guid,item_quality) VALUES ";
-            // guid type data date counter difficulty item_guid item_quality
-            sWowarmory << "(" << (*iter).guid << ", " << (*iter).type << ", " << (*iter).data << ", " << uint64((*iter).date) << ", " << (*iter).counter << ", " << uint32((*iter).difficulty) << ", " << (*iter).item_guid << ", " << (*iter).item_quality << ");";
+            //                      guid                    type                        data                    date                            counter                   difficulty                        item_guid                      item_quality
+            sWowarmory << "(" << (*iter).guid << ", " << (*iter).type << ", " << (*iter).data << ", " << uint64((*iter).date) << ", " << (*iter).counter << ", " << uint32((*iter).difficulty) << ", " << (*iter).item_guid << ", " << (*iter).item_quality <<  ");";
             CharacterDatabase.PExecute(sWowarmory.str().c_str());
             sWowarmory.str("");
         }
@@ -25591,7 +25592,7 @@ void Player::CreateWowarmoryFeed(uint32 type, uint32 data, uint32 item_guid, uin
     feed.type = type;
     feed.data = data;
     feed.difficulty = type == 3 ? GetMap()->GetDifficulty() : 0;
-    feed.item_guid = item_guid;
+    feed.item_guid  = item_guid;
     feed.item_quality = item_quality;
     feed.counter = 0;
     feed.date = time(NULL);
