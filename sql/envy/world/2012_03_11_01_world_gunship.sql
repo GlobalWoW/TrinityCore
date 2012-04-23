@@ -238,6 +238,7 @@ INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`pr
 (@FROSTWYRM,1, 0, 'A Spire Frostwyrm lands just before The Skybreaker. ', 16, 0, 100, 0, 0, @SOUNDID, 'Frostwyrm - SAY_FROSTWYRM_LAND_A_2');
 
 -- Loot de los cofres :)
+/*
 DELETE FROM `gameobject_loot_template` WHERE (`entry`=201872);
 INSERT INTO `gameobject_loot_template` VALUES
 (201872, 49426, 100, 1, 0, 2, 2),
@@ -312,6 +313,7 @@ INSERT INTO `gameobject_loot_template` VALUES
 (201875, 50664, 0, 1, 2, 1, 1),
 (201875, 50665, 0, 1, 1, 1, 1),
 (201875, 50667, 0, 1, 3, 1, 1);
+*/
 
 -- Esto es un poco hacky, para los transportes
 UPDATE `gameobject_template` SET `data1` = 201872 WHERE `entry` = 201872;
