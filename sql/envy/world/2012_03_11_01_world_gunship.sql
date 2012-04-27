@@ -237,8 +237,7 @@ INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`pr
 (@FROSTWYRM,0, 0, 'A Spire Frostwyrm lands just before Orgrim''s Hammer.', 16, 0, 100, 0, 0, @SOUNDID, 'Frostwyrm - SAY_FROSTWYRM_LAND_H_1'),
 (@FROSTWYRM,1, 0, 'A Spire Frostwyrm lands just before The Skybreaker. ', 16, 0, 100, 0, 0, @SOUNDID, 'Frostwyrm - SAY_FROSTWYRM_LAND_A_2');
 
--- Loot de los cofres :)
-/*
+-- Loot
 DELETE FROM `gameobject_loot_template` WHERE (`entry`=201872);
 INSERT INTO `gameobject_loot_template` VALUES
 (201872, 49426, 100, 1, 0, 2, 2),
@@ -313,7 +312,6 @@ INSERT INTO `gameobject_loot_template` VALUES
 (201875, 50664, 0, 1, 2, 1, 1),
 (201875, 50665, 0, 1, 1, 1, 1),
 (201875, 50667, 0, 1, 3, 1, 1);
-*/
 
 -- Esto es un poco hacky, para los transportes
 UPDATE `gameobject_template` SET `data1` = 201872 WHERE `entry` = 201872;
@@ -325,7 +323,7 @@ UPDATE `gameobject_template` SET `data1` = 201873 WHERE `entry` = 202178;
 UPDATE `gameobject_template` SET `data1` = 201874 WHERE `entry` = 202179;
 UPDATE `gameobject_template` SET `data1` = 201875 WHERE `entry` = 202180;
 
--- El rocket pack
+-- rocket pack
 UPDATE item_template SET ScriptName = 'item_icc_rocket_pack' WHERE entry = 49278;
 
 -- Zafod Boombox (37184) giver of jetpack
