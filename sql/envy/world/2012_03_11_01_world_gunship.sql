@@ -329,7 +329,6 @@ UPDATE item_template SET ScriptName = 'item_icc_rocket_pack' WHERE entry = 49278
 -- Zafod Boombox (37184) giver of jetpack
 UPDATE `creature_template` SET `npcflag`=1 WHERE `entry`=37184;
 
-/*
 -- Need Fix for DB errors conditions
 DELETE FROM `conditions` WHERE `SourceEntry` IN (69705, 69400, 69402, 70175, 70374, 70383, 72959, 70173);
 INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES
@@ -347,4 +346,3 @@ INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry
 (13, 3, 70173, 0, 0, 31, 0, 3, 38701, 0, 0, 0, '', NULL),
 (13, 3, 70173, 0, 0, 31, 0, 3, 38702, 0, 0, 0, '', NULL),
 (13, 3, 70173, 0, 0, 31, 0, 3, 38129, 0, 0, 0, '', NULL);
-*/

@@ -25,8 +25,8 @@
 #include "WorldPacket.h"
 #include "DBCStores.h"
 #include "World.h"
-#include "GameObjectAI.h"
 #include "Vehicle.h"
+#include "GameObjectAI.h"
 
 Transport* MapManager::LoadTransportInMap(Map* instance, uint32 goEntry, uint32 period)
 {
