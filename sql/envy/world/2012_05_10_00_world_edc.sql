@@ -17,7 +17,7 @@ DELETE FROM `conditions` WHERE SourceTypeOrReferenceId = 13 AND SourceEntry IN (
 INSERT INTO `conditions` VALUES
 (13,1,66905,0,0,31,0,3,35119,0,0,0,'', 'Eadric Hammer of Rigtheous'), -- Target Eadric with Hammer of Righteous
 (13,1,66798,0,0,31,0,3,35005,0,0,0,'', 'The Black Kinght - Deaths Respite'),
-(13,2,66798,0,0,31,0,3,35004,0,0,0,'', 'The Black Kinght - Deaths Respite'),
+(13,1,66798,0,0,31,0,3,35004,0,0,0,'', 'The Black Kinght - Deaths Respite'),
 (13,1,67705,0,0,31,0,3,35005,0,0,0,'', 'The Black Kinght - Raise Arelas Brightstar'),
 (13,1,67715,0,0,31,0,3,35004,0,0,0,'','The Black Kinght - Raise Arelas Brightstar');
 
