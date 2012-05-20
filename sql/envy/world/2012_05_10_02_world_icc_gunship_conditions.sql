@@ -46,25 +46,7 @@ INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceEntry`, `ConditionTy
 ('13', '69705' ,'18', '1', 36838),      -- Gunship Battle - Spell 69705 (Below Zero) target creature 36838
 ('13', '69705' ,'18', '1', 36839);      -- Gunship Battle - Spell 69705 (Below Zero) target creature 36839
 
-
--- ==> Need more Fix for DB errors conditions:
-/*DELETE FROM `conditions` WHERE `SourceEntry` IN (69705, 69400, 69402, 70175, 70374, 70383, 72959, 70173);
-INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES
-(13, 1, 69705, 0, 0, 31, 0, 3, 36838, 0, 0, 0, '', NULL),
-(13, 1, 69705, 0, 1, 31, 0, 3, 36839, 0, 0, 0, '', NULL),
-(13, 3, 69400, 0, 0, 31, 0, 3, 37540, 0, 0, 0, '', NULL),
-(13, 3, 69402, 0, 0, 31, 0, 3, 37540, 0, 0, 0, '', NULL),
-(13, 3, 69402, 0, 1, 31, 0, 3, 37215, 0, 0, 0, '', NULL),
-(13, 3, 70175, 0, 0, 31, 0, 3, 37540, 0, 0, 0, '', NULL),
-(13, 3, 70175, 0, 1, 31, 0, 3, 37215, 0, 0, 0, '', NULL),
-(13, 1, 70374, 0, 0, 31, 0, 3, 37540, 0, 0, 0, '', NULL),
-(13, 1, 70383, 0, 0, 31, 0, 3, 37215, 0, 0, 0, '', NULL),
-(13, 1, 72959, 0, 0, 31, 0, 3, 0, 0, 0, 0, '', NULL),
-(13, 3, 70173, 0, 0, 31, 0, 3, 37215, 0, 0, 0, '', NULL),
-(13, 3, 70173, 0, 0, 31, 0, 3, 38701, 0, 0, 0, '', NULL),
-(13, 3, 70173, 0, 0, 31, 0, 3, 38702, 0, 0, 0, '', NULL),
-(13, 3, 70173, 0, 0, 31, 0, 3, 38129, 0, 0, 0, '', NULL);*/
-
+-- Update condition by TrinityCore:
 DELETE FROM conditions WHERE SourceTypeOrReferenceId=13 AND SourceEntry IN (69400, 70173, 69402, 70175, 70374, 70383, 69705, 72959);
 INSERT INTO conditions (SourceTypeOrReferenceId, SourceGroup, SourceEntry, SourceId, ElseGroup, ConditionTypeOrReference, ConditionTarget, ConditionValue1, ConditionValue2, ConditionValue3, NegativeCondition, ErrorTextId, ScriptName, Comment) VALUES
 -- Alliance
@@ -78,90 +60,11 @@ INSERT INTO conditions (SourceTypeOrReferenceId, SourceGroup, SourceEntry, Sourc
 (13, 3, 70173, 0, 1, 31, 0, 3, 37215, 0, 0, 0, '', NULL),
 (13, 1, 69705, 0, 1, 31, 0, 3, 36839, 0, 0, 0, '', NULL);
 
+
+
 -- Loot templates
-/*-- UPDATE `gameobject_template` SET `data1` = 201872 WHERE `entry` = 202177;
--- UPDATE `gameobject_template` SET `data1` = 201873 WHERE `entry` = 202178;
--- UPDATE `gameobject_template` SET `data1` = 201874 WHERE `entry` = 202179;
--- UPDATE `gameobject_template` SET `data1` = 201875 WHERE `entry` = 202180;
+-- Fix by TrinityCore
 
-UPDATE `gameobject_template` SET `data1` = 201872 WHERE `entry` = 201872;
-UPDATE `gameobject_template` SET `data1` = 201873 WHERE `entry` = 201873;
-UPDATE `gameobject_template` SET `data1` = 201874 WHERE `entry` = 201874;
-UPDATE `gameobject_template` SET `data1` = 201875 WHERE `entry` = 201875;
-
-DELETE FROM `gameobject_loot_template` WHERE `entry` IN (201872, 201873, 201874, 201875);
-INSERT INTO `gameobject_loot_template`
-(`entry`,`item`,`ChanceOrQuestChance`,`lootmode`,`groupid`,`mincountOrRef`,`maxcount`)
-VALUES
-
-(201872, 49426, 100,  1, 0, 2, 2),
-(201872, 50340, 0,    1, 1, 1, 1),
-(201872, 50787, 0,    1, 1, 1, 1),
-(201872, 50788, 0,    1, 1, 1, 1),
-(201872, 50789, 0,    1, 2, 1, 1),
-(201872, 50790, 0,    1, 2, 1, 1),
-(201872, 50791, 0,    1, 1, 1, 1),
-(201872, 50792, 0,    1, 2, 1, 1),
-(201872, 50793, 0,    1, 1, 1, 1),
-(201872, 50794, 0,    1, 1, 1, 1),
-(201872, 50795, 0,    1, 2, 1, 1),
-(201872, 50796, 0,    1, 2, 1, 1),
-(201872, 50797, 0,    1, 2, 1, 1),
-
-(201873, 49426, 100,  1, 0, 2, 2),
-(201873, 49908, 10,   1, 0, 1, 1),
-(201873, 49998, 0,    1, 1, 1, 1),
-(201873, 49999, 0,    1, 2, 1, 1),
-(201873, 50000, 0,    1, 2, 1, 1),
-(201873, 50001, 0,    1, 3, 1, 1),
-(201873, 50002, 0,    1, 2, 1, 1),
-(201873, 50003, 0,    1, 3, 1, 1),
-(201873, 50005, 0,    1, 1, 1, 1),
-(201873, 50006, 0,    1, 3, 1, 1),
-(201873, 50008, 0,    1, 1, 1, 1),
-(201873, 50009, 0,    1, 3, 1, 1),
-(201873, 50010, 0,    1, 2, 1, 1),
-(201873, 50011, 0,    1, 1, 1, 1),
-(201873, 50274, 37.5, 1, 0, 1, 1),
-(201873, 50352, 0,    1, 1, 1, 1),
-(201873, 50359, 0,    1, 2, 1, 1),
-(201873, 50411, 0,    1, 3, 1, 1),
-
-(201874, 49426, 100,  1, 0, 2, 2),
-(201874, 49908, 10,   1, 0, 1, 1),
-(201874, 50345, 0,    1, 2, 1, 1),
-(201874, 51906, 0,    1, 1, 1, 1),
-(201874, 51907, 0,    1, 1, 1, 1),
-(201874, 51908, 0,    1, 1, 1, 1),
-(201874, 51909, 0,    1, 2, 1, 1),
-(201874, 51910, 0,    1, 2, 1, 1),
-(201874, 51911, 0,    1, 2, 1, 1),
-(201874, 51912, 0,    1, 2, 1, 1),
-(201874, 51913, 0,    1, 1, 1, 1),
-(201874, 51914, 0,    1, 2, 1, 1),
-(201874, 51915, 0,    1, 1, 1, 1),
-(201874, 51916, 0,    1, 1, 1, 1),
-
-(201875, 49426, 100,  1, 0, 2, 2),
-(201875, 49908, 10,   1, 0, 1, 1),
-(201875, 50274, 75,   1, 0, 1, 1),
-(201875, 50349, 0,    1, 2, 1, 1),
-(201875, 50366, 0,    1, 1, 1, 1),
-(201875, 50653, 0,    1, 3, 1, 1),
-(201875, 50654, 0,    1, 3, 1, 1),
-(201875, 50655, 0,    1, 3, 1, 1),
-(201875, 50656, 0,    1, 2, 1, 1),
-(201875, 50657, 0,    1, 3, 1, 1),
-(201875, 50658, 0,    1, 1, 1, 1),
-(201875, 50659, 0,    1, 2, 1, 1),
-(201875, 50660, 0,    1, 1, 1, 1),
-(201875, 50661, 0,    1, 1, 1, 1),
-(201875, 50663, 0,    1, 2, 1, 1),
-(201875, 50664, 0,    1, 2, 1, 1),
-(201875, 50665, 0,    1, 1, 1, 1),
-(201875, 50667, 0,    1, 3, 1, 1);*/
-
--- Fix by Trinity
 -- Set Variables
 SET @Gunship10N := 28057; -- Data1 for 201872 & 202177
 SET @Gunship10H := 28045; -- Data1 for 201873 & 202178
@@ -175,6 +78,7 @@ SET @Ref10J := 34329;
 SET @Ref25J := 34251;
 SET @RefJ10H := 34263;
 SET @RefJ25H := 34275;
+
 -- Gunship_Armory10N_reference
 DELETE FROM `reference_loot_template` WHERE `entry` IN (@Ref10J,@Ref25J,@RefJ10H,@RefJ25H);
 INSERT INTO `reference_loot_template` (`entry`,`item`,`ChanceOrQuestChance`,`lootmode`,`groupid`,`mincountOrRef`,`maxcount`) VALUES
@@ -235,6 +139,7 @@ INSERT INTO `reference_loot_template` (`entry`,`item`,`ChanceOrQuestChance`,`loo
 (@RefJ25H,50658,0,1,1,1,1), -- Amulet of the Silent Eulogy (heroic)
 (@RefJ25H,50654,0,1,1,1,1), -- Scourgeborne Waraxe (heroic)
 (@RefJ25H,50656,0,1,1,1,1); -- Ikfirus's Sack of Wonder (heroic)
+
 -- Bind the refs to the objects
 DELETE FROM `gameobject_loot_template` WHERE `entry` IN (@Gunship10N,@Gunship10H,@Gunship25N,@Gunship25H);
 INSERT INTO `gameobject_loot_template` (`entry`,`item`,`ChanceOrQuestChance`,`lootmode`,`groupid`,`mincountOrRef`,`maxcount`) VALUES
