@@ -504,7 +504,7 @@ class boss_the_lich_king : public CreatureScript
             void JustDied(Unit* /*killer*/)
             {
                 _JustDied();
-                //DoCastAOE(SPELL_PLAY_MOVIE, false);
+                DoCastAOE(SPELL_PLAY_MOVIE, false);
                 me->SetDisableGravity(false);
                 me->RemoveByteFlag(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_ALWAYS_STAND | UNIT_BYTE1_FLAG_HOVER);
                 me->GetMotionMaster()->MoveFall();
@@ -721,7 +721,7 @@ class boss_the_lich_king : public CreatureScript
                     case NPC_FROSTMOURNE_TRIGGER:
                     {
                         summons.Summon(summon);
-                        summon->CastSpell((Unit*)NULL, SPELL_BROKEN_FROSTMOURNE, true);
+                        //summon->CastSpell((Unit*)NULL, SPELL_BROKEN_FROSTMOURNE, true);
 
                         SendLightOverride(LIGHT_SOULSTORM, 10000);
                         SendWeather(WEATHER_STATE_BLACKSNOW);
@@ -2015,7 +2015,10 @@ class npc_broken_frostmourne : public CreatureScript
                     switch (eventId)
                     {
                         case EVENT_OUTRO_KNOCK_BACK:
-                            DoCastAOE(SPELL_BROKEN_FROSTMOURNE_KNOCK);
+                            //DoCastAOE(SPELL_BROKEN_FROSTMOURNE_KNOCK);
+                            // TEMP FIX
+                            me->AddAura(SPELL_BROKEN_FROSTMOURNE, me);
+                            me->AddAura(SPELL_BROKEN_FROSTMOURNE_KNOCK, me);
                             break;
                         case EVENT_OUTRO_SUMMON_TERENAS:
                             DoCastAOE(SPELL_SUMMON_TERENAS);

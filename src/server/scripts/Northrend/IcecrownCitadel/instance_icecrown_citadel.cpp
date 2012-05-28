@@ -178,9 +178,7 @@ class instance_icecrown_citadel : public InstanceMapScript
             {
                 if (!TeamInInstance)
                     TeamInInstance = player->GetTeam();
-/* ---------------- Esta linea es la peor de todas -------------- */
-                // Gunship: Precargar el spawn
-                PrepareGunshipEvent(player); // <-- ojala halle una manera para esto
+                    PrepareGunshipEvent(player); // Spawn Gunship Event
             }
 
             void OnCreatureCreate(Creature* creature)
@@ -659,7 +657,6 @@ class instance_icecrown_citadel : public InstanceMapScript
                         return ArthasPlatformGUID;
                     case DATA_TERENAS_MENETHIL:
                         return TerenasMenethilGUID;
-// * OJO * Aqui faltan DATAS, como el de los frostwyrm el de firstsquad que no hay
                     //Gunship: Para unir todo
                     case DATA_SKYBREAKER_BOSS:
                         return SkybreakerBossGUID;
@@ -690,7 +687,6 @@ class instance_icecrown_citadel : public InstanceMapScript
                 switch (type)
                 {
                     case DATA_LADY_DEATHWHISPER:
-                        // SetBossState(DATA_GUNSHIP_EVENT, state);    // TEMP HACK UNTIL GUNSHIP SCRIPTED
                         if (state == DONE)
                         {
                             if (GameObject* elevator = instance->GetGameObject(LadyDeathwisperElevatorGUID))
@@ -700,9 +696,6 @@ class instance_icecrown_citadel : public InstanceMapScript
                             }
                         }
                         break;
-// ******* OJO ********* AQUI FALTA EL CASE DE GUNSHIP 
-// a saber que se hace luego que se acaba, si se spamea algo, se les da un logro
-// les aparecemos algun npc o alguna cosa estilo wowrean.
                     case DATA_DEATHBRINGER_SAURFANG:
                         switch (state)
                         {
@@ -1307,8 +1300,6 @@ class instance_icecrown_citadel : public InstanceMapScript
                 }
             }
 
-/* -------------------------- ARREGLAR ESTO DIOS ----------------------- */
-            // Gunship: esto es una mierda, hay que hacerlo de otra forma
             void PrepareGunshipEvent(Player* player)
             {
                 Transport* th;
@@ -1564,7 +1555,7 @@ class instance_icecrown_citadel : public InstanceMapScript
             bool IsOozeDanceEligible;
             bool IsNauseaEligible;
             bool IsOrbWhispererEligible;
-/* ----------------------------------------- AQUI OJO CON ESTAS VARIABLES PARA USAR LUEGO ----------------------- */
+            bool isPrepared;
             // Gunship: Variables
             // Aqui hay que unir los estados del first squad y estas cosas con ls eventos reales
             uint32 FirstSquadState;
@@ -1582,7 +1573,6 @@ class instance_icecrown_citadel : public InstanceMapScript
             uint64 GBSaurfangGUID;
             uint64 GBSkybreakerGUID;
             uint64 GBOgrimsHammerGUID;
-            bool isPrepared;
         };
 
         InstanceScript* GetInstanceScript(InstanceMap* map) const
