@@ -50,28 +50,28 @@ class boss_marwyn : public CreatureScript
 public:
     boss_marwyn() : CreatureScript("boss_marwyn") { }
 
-    CreatureAI* GetAI(Creature* creature) const
+    CreatureAI* GetAI(Creature* pCreature) const
     {
-        return new boss_marwynAI(creature);
+        return new boss_marwynAI(pCreature);
     }
 
     struct boss_marwynAI : public boss_horAI
     {
-        boss_marwynAI(Creature* creature) : boss_horAI(creature) {}
+        boss_marwynAI(Creature *pCreature) : boss_horAI(pCreature) {}
 
         void Reset()
         {
             boss_horAI::Reset();
 
-            if (instance)
-                instance->SetData(DATA_MARWYN_EVENT, NOT_STARTED);
+            if (pInstance)
+                pInstance->SetData(DATA_MARWYN_EVENT, NOT_STARTED);
         }
 
         void EnterCombat(Unit* /*who*/)
         {
             DoScriptText(SAY_AGGRO, me);
-            if (instance)
-                instance->SetData(DATA_MARWYN_EVENT, IN_PROGRESS);
+            if (pInstance)
+                pInstance->SetData(DATA_MARWYN_EVENT, IN_PROGRESS);
 
             events.ScheduleEvent(EVENT_OBLITERATE, 30000);          // TODO Check timer
             events.ScheduleEvent(EVENT_WELL_OF_CORRUPTION, 13000);
@@ -83,8 +83,8 @@ public:
         {
             DoScriptText(SAY_DEATH, me);
 
-            if (instance)
-                instance->SetData(DATA_MARWYN_EVENT, DONE);
+            if (pInstance)
+                pInstance->SetData(DATA_MARWYN_EVENT, DONE);
         }
 
         void KilledUnit(Unit* /*victim*/)
@@ -119,8 +119,8 @@ public:
                     events.ScheduleEvent(EVENT_CORRUPTED_FLESH, 20000);
                     break;
                 case EVENT_SHARED_SUFFERING:
-                    if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM))
-                        DoCast(target, SPELL_SHARED_SUFFERING);
+                    if (Unit* pTarget = SelectTarget(SELECT_TARGET_RANDOM))
+                        DoCast(pTarget, SPELL_SHARED_SUFFERING);
                     events.ScheduleEvent(EVENT_SHARED_SUFFERING, 20000);
                     break;
             }

@@ -50,14 +50,14 @@ class boss_falric : public CreatureScript
 public:
     boss_falric() : CreatureScript("boss_falric") { }
 
-    CreatureAI* GetAI(Creature* creature) const
+    CreatureAI* GetAI(Creature* pCreature) const
     {
-        return new boss_falricAI(creature);
+        return new boss_falricAI(pCreature);
     }
 
     struct boss_falricAI : public boss_horAI
     {
-        boss_falricAI(Creature* creature) : boss_horAI(creature) {}
+        boss_falricAI(Creature *pCreature) : boss_horAI(pCreature) {}
 
         uint8 uiHopelessnessCount;
 
@@ -67,15 +67,15 @@ public:
 
             uiHopelessnessCount = 0;
 
-            if (instance)
-                instance->SetData(DATA_FALRIC_EVENT, NOT_STARTED);
+            if (pInstance)
+                pInstance->SetData(DATA_FALRIC_EVENT, NOT_STARTED);
         }
 
         void EnterCombat(Unit* /*who*/)
         {
             DoScriptText(SAY_AGGRO, me);
-            if (instance)
-                instance->SetData(DATA_FALRIC_EVENT, IN_PROGRESS);
+            if (pInstance)
+                pInstance->SetData(DATA_FALRIC_EVENT, IN_PROGRESS);
 
             events.ScheduleEvent(EVENT_QUIVERING_STRIKE, 23000);
             events.ScheduleEvent(EVENT_IMPENDING_DESPAIR, 9000);
@@ -86,8 +86,8 @@ public:
         {
             DoScriptText(SAY_DEATH, me);
 
-            if (instance)
-                instance->SetData(DATA_FALRIC_EVENT, DONE);
+            if (pInstance)
+                pInstance->SetData(DATA_FALRIC_EVENT, DONE);
         }
 
         void KilledUnit(Unit* /*victim*/)
@@ -113,10 +113,10 @@ public:
                     events.ScheduleEvent(EVENT_QUIVERING_STRIKE, 10000);
                     break;
                 case EVENT_IMPENDING_DESPAIR:
-                    if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM))
+                    if (Unit* pTarget = SelectTarget(SELECT_TARGET_RANDOM))
                     {
                         DoScriptText(SAY_IMPENDING_DESPAIR, me);
-                        DoCast(target, SPELL_IMPENDING_DESPAIR);
+                        DoCast(pTarget, SPELL_IMPENDING_DESPAIR);
                     }
                     events.ScheduleEvent(EVENT_IMPENDING_DESPAIR, 13000);
                     break;

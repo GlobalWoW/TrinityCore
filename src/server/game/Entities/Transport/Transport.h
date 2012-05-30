@@ -88,9 +88,10 @@ class Transport : public GameObject
     public:
         WayPointMap m_WayPoints;
         uint32 m_nextNodeTime;
+
     private:
-        void UpdateForMap(Map const* map);
         void TeleportTransport(uint32 newMapid, float x, float y, float z);
+        void UpdateForMap(Map const* map);
         void DoEventIfAny(WayPointMap::value_type const& node, bool departure);
         WayPointMap::const_iterator GetNextWayPoint();
 };

@@ -30,7 +30,7 @@
 
 Transport* MapManager::LoadTransportInMap(Map* instance, uint32 goEntry, uint32 period)
 {
-    GameObjectTemplate const* goInfo = sObjectMgr->GetGameObjectTemplate(goEntry);
+    const GameObjectTemplate* goInfo = sObjectMgr->GetGameObjectTemplate(goEntry);
 
     if (!goInfo)
     {
@@ -97,7 +97,7 @@ void MapManager::UnLoadTransportFromMap(Transport* t)
         if (t != itr->getSource()->GetTransport())
             itr->getSource()->SendDirectMessage(&out_packet);
 
-    t->m_NPCPassengerSet.clear();         
+    t->m_NPCPassengerSet.clear();
     m_TransportsByInstanceIdMap[t->GetInstanceId()].erase(t);
     m_Transports.erase(t);
     t->m_WayPoints.clear();
@@ -346,7 +346,7 @@ bool Transport::Create(uint32 guidlow, uint32 entry, uint32 mapid, float x, floa
 
     SetUInt32Value(GAMEOBJECT_FACTION, goinfo->faction);
     //SetUInt32Value(GAMEOBJECT_FLAGS, goinfo->flags);
-    SetUInt32Value(GAMEOBJECT_FLAGS, MAKE_PAIR32(0x28, 0x64));
+    SetUInt32Value(GAMEOBJECT_FLAGS, MAKE_PAIR32(0x28, 0x64)); //TEMP FIX
     SetUInt32Value(GAMEOBJECT_LEVEL, m_period);
     SetEntry(goinfo->entry);
 
@@ -686,8 +686,7 @@ void Transport::Update(uint32 p_diff)
         {
             Relocate(m_curr->second.x, m_curr->second.y, m_curr->second.z, GetAngle(m_next->second.x, m_next->second.y) + float(M_PI));
             UpdateNPCPositions(); // COME BACK MARKER
-            // Esto obliga al server a actualizar posiciones en el transporte para players
-            UpdatePlayerPositions();
+            UpdatePlayerPositions(); // Esto obliga al server a actualizar posiciones en el transporte para players
         }
 
         sScriptMgr->OnRelocate(this, m_curr->first, m_curr->second.mapid, m_curr->second.x, m_curr->second.y, m_curr->second.z);
