@@ -3319,28 +3319,6 @@ void SpellMgr::LoadDbcDataCorrections()
                 break;
             // ENDOF ULDUAR SPELLS
             //
-            // TRIAL OF THE CHAMPION SPELLS
-            case 68284: // ToC5 Charge
-                spellInfo->Effect[1] = SPELL_EFFECT_SCHOOL_DAMAGE;
-                spellInfo->EffectBasePoints[1] = 20000;
-                spellInfo->EffectImplicitTargetA[1] = TARGET_UNIT_TARGET_ENEMY;
-                break;
-            case 68282: // ToC5 Charge
-                spellInfo->Effect[1] = 0;
-                break;
-            case 67705: // Raise Arelas Birhgtstar
-            case 67715: // Raise Jaeren Sunworn
-                spellInfo->AttributesEx2 |= SPELL_ATTR2_CAN_TARGET_DEAD;
-                break;
-            case 67782: // Desecration
-                spellInfo->rangeIndex = EFFECT_RADIUS_2_YARDS;
-                spellInfo->EffectImplicitTargetA[0] = TARGET_UNIT_SRC_AREA_ENEMY;
-                break;
-            case 66545:
-                spellInfo->EffectImplicitTargetB[0] = TARGET_UNIT_CASTER;
-                break;
-            // ENDOF TRIAL OF THE CHAMPION SPELLS
-            //
             // TRIAL OF THE CRUSADER SPELLS
             //
             case 66258: // Infernal Eruption (10N)
