@@ -119,6 +119,7 @@ INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_
 (37133, 0, 0, 0, 0, 0, 100, 0, 5000, 15000, 12000, 20000, 11, 41056, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 'Ymirjar Warlord - Whirlwind');
 
 
+/* NEED MORE FIX
 -- Try Fix SAI for Nerub'ar Broodkeeper
 SET @entry := 36725; -- NPC entry
 SET @SPELL1 := 69127; -- Chill of the Throne
@@ -135,3 +136,4 @@ INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type
 (@ENTRY,0,2,0,0,0,100,30,5000,7000,5000,9000,11,@SPELL2,0,0,0,0,0,4,0,0,0,0,0,0,0, "Nerub'ar Broodkeeper - In Combat - Cast Crypt Scarabs"),
 (@ENTRY,0,3,0,0,0,100,30,5000,7000,5000,9000,11,@SPELL3,0,0,0,0,0,4,0,0,0,0,0,0,0, "Nerub'ar Broodkeeper - In Combat - Cast Web Wrap"),
 (@ENTRY,0,4,0,14,0,100,30,5000,30,8000,13000,11,@SPELL4,0,0,0,0,0,7,0,0,0,0,0,0,0, "Nerub'ar Broodkeeper - In Combat - Cast Dark Mending on Friendlies");
+*/
