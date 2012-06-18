@@ -147,7 +147,6 @@ class instance_icecrown_citadel : public InstanceMapScript
                 ColdflameJetsState = NOT_STARTED;
                 BloodQuickeningState = NOT_STARTED;
                 BloodQuickeningMinutes = 0;
-                FrostwyrmFlags = 0;
                 // Gunship Battle
                 FirstSquadState = 0;
                 SecondSquadState = 0;
