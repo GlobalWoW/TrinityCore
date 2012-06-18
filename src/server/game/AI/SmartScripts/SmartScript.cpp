@@ -160,9 +160,6 @@ void SmartScript::ProcessAction(SmartScriptHolder& e, Unit* unit, uint32 var0, u
     {
         case SMART_ACTION_TALK:
         {
-            if (!me)
-                break;
-
             ObjectList* targets = GetTargets(e, unit);
             Creature* talker = me;
             Player* targetPlayer = NULL;
@@ -184,6 +181,9 @@ void SmartScript::ProcessAction(SmartScriptHolder& e, Unit* unit, uint32 var0, u
 
                 delete targets;
             }
+
+            if (!talker)
+                break;
 
             mTalkerEntry = talker->GetEntry();
             mLastTextID = e.action.talk.textGroupID;
@@ -2778,6 +2778,13 @@ void SmartScript::ProcessEvent(SmartScriptHolder& e, Unit* unit, uint32 var0, ui
             ProcessAction(e, NULL, var0);
             break;
         }
+        case SMART_EVENT_ACTION_DONE:
+        {
+            if (e.event.doAction.eventId != var0)
+                return;
+            ProcessAction(e, unit, var0);
+            break;
+        }
         default:
             sLog->outErrorDb("SmartScript::ProcessEvent: Unhandled Event type %u", e.GetEventType());
             break;
@@ -2892,23 +2899,6 @@ void SmartScript::InstallEvents()
 
         mInstallEvents.clear();
     }
-}
-
-bool SmartScript::ConditionValid(Unit* u, int32 c, int32 v1, int32 v2, int32 v3)
-{
-    if (c == 0)
-        return true;
-
-    if (!u || !u->ToPlayer())
-        return false;
-
-    Condition cond;
-    cond.ConditionType = ConditionTypes(uint32(c));
-    cond.ConditionValue1 = uint32(v1);
-    cond.ConditionValue1 = uint32(v2);
-    cond.ConditionValue1 = uint32(v3);
-    ConditionSourceInfo srcInfo = ConditionSourceInfo(u->ToPlayer());
-    return cond.Meets(srcInfo);
 }
 
 void SmartScript::OnUpdate(uint32 const diff)
