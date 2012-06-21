@@ -353,6 +353,12 @@ void Spell::EffectSchoolDMG(SpellEffIndex effIndex)
                             return;
                         break;
                     }
+                    case 46198: // Cold Slap
+                    case 46588: // Ice Spear
+                    {
+                        damage = unitTarget->CountPctFromMaxHealth(damage);
+                        break;
+                    }
                     // Gargoyle Strike
                     case 51963:
                     {
