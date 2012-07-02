@@ -1,6 +1,7 @@
 /*
  * Copyright (C) 2008-2012 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2008-2012 DarkmanRepo <https://github.com/darkman1983/TrinityCore/>
+ * Copyright (C) 2008-2012 AvalonFr <https://github.com/avalonfr/TrinityCore/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -17,315 +18,417 @@
  */
 
 #include "ScriptPCH.h"
-#include "LFGMgr.h"
 
-#define EMOTE_SUBMERGE             "Ahune Retreats. His Defenses Diminish."
-#define EMOTE_EMERGE_SOON          "Ahune will soon resurface."
-#define GOSSIP_STONE_ITEM          "Disturb the stone and summon Lord Ahune."
+enum Creatures
+{
+    NPC_AHUNE                   = 25740,
+    NPC_FROZEN_CORE             = 25865,
+    NPC_AHUNITE_COLDWEAVE       = 25756,
+    NPC_AHUNITE_FROSTWIND       = 25757,
+    NPC_AHUNITE_HAILSTONE       = 25755,
+    NPC_SLIPPERY_FLOOR          = 25952,
+    NPC_ICESPEAR_BUNNY          = 25985,
+    NPC_EARTHEN_RING_TOTEM      = 25961,
+};
+
+enum GameObjects
+{
+    GO_ICE_STONE                = 187882,
+    GO_ICE_SPEAR                = 188077,
+    GO_ICE_CHEST                = 187892,
+};
 
 enum Spells
 {
     // Ahune
-    SPELL_SLIPPERY_FLOOR_AMBIENT  = 46314,
-    SPELL_SUMMON_ICE_SPEAR_BUNNY  = 46359,
-    SPELL_SUMMON_ICE_SPEAR_OBJECT = 46369,
-    SPELL_SELF_STUN               = 46416,
-    SPELL_RESURFACE               = 46402,
-    SPELL_SHIELD                  = 45954,
-    SPELL_BEAM_ATTACK             = 46336,
-    SPELL_BEAM_ATTACK_BEAM        = 46363,
-    SPELL_SUBMERGE                = 37550,
-    SPELL_EMERGE                  = 50142,
-    SPELL_SNOWY                   = 46423,
-    // Ahunite Hailstone
-    SPELL_CHILLING_AURA           = 46542,
-    SPELL_PULVERIZE               =  2676,
-    // Ahunite Frostwind
-    SPELL_WIND_BUFFET             = 46568,
-    SPELL_LIGHTNING_SHIELD        = 12550,
-    // Ahunite Coldwave
-    SPELL_BITTER_BLAST            = 46406,
-    // Ice Spear
-    SPELL_ICE_SPEAR_KNOCKBACK     = 46360,
-    // Slippery Floor
-    SPELL_SLIP                    = 45947, // stun
-    SPELL_YOU_SLIPPED             = 45946, // decrease speed
-    SPELL_SLIPPERY_FLOOR          = 45945  // periodic, channeled
-};
+    SPELL_AHUNES_SHIELD         = 45954,
+    SPELL_COLD_SLAP             = 46145,
 
-enum Npcs
-{
-    NPC_FROSTLORD_AHUNE           = 25740,
-    NPC_FROZEN_CORE               = 25865,
-    NPC_AHUNITE_HAILSTONE         = 25755,
-    NPC_AHUNITE_COLDWAVE          = 25756,
-    NPC_AHUNITE_FROSTWIND         = 25757,
-    NPC_SLIPPERY_FLOOR            = 25952,
-    NPC_EARTHEN_RING_TOTEM        = 25961,
-    NPC_ICE_SPEAR_BUNNY           = 25985
-};
+    SPELL_ICESPEAR_SUMMON_BUNNY = 46359,
+    SPELL_ICESPEAR_SUMMON_GO    = 46369,
+    SPELL_ICESPEAR_KNOCKBACK    = 46360, // also triggers dmg
 
-enum Objects
-{
-    GO_ICE_SPEAR                  = 188077,
-    GO_ICE_STONE                  = 187882,
-    GO_ICE_CHEST                  = 187892
-};
+    SPELL_MAKE_BONFIRE          = 45930,
+    SPELL_SUMMONING_VISUAL1     = 45937, // below Ahune (?)
+    SPELL_SUMMONING_VISUAL2     = 45938, // below the Summoning Stone (?)
+    SPELL_SUMMON_MINION_VISUAL  = 46103, // Midsummer - Ahune - Summon Minion, Lower
+    SPELL_GHOST_VISUAL          = 46786,
+    SPELL_RESURFACE             = 46402, // Ahune Resurfaces
+    SPELL_SLIPPERY_FLOOR_AMBIENT = 46314,
 
-enum Actions
-{
-    ACTION_START_EVENT
+    SPELL_LOOT_CHEST            = 45939,
+    SPELL_LOOT_CHEST_HC         = 46622,
+
+    SPELL_AHUNE_ACHIEVEMENT     = 62043, // Midsummer - Ahune - DIES, Achievement (Visual, no credit)
+
+    // Totem
+    SPELL_BEAM_ATTACK           = 46336, // Earthen Ring Totem Attack Visuals
+    SPELL_BEAM_ATTACK_BEAM      = 46363,
+
+    // Coldweave
+    SPELL_BITTER_BLAST          = 46406,
+
+    // Frostwind
+    SPELL_LIGHTNING_SHIELD      = 12550,
+    SPELL_WIND_BUFFET           = 46568,
+
+    // Hailstone
+    SPELL_CHILLING_AURA         = 46542, // damage tick
+    SPELL_CHILLING_AURA_PERIODIC = 46885, // periodic trigger (yet to be scripted..., we use it as visual for now)
+    SPELL_PULVERIZE             = 2676,
 };
 
 enum Events
 {
-    EVENT_EMERGE = 1,
-    EVENT_EMERGE_SOON,
-    EVENT_SUBMERGED,
-    EVENT_EARTHEN_RING_ATTACK,
-    EVENT_SUMMON_HAILSTONE,
-    EVENT_SUMMON_COLDWAVE,
-    EVENT_ICE_SPEAR
+    // Ahune
+    EVENT_SWITCH_PHASE          = 1,
+    EVENT_SUMMON_HAILSTONE      = 2,
+    EVENT_SUMMON_COLDWEAVE      = 3,
+    EVENT_SUMMON_FROSTWIND      = 4,
+    EVENT_ICE_SPEAR             = 5,
+    EVENT_ICE_SPEAR_KNOCKBACK   = 6,
+    EVENT_COLD_SLAP             = 7,
+
+    // Frozen Core
+    EVENT_GHOST_VISUAL          = 8,
+    EVENT_RESURFACE_SOON        = 9,
+
+    // Coldweave
+    EVENT_BITTER_BLAST          = 10,
+
+    // Frostwind
+    EVENT_WIND_BUFFET           = 11,
+
+    // Hailstone
+    EVENT_CHILLING_AURA         = 12,
+    EVENT_PULVERIZE             = 13,
+
+    // Visual Stuff
+    EVENT_EARTHEN_RING_ATTACK   = 14,
 };
 
-class npc_frostlord_ahune : public CreatureScript
+enum Phases
+{
+    PHASE_ONE    = 1,
+    PHASE_TWO    = 2,
+
+    PHASE_MASK_ONE  = 1 << PHASE_ONE,
+    PHASE_MASK_TWO  = 1 << PHASE_TWO,
+};
+
+#define GOSSIP_AHUNE_SUMMON "Remuer la pierre et invoquer le Seigneur Ahune"
+#define EMOTE_SUBMERGE "Ahune bat en retraites. Son potentiel de defense diminue."
+#define EMOTE_EMERGE_SOON "Ahune va refaire surface."
+
+// After GOSSIP_SUMMON was clicked
+// Player says: The Ice stone has melted.
+// Player says: Ahune, your strength grows no more!
+// Player says: Your frozen reign will not come to pass!
+
+Position const SummonPositions[4] =
+{
+        {-88.495071, -254.462997, -1.077302, 1.84}, // Ahune / Frozen-Core
+        {-90.891891, -243.488068, -1.116222}, // Hailstone
+        {-97.389175, -239.780701, -1.264044}, // Coldweave #1
+        {-85.160637, -236.127808, -1.572418}, // Coldweave #2
+};
+
+class boss_ahune : public CreatureScript
 {
     public:
-        npc_frostlord_ahune() : CreatureScript("npc_frostlord_ahune") { }
+        boss_ahune() : CreatureScript("boss_ahune") { }
 
-        struct npc_frostlord_ahuneAI : public Scripted_NoMovementAI
+        CreatureAI* GetAI(Creature* creature) const
         {
-            npc_frostlord_ahuneAI(Creature* c) : Scripted_NoMovementAI(c), _summons(me) { }
+            return new boss_ahuneAI(creature);
+        }
+
+        struct boss_ahuneAI : public Scripted_NoMovementAI
+        {
+            boss_ahuneAI(Creature* creature) : Scripted_NoMovementAI(creature), summons(me) { }
+
+            EventMap events;
+            SummonList summons;
+
+            bool intro;
 
             void Reset()
             {
-                _summons.DespawnAll();
-                _events.Reset();
-                _submerged = false;
+                summons.DespawnAll();
 
-                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
-                me->SetReactState(REACT_PASSIVE);
-                me->SetCorpseDelay(20);
-                me->SetVisible(false);
-                DoCast(me, SPELL_SHIELD, true);
-                DoCast(me, SPELL_SUBMERGE, true);
+                events.Reset();
+                events.SetPhase(PHASE_ONE);
 
-                me->SummonGameObject(GO_ICE_STONE, -65.65f, -159.765f, -2.25f, 0, 0, 0, 0, 0, 0);
+                intro = false;
+
+                me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
+                me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK_DEST, true);
+
+                me->CastSpell(me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), SPELL_SUMMONING_VISUAL1, true);
+                me->SetUInt32Value(UNIT_NPC_EMOTESTATE, 0);
+
+                me->AddAura(SPELL_AHUNES_SHIELD, me);
             }
 
-            void JustSummoned(Creature* summon)
+            void EnterCombat(Unit* who)
             {
-                switch (summon->GetEntry())
+                DoZoneInCombat();
+
+                events.Reset();
+                events.SetPhase(PHASE_ONE);
+                events.ScheduleEvent(EVENT_SWITCH_PHASE, 90000); // phase 2 after 90 seconds
+                events.ScheduleEvent(EVENT_COLD_SLAP, 500, 0, PHASE_ONE); // every 500ms in melee range in phase 1
+                events.ScheduleEvent(EVENT_SUMMON_HAILSTONE, 1000, 0, PHASE_ONE); // once in every phase 1
+                events.ScheduleEvent(EVENT_SUMMON_COLDWEAVE, 8000, 0, PHASE_ONE); // every 7 seconds in phase 1
+                events.ScheduleEvent(EVENT_ICE_SPEAR, 9500, 0, PHASE_ONE); // every 7 seconds in phase 1, first after 9.5 seconds
+                events.ScheduleEvent(EVENT_EARTHEN_RING_ATTACK, 10000, 0, PHASE_ONE); // every 10 seconds in phase 1 totem attack visual
+            }
+
+            void JustDied(Unit* killer)
+            {
+                Map::PlayerList const& playerList = me->GetMap()->GetPlayers();
+                if (!playerList.isEmpty())
+                    for (Map::PlayerList::const_iterator i = playerList.begin(); i != playerList.end(); ++i)
+                        if (i->getSource())
+                            DoCast(i->getSource(), SPELL_AHUNE_ACHIEVEMENT);
+
+                DoCast(me, SPELL_LOOT_CHEST);
+            }
+
+            void JustSummoned(Creature* summoned)
+            {
+                summons.Summon(summoned);
+
+                switch (summoned->GetEntry())
                 {
-                    case NPC_FROZEN_CORE:
-                        summon->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
-                        summon->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_GRIP, true);
-                        summon->SetHealth(me->GetHealth());
-                        summon->SetReactState(REACT_PASSIVE);
-                        summon->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
+                    case NPC_ICESPEAR_BUNNY:
+                        summoned->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_DISABLE_MOVE);
                         break;
                     case NPC_SLIPPERY_FLOOR:
-                        summon->SetReactState(REACT_PASSIVE);
-                        summon->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_DISABLE_MOVE);
-                        summon->SetDisplayId(11686);
-                        summon->setFaction(14);
-                        me->AddAura(SPELL_SLIPPERY_FLOOR_AMBIENT, summon);
-                        break;
-                    case NPC_ICE_SPEAR_BUNNY:
-                        summon->SetInCombatWithZone();
+                        summoned->SetReactState(REACT_PASSIVE);
+                        summoned->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_DISABLE_MOVE);
+                        summoned->SetDisplayId(11686);
+                        me->AddAura(SPELL_SLIPPERY_FLOOR_AMBIENT, summoned);
                         return;
+                    case NPC_FROZEN_CORE:
+                        summoned->SetHealth(me->GetHealth()); // sync health on phase change
+                        break;
                 }
 
-                _summons.Summon(summon);
-                summon->SetInCombatWithZone();
+                DoZoneInCombat(summoned);
             }
 
-            void SummonedCreatureDespawn(Creature* summon)
+            void SummonedCreatureDespawn(Creature* summoned)
             {
-                if (me->isDead())
-                    return;
-
-                if (summon->GetEntry() == NPC_FROZEN_CORE)
-                    me->SetHealth(summon->GetHealth());
-            }
-
-            void SummonedCreatureDies(Creature* summon, Unit* /*killer*/)
-            {
-                if (summon->GetEntry() == NPC_FROZEN_CORE)
-                    me->DealDamage(me, me->GetHealth());
-            }
-
-            void JustDied(Unit* /*who*/)
-            {
-                me->SummonGameObject(GO_ICE_CHEST, -97.095f, -203.866f, -1.191f, 1.5f, 0, 0, 0, 0, 0);
-                _summons.DespawnAll();
-
-                // lfg reward as there is no ahune entry in dbcs dungeonencounters
-                // TODO: unhack
-                Map* map = me->GetMap();
-                if (map && map->IsDungeon())
-                {
-                    Map::PlayerList const& players = map->GetPlayers();
-                    if (!players.isEmpty())
-                        for (Map::PlayerList::const_iterator i = players.begin(); i != players.end(); ++i)
-                            if (Player* player = i->getSource())
-                                if (player->GetDistance(me) < 120.0f)
-                                    sLFGMgr->RewardDungeonDoneFor(286, player);
-                }
-            }
-
-            void DoAction(int32 const action)
-            {
-                me->SetVisible(true);
-                me->SetReactState(REACT_AGGRESSIVE);
-                me->SetInCombatWithZone();
-                _events.ScheduleEvent(EVENT_EMERGE, 10000);
-
-                if (GameObject* chest = me->FindNearestGameObject(GO_ICE_CHEST, 100.0f))
-                    chest->Delete();
+                summons.Despawn(summoned);
             }
 
             void UpdateAI(uint32 const diff)
+            {
+                if (!intro)
+                {
+                    me->SummonCreature(NPC_SLIPPERY_FLOOR, SummonPositions[0]); // floor ambient
+                    me->HandleEmoteCommand(EMOTE_ONESHOT_EMERGE);
+                    me->SetReactState(REACT_AGGRESSIVE);
+                    intro = true;
+                }
+
+                if (!UpdateVictim())
+                    return;
+
+                events.Update(diff);
+
+                while (uint32 eventId = events.ExecuteEvent())
+                {
+                    switch (eventId)
+                    {
+                        case EVENT_SWITCH_PHASE:
+                            if (events.GetPhaseMask() & PHASE_MASK_ONE)
+                            {
+                                // Emote: Ahune retreats. His defenses diminish.
+                                //                                 me->MonsterTextEmote(EMOTE_SUBMERGE, 0, true);
+
+
+                                events.SetPhase(PHASE_TWO);
+                                events.ScheduleEvent(EVENT_SWITCH_PHASE, 30000);
+
+                                DoCast(me, SPELL_MAKE_BONFIRE);
+
+                                // Handle Submerge. This is essentially a copy of how Ragnaros submerges... :) minus the threatwipe
+                                me->AttackStop();
+                                me->SetReactState(REACT_PASSIVE);
+                                me->setFaction(35);
+                                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                                me->SetUInt32Value(UNIT_NPC_EMOTESTATE, EMOTE_STATE_SUBMERGED);
+                                me->HandleEmoteCommand(EMOTE_ONESHOT_SUBMERGE);
+
+                                // spawn core
+                                me->SummonCreature(NPC_FROZEN_CORE, SummonPositions[0], TEMPSUMMON_CORPSE_DESPAWN);
+                            }
+                            else
+                            {
+                                events.SetPhase(PHASE_ONE);
+                                events.ScheduleEvent(EVENT_SWITCH_PHASE, 90000);
+                                events.ScheduleEvent(EVENT_COLD_SLAP, 500, 0, PHASE_ONE);
+                                events.ScheduleEvent(EVENT_SUMMON_HAILSTONE, 1000, 0, PHASE_ONE);
+                                events.ScheduleEvent(EVENT_SUMMON_COLDWEAVE, 8000, 0, PHASE_ONE);
+                                events.ScheduleEvent(EVENT_SUMMON_FROSTWIND, 9000, 0, PHASE_ONE);
+                                events.ScheduleEvent(EVENT_ICE_SPEAR, 9500, 0, PHASE_ONE);
+                                events.ScheduleEvent(EVENT_EARTHEN_RING_ATTACK, 10000, 0, PHASE_ONE);
+
+                                me->SetReactState(REACT_AGGRESSIVE);
+                                me->setFaction(14);
+                                me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                                me->SetUInt32Value(UNIT_NPC_EMOTESTATE, 0);
+                                me->HandleEmoteCommand(EMOTE_ONESHOT_EMERGE);
+
+                                DoCastVictim(SPELL_RESURFACE);
+
+                                // despawn core
+                                summons.DespawnEntry(NPC_FROZEN_CORE);
+                            }
+                            break;
+                        case EVENT_COLD_SLAP:
+                            if (Unit* target = SelectTarget(SELECT_TARGET_NEAREST, 0, 8.0f, true))
+                            {
+                                DoCast(target, SPELL_COLD_SLAP);
+                                Position targetPos;
+                                target->GetNearPosition(targetPos, float(rand_norm()) * 5.0f + 35.0f, me->GetAngle(target));
+                                target->GetMotionMaster()->MoveJump(targetPos.GetPositionX(), targetPos.GetPositionY(), targetPos.GetPositionZ(), target->GetExactDist2d(targetPos.GetPositionX(), targetPos.GetPositionY()), 10.0f);
+                            }
+                            events.ScheduleEvent(EVENT_COLD_SLAP, 500, 0, PHASE_ONE);
+                            break;
+                        case EVENT_ICE_SPEAR: // FIXME: should make use of all the proper spells...
+                            if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 120.0f, true))
+                            {
+                                target->CastSpell(target, SPELL_ICESPEAR_SUMMON_BUNNY);
+                                target->CastSpell(target, SPELL_ICESPEAR_SUMMON_GO);
+                                events.ScheduleEvent(EVENT_ICE_SPEAR_KNOCKBACK, 2000);
+                            }
+                            events.ScheduleEvent(EVENT_ICE_SPEAR, 7000, 0, PHASE_ONE);
+                            break;
+                        case EVENT_ICE_SPEAR_KNOCKBACK:
+                            if (GameObject* go = me->FindNearestGameObject(GO_ICE_SPEAR, 120.0f))
+                            {
+                                go->UseDoorOrButton();
+                                Map::PlayerList const& playerList = me->GetMap()->GetPlayers();
+                                if (!playerList.isEmpty())
+                                    for (Map::PlayerList::const_iterator i = playerList.begin(); i != playerList.end(); ++i)
+                                        if (i->getSource() && go->GetDistance(i->getSource()) <= 2.0f)
+                                            i->getSource()->CastSpell(i->getSource(), SPELL_ICESPEAR_KNOCKBACK);
+                                go->Delete();
+                            }
+                            break;
+                        case EVENT_SUMMON_HAILSTONE:
+                            me->SummonCreature(NPC_AHUNITE_HAILSTONE, SummonPositions[1], TEMPSUMMON_CORPSE_TIMED_DESPAWN, 3000);
+                            break;
+                        case EVENT_SUMMON_COLDWEAVE: // they always come in pairs of two
+                            me->SummonCreature(NPC_AHUNITE_COLDWEAVE, SummonPositions[2], TEMPSUMMON_CORPSE_TIMED_DESPAWN, 3000);
+                            me->SummonCreature(NPC_AHUNITE_COLDWEAVE, SummonPositions[3], TEMPSUMMON_CORPSE_TIMED_DESPAWN, 3000);
+                            events.ScheduleEvent(EVENT_SUMMON_COLDWEAVE, 5000, 0, PHASE_ONE);
+                            break;
+                        case EVENT_SUMMON_FROSTWIND: // not in first phase 1
+                            me->SummonCreature(NPC_AHUNITE_FROSTWIND, SummonPositions[urand(2,3)], TEMPSUMMON_CORPSE_TIMED_DESPAWN, 3000);
+                            events.ScheduleEvent(EVENT_SUMMON_FROSTWIND, 7000, 0, PHASE_ONE);
+                            break;
+                        case EVENT_EARTHEN_RING_ATTACK:
+                            if (Creature* totem = me->FindNearestCreature(NPC_EARTHEN_RING_TOTEM, 200.0f))
+                            {
+                                totem->CastSpell(me, SPELL_BEAM_ATTACK, false);
+                                totem->CastSpell(me, SPELL_BEAM_ATTACK_BEAM, false);
+                            }
+                            events.ScheduleEvent(EVENT_EARTHEN_RING_ATTACK, 10000, 0, PHASE_ONE);
+                            break;
+                    }
+                }
+
+                DoMeleeAttackIfReady();
+            }
+        };
+};
+
+class npc_frozen_core : public CreatureScript
+{
+    public:
+        npc_frozen_core() : CreatureScript("npc_frozen_core") { }
+
+        CreatureAI* GetAI(Creature* creature) const
+        {
+            return new npc_frozen_coreAI(creature);
+        }
+
+        struct npc_frozen_coreAI : public Scripted_NoMovementAI
+        {
+            npc_frozen_coreAI(Creature* creature) : Scripted_NoMovementAI(creature) { }
+
+            EventMap events;
+
+            void Reset()
+            {
+                events.Reset();
+                events.ScheduleEvent(EVENT_RESURFACE_SOON, 25000); // after 25 seconds Emote: Ahune will soon resurface.
+
+                me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
+                me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK_DEST, true);
+
+                me->MonsterTextEmote(EMOTE_SUBMERGE, 0, true);
+            }
+
+            void DamageTaken(Unit* who, uint32& damage)
+            {
+                if (me->ToTempSummon())
+                {
+                    if (Unit* summoner = me->ToTempSummon()->GetSummoner())
+                    {
+                        if (me->GetHealth() > damage)
+                            summoner->SetHealth((summoner->GetMaxHealth() / 100) * me->GetHealthPct());
+                        else
+                            who->Kill(summoner);
+                    }
+                }
+                if (!me->HasAura(SPELL_GHOST_VISUAL))
+                    DoCast(me, SPELL_GHOST_VISUAL);
+            }
+
+            void JustDied(Unit* killer)
+            {
+                if (me->ToTempSummon())
+                    if (Unit* summoner = me->ToTempSummon()->GetSummoner())
+                        if (summoner->isAlive())
+                            killer->Kill(summoner);
+            }
+
+            void UpdateAI(const uint32 diff)
             {
                 if (!UpdateVictim())
                     return;
 
-                _events.Update(diff);
+                events.Update(diff);
 
-                while (uint32 eventId = _events.ExecuteEvent())
+                while (uint32 eventId = events.ExecuteEvent())
                 {
                     switch (eventId)
                     {
-                        case EVENT_EMERGE:
-                            me->SummonCreature(NPC_SLIPPERY_FLOOR, *me, TEMPSUMMON_TIMED_DESPAWN, 90000);
-                            me->RemoveAurasDueToSpell(SPELL_SELF_STUN);
-                            me->RemoveAurasDueToSpell(SPELL_SUBMERGE);
-                            me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
-                            DoCast(me, SPELL_RESURFACE, true);
-                            DoCast(SPELL_EMERGE);
-                            _attacks = 0;
-                            _events.ScheduleEvent(EVENT_EARTHEN_RING_ATTACK, 10000);
-                            _events.ScheduleEvent(EVENT_SUMMON_HAILSTONE, 2000);
-                            _events.ScheduleEvent(EVENT_SUMMON_COLDWAVE, 5000);
-                            _events.ScheduleEvent(EVENT_ICE_SPEAR, 10000);
-                            break;
-                        case EVENT_EMERGE_SOON:
+                        case EVENT_RESURFACE_SOON:
+                            // Emote: Ahune will soon resurface.
                             me->MonsterTextEmote(EMOTE_EMERGE_SOON, 0, true);
                             break;
-                        case EVENT_SUBMERGED:
-                            DoCast(me, SPELL_SELF_STUN, true);
-                            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
-                            me->SummonCreature(NPC_FROZEN_CORE, *me, TEMPSUMMON_TIMED_DESPAWN, 30000);
-                            _submerged = true;
-                            _events.ScheduleEvent(EVENT_EMERGE_SOON, 25000);
-                            _events.ScheduleEvent(EVENT_EMERGE, 30000);
-                            break;
-                        case EVENT_EARTHEN_RING_ATTACK:
-                            ++_attacks;
-                            if (_attacks >= 9)
-                            {
-                                me->MonsterTextEmote(EMOTE_SUBMERGE, 0, true);
-                                DoCast(SPELL_SUBMERGE);
-                                _events.Reset();
-                                _events.ScheduleEvent(EVENT_SUBMERGED, 4500);
-                            }
-                            else
-                            {
-                                if (Creature* totem = me->FindNearestCreature(NPC_EARTHEN_RING_TOTEM, 150.0f))
-                                    totem->CastSpell(me, SPELL_BEAM_ATTACK_BEAM, false);
-                                _events.ScheduleEvent(EVENT_EARTHEN_RING_ATTACK, 10000);
-                            }
-                            break;
-                        case EVENT_SUMMON_HAILSTONE:
-                            me->SummonCreature(NPC_AHUNITE_HAILSTONE, float(irand(-110, -80)), float(irand(-225, -215)), -1.0f, 0, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 5000);
-                            break;
-                        case EVENT_SUMMON_COLDWAVE:
-                            for (uint8 i = 0; i < 2; ++i)
-                                me->SummonCreature(NPC_AHUNITE_COLDWAVE, float(irand(-110, -80)), float(irand(-225, -215)), -1.0f, 0, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 3000);
-                            if (_submerged)
-                                me->SummonCreature(NPC_AHUNITE_FROSTWIND, float(irand(-110, -80)), float(irand(-225, -215)), -1.0f, 0, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 3000);
-                            _events.ScheduleEvent(EVENT_SUMMON_COLDWAVE, 7000);
-                            break;
-                        case EVENT_ICE_SPEAR:
-                            if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 150.0f, true))
-                                DoCast(target, SPELL_SUMMON_ICE_SPEAR_BUNNY);
-                            _events.ScheduleEvent(EVENT_ICE_SPEAR, 7000);
-                            break;
-                        default:
-                            break;
                     }
                 }
+
+                DoMeleeAttackIfReady();
             }
-
-        private:
-            SummonList _summons;
-            EventMap _events;
-            bool _submerged;
-            uint8 _attacks;
         };
-
-        CreatureAI* GetAI(Creature* creature) const
-        {
-            return new npc_frostlord_ahuneAI(creature);
-        }
 };
 
-class npc_ahune_ice_spear : public CreatureScript
+class go_ice_stone : public GameObjectScript
 {
     public:
-        npc_ahune_ice_spear() : CreatureScript("npc_ahune_ice_spear") { }
-
-        struct npc_ahune_ice_spearAI : public Scripted_NoMovementAI
-        {
-            npc_ahune_ice_spearAI(Creature* creature) : Scripted_NoMovementAI(creature)
-            {
-                _spikeTimer = 2500;
-                _spiked = false;
-                DoCast(me, SPELL_SUMMON_ICE_SPEAR_OBJECT, true);
-            }
-
-            void UpdateAI(uint32 const diff)
-            {
-                if (_spikeTimer <= diff)
-                {
-                    GameObject* spike = me->FindNearestGameObject(GO_ICE_SPEAR, 10.0f);
-                    if (spike && !_spiked)
-                    {
-                        if (Unit* target = SelectTarget(SELECT_TARGET_NEAREST, 0, 3.0f, true))
-                            target->CastSpell(target, SPELL_ICE_SPEAR_KNOCKBACK, true);
-                        spike->UseDoorOrButton();
-                        _spiked = true;
-                        _spikeTimer = 3500;
-                    }
-                    else if (spike)
-                    {
-                        spike->Delete();
-                        me->DespawnOrUnsummon();
-                    }
-                }
-                else
-                    _spikeTimer -= diff;
-            }
-
-        private:
-            uint32 _spikeTimer;
-            bool _spiked;
-        };
-
-        CreatureAI* GetAI(Creature* creature) const
-        {
-            return new npc_ahune_ice_spearAI(creature);
-        }
-};
-
-class go_ahune_ice_stone : public GameObjectScript
-{
-    public:
-        go_ahune_ice_stone() : GameObjectScript("go_ahune_ice_stone") { }
+        go_ice_stone() : GameObjectScript("go_ice_stone") { }
 
         bool OnGossipHello(Player* player, GameObject* go)
         {
-            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_STONE_ITEM, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF);
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_AHUNE_SUMMON, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF);
             player->SEND_GOSSIP_MENU(player->GetGossipTextId(go), go->GetGUID());
 
             return true;
@@ -337,19 +440,161 @@ class go_ahune_ice_stone : public GameObjectScript
 
             if (action == GOSSIP_ACTION_INFO_DEF)
             {
-                if (Creature* ahune = go->FindNearestCreature(NPC_FROSTLORD_AHUNE, 100.0f, true))
-                {
-                    ahune->AI()->DoAction(ACTION_START_EVENT);
-                    go->Delete();
-                }
+                go->SummonCreature(NPC_AHUNE, SummonPositions[0], TEMPSUMMON_DEAD_DESPAWN);
+                go->Delete();
             }
+
             return true;
         }
 };
 
-void AddSC_boss_frostlord_ahune()
+class npc_ahunite_hailstone : public CreatureScript
 {
-    new npc_frostlord_ahune();
-    new npc_ahune_ice_spear();
-    new go_ahune_ice_stone();
+    public:
+        npc_ahunite_hailstone() : CreatureScript("npc_ahunite_hailstone") { }
+
+        CreatureAI* GetAI(Creature* creature) const
+        {
+            return new npc_ahunite_hailstoneAI(creature);
+        }
+
+        struct npc_ahunite_hailstoneAI : public ScriptedAI
+        {
+            npc_ahunite_hailstoneAI(Creature* creature) : ScriptedAI(creature) { }
+
+            EventMap events;
+
+            void Reset()
+            {
+                events.Reset();
+                events.ScheduleEvent(EVENT_PULVERIZE, urand(6000, 8000));
+
+                DoCast(me, SPELL_CHILLING_AURA);
+                DoCast(me, SPELL_CHILLING_AURA_PERIODIC); // use for visual atm
+            }
+
+            void UpdateAI(const uint32 diff)
+            {
+                if (!UpdateVictim())
+                    return;
+
+                events.Update(diff);
+
+                while (uint32 eventId = events.ExecuteEvent())
+                {
+                    switch (eventId)
+                    {
+                        case EVENT_PULVERIZE:
+                            DoCastVictim(SPELL_PULVERIZE);
+                            events.ScheduleEvent(EVENT_PULVERIZE, urand(6000, 8000));
+                            break;
+                    }
+                }
+
+                DoMeleeAttackIfReady();
+            }
+        };
+};
+
+class npc_ahunite_coldweave : public CreatureScript
+{
+    public:
+        npc_ahunite_coldweave() : CreatureScript("npc_ahunite_coldweave") { }
+
+        CreatureAI* GetAI(Creature* creature) const
+        {
+            return new npc_ahunite_coldweaveAI(creature);
+        }
+
+        struct npc_ahunite_coldweaveAI : public ScriptedAI
+        {
+            npc_ahunite_coldweaveAI(Creature* creature) : ScriptedAI(creature) { }
+
+            EventMap events;
+
+            void Reset()
+            {
+                events.Reset();
+                events.ScheduleEvent(EVENT_BITTER_BLAST, 500);
+            }
+
+            void UpdateAI(const uint32 diff)
+            {
+                if (!UpdateVictim())
+                    return;
+
+                events.Update(diff);
+
+                while (uint32 eventId = events.ExecuteEvent())
+                {
+                    switch (eventId)
+                    {
+                        case EVENT_BITTER_BLAST:
+                            DoCastVictim(SPELL_BITTER_BLAST);
+                            events.ScheduleEvent(EVENT_BITTER_BLAST, urand(5000, 7000));
+                            break;
+                    }
+                }
+
+                DoMeleeAttackIfReady();
+            }
+        };
+};
+
+class npc_ahunite_frostwind : public CreatureScript
+{
+    public:
+        npc_ahunite_frostwind() : CreatureScript("npc_ahunite_frostwind") { }
+
+        CreatureAI* GetAI(Creature* creature) const
+        {
+            return new npc_ahunite_frostwindAI(creature);
+        }
+
+        struct npc_ahunite_frostwindAI : public ScriptedAI
+        {
+            npc_ahunite_frostwindAI(Creature* creature) : ScriptedAI(creature) { }
+
+            EventMap events;
+
+            void Reset()
+            {
+                events.Reset();
+                events.ScheduleEvent(EVENT_WIND_BUFFET, 2000); // FIXME: get correct timing for wind buffet
+
+                DoCast(me, SPELL_LIGHTNING_SHIELD);
+            }
+
+            void UpdateAI(const uint32 diff)
+            {
+                if (!UpdateVictim())
+                    return;
+
+                events.Update(diff);
+
+                while (uint32 eventId = events.ExecuteEvent())
+                {
+                    switch (eventId)
+                    {
+                        case EVENT_WIND_BUFFET:
+                            if (Unit* target = SelectTarget(SELECT_TARGET_FARTHEST, 0, 120.0f))
+                                DoCast(target, SPELL_WIND_BUFFET);
+                            events.ScheduleEvent(EVENT_WIND_BUFFET, urand(5000, 7000));
+                            break;
+                    }
+                }
+
+                DoMeleeAttackIfReady();
+            }
+        };
+};
+
+void AddSC_boss_ahune()
+{
+    new boss_ahune();
+    new npc_frozen_core();
+    new go_ice_stone();
+    new npc_ahunite_hailstone();
+    new npc_ahunite_coldweave();
+    new npc_ahunite_frostwind();
 }
