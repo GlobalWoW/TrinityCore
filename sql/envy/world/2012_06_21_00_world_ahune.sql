@@ -59,7 +59,7 @@ DELETE FROM `gameobject_involvedrelation` WHERE `id` = 188152;
 INSERT INTO `gameobject_involvedrelation` (`id`, `quest`) VALUES
 (188152 , 11691);
 
--- implicit targeting for totem attack beam
-DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId` = 13 AND `SourceEntry` = 46363;
+-- implicit targeting for totem attack beam (need fix)
+/*DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId` = 13 AND `SourceEntry` = 46363;
 INSERT INTO `conditions` (SourceTypeOrReferenceId, SourceGroup, SourceEntry, SourceId, ElseGroup, ConditionTypeOrReference, ConditionTarget, ConditionValue1, ConditionValue2, ConditionValue3, NegativeCondition, ErrorTextId, ScriptName, Comment) VALUES
-(13, 0, 46363, 0, 0, 18, 0, 1, 25740, 0, 0, 0, '', 'Beam Attack against Ahune 2 - targets Ahune');
+(13, 5, 46363, 0, 0, 18, 0, 1, 25740, 0, 0, 0, '', 'Beam Attack against Ahune 2 - targets Ahune');*/

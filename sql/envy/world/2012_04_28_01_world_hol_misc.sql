@@ -2,7 +2,7 @@
 DELETE FROM `spell_linked_spell` WHERE `spell_trigger` = -52098;
 INSERT INTO `spell_linked_spell` VALUES (-52098, 52092, 0, 'General Bjarngrim  - Charge up trigger Temporary Electrical Charge');
 
-DELETE FROM `waypoint_scripts` WHERE `id` IN (12698101, 12698100,12698102);
+DELETE FROM `waypoint_scripts` WHERE `id` IN (12698101, 12698100, 12698102);
 INSERT INTO `waypoint_scripts` VALUES
 (12698100, 0, 14, 52092, 1, 0, 0, 0, 0, 0, 900), -- Remove aura
 (12698101, 2, 15, 52098, 1, 0, 0, 0, 0, 0, 901); -- Cast Charge up
