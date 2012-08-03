@@ -50,6 +50,7 @@ void AddSC_ban_commandscript();
 void AddSC_cast_commandscript();
 void AddSC_character_commandscript();
 void AddSC_debug_commandscript();
+void AddSC_disable_commandscript();
 void AddSC_event_commandscript();
 void AddSC_gm_commandscript();
 void AddSC_go_commandscript();
@@ -479,7 +480,6 @@ void AddSC_instance_halls_of_reflection();   // Halls of Reflection
 void AddSC_halls_of_reflection();
 void AddSC_boss_falric();
 void AddSC_boss_marwyn();
-void AddSC_boss_lich_king_hr();
 void AddSC_boss_lord_marrowgar();       // Icecrown Citadel
 void AddSC_boss_lady_deathwhisper();
 void AddSC_boss_gunship_battle();
@@ -666,6 +666,7 @@ void AddCommandScripts()
     AddSC_cast_commandscript();
     AddSC_character_commandscript();
     AddSC_debug_commandscript();
+    AddSC_disable_commandscript();
     AddSC_event_commandscript();
     AddSC_gm_commandscript();
     AddSC_go_commandscript();
@@ -1198,7 +1199,6 @@ void AddNorthrendScripts()
     AddSC_halls_of_reflection();
     AddSC_boss_falric();
     AddSC_boss_marwyn();
-    AddSC_boss_lich_king_hr();
     AddSC_boss_lord_marrowgar();        // Icecrown Citadel
     AddSC_boss_lady_deathwhisper();
     AddSC_boss_gunship_battle();
