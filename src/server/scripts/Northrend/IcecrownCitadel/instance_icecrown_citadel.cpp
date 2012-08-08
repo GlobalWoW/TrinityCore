@@ -1318,7 +1318,7 @@ class instance_icecrown_citadel : public InstanceMapScript
 
                 if(!isPrepared)
                 {
-                sLog->outDetail("isPrepared = false ----");
+                sLog->outInfo(LOG_FILTER_MAPS, "isPrepared = false ----");
                 if(TeamInInstance == ALLIANCE)
                 {
                     if(th = sMapMgr->LoadTransportInMap(instance, GO_ORGRIM_S_HAMMER_ALLIANCE_ICC, 108000))
@@ -1505,7 +1505,7 @@ class instance_icecrown_citadel : public InstanceMapScript
                 }
                 else
                 {
-                    sLog->outDetail("isPrepared =true ----");
+                    sLog->outInfo(LOG_FILTER_MAPS, "isPrepared =true ----");
                     sMapMgr->LoadTransportForPlayers(player);
                 }
             }
