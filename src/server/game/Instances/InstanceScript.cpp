@@ -20,9 +20,11 @@
 #include "DatabaseEnv.h"
 #include "Map.h"
 #include "Player.h"
+#include "Group.h"
 #include "GameObject.h"
 #include "Creature.h"
 #include "CreatureAI.h"
+#include "CreatureAIImpl.h"
 #include "Log.h"
 #include "LFGMgr.h"
 
@@ -336,6 +338,58 @@ void InstanceScript::DoCompleteAchievement(uint32 achievement)
         for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
             if (Player *player = i->getSource())
                 player->CompletedAchievement(pAE);
+}
+
+uint32 InstanceScript::GetMajorityTeam()
+{
+    uint32 hordePlayers = 0, alliancePlayers = 0;
+    if (instance)
+    {
+        const Map::PlayerList& players = instance->GetPlayers();
+        if (!players.isEmpty())
+        {
+            Player* arbitraryPlayer = players.getFirst()->getSource();  // Just get the first one - it doesn't matter, we may take anyone. 
+            if (!arbitraryPlayer)
+                return 0;   // Cannot make a decision if there's no player
+
+            Group* group = arbitraryPlayer->GetGroup();                 // Decisions are based on the players group, despite they are in the instance or not.
+            if (!group)
+                return arbitraryPlayer->GetTeam();   // Only one player -> get his team
+
+            for (GroupReference* it = group->GetFirstMember(); it != 0; it = it->next())
+            {
+                if (Player* member = it->getSource())
+                {
+                    if (!member->isGameMaster())
+                    {
+                        // If it's not an alliance member, it's a horde member... should be logical :)
+                        if (member->GetTeam() == ALLIANCE)
+                            alliancePlayers++;
+                        else
+                            hordePlayers++;
+                        if (!ServerAllowsTwoSideGroups())
+                            break;
+                    }
+                }
+            }
+        }
+    }
+
+    // Note: We have to return 0 if we cannot make a decision, i.e. when there's no player in the instance (yet).
+    if (hordePlayers == 0 && alliancePlayers == 0)
+    {
+        return 0;
+    }
+    else
+    {
+        /*
+            Decision rules:
+            #Horde > #Alliance: HORDE
+            #Horde == #Alliance: Random(HORDE, ALLIANCE)
+            else: ALLIANCE
+        */
+        return hordePlayers > alliancePlayers ? HORDE : (hordePlayers == alliancePlayers ? RAND(HORDE, ALLIANCE) : ALLIANCE);
+    }
 }
 
 // Update Achievement Criteria for all players in instance
