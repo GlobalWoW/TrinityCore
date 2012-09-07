@@ -112,18 +112,6 @@ enum Creatures
     NPC_FREYA_TARGET_BEACON        = 33366,
     NPC_WRITHING_LASHER            = 33387, // bunny
     NPC_WARD_OF_LIFE               = 34275, // bunny
-    NPC_LOREKEEPER                 = 33686, // Hard mode starter
-    NPC_BRANN_BRONZBEARD           = 33579,
-    NPC_DELORAH                    = 33701,
-    NPC_ULDUAR_GAUNTLET_GENERATOR  = 33571, // Trigger tied to towers
-};
-
-enum Towers
-{
-    GO_TOWER_OF_STORMS    = 194377,
-    GO_TOWER_OF_FLAMES    = 194371,
-    GO_TOWER_OF_FROST     = 194370,
-    GO_TOWER_OF_LIFE      = 194375,
 };
 
 enum Events
@@ -196,7 +184,6 @@ enum AchievementData
 
 enum Actions
 {
-    ACTION_ACTIVATE_HARD_MODE        = 5,
     ACTION_SPAWN_VEHICLES            = 6,
     ACTION_START_ENCOUNTER           = 10,
     ACTION_OVERLOAD_CIRCUIT          = 11
@@ -294,6 +281,8 @@ class boss_flame_leviathan : public CreatureScript
                 Pursued = false;
                 pursueTarget = 0;
                 me->SetReactState(REACT_DEFENSIVE);
+                me->ResetLootMode();
+                TowerCount = 0;
                 if (checkUnbrokenOnReset) // A fight was already performed, the raid got wiped before starting this Reset() call -> Unbroken can only be done on first try!
                     SetData(DATA_UNBROKEN, 0);
             }
@@ -406,24 +395,28 @@ class boss_flame_leviathan : public CreatureScript
                 {
                     if (towerOfStorms)
                     {
+                        TowerCount++;
                         me->AddAura(SPELL_BUFF_TOWER_OF_STORMS, me);
                         events.ScheduleEvent(EVENT_THORIMS_HAMMER, 35*IN_MILLISECONDS);
                     }
 
                     if (towerOfFlames)
                     {
+                        TowerCount++;
                         me->AddAura(SPELL_BUFF_TOWER_OF_FLAMES, me);
                         events.ScheduleEvent(EVENT_MIMIRONS_INFERNO, 70*IN_MILLISECONDS);
                     }
 
                     if (towerOfFrost)
                     {
+                        TowerCount++;
                         me->AddAura(SPELL_BUFF_TOWER_OF_FR0ST, me);
                         events.ScheduleEvent(EVENT_HODIRS_FURY, 105*IN_MILLISECONDS);
                     }
 
                     if (towerOfLife)
                     {
+                        TowerCount++;
                         me->AddAura(SPELL_BUFF_TOWER_OF_LIFE, me);
                         events.ScheduleEvent(EVENT_FREYAS_WARD, 140*IN_MILLISECONDS);
                     }
@@ -433,6 +426,23 @@ class boss_flame_leviathan : public CreatureScript
                 else
                     DoScriptText(SAY_TOWER_NONE, me);
                     //DoScriptText(SAY_AGGRO, me);
+
+                switch (TowerCount)
+                {
+                    case 4:
+                        me->AddLootMode(LOOT_MODE_HARD_MODE_4);
+                    case 3:
+                        me->AddLootMode(LOOT_MODE_HARD_MODE_3);
+                    case 2:
+                        me->AddLootMode(LOOT_MODE_HARD_MODE_2);
+                    case 1:
+                        DoScriptText(SAY_HARDMODE, me);
+                        me->AddLootMode(LOOT_MODE_HARD_MODE_1);
+                        break;
+                    default:
+                    me->SetLootMode(LOOT_MODE_DEFAULT);
+                    break;
+				}
             }
 
             void JustDied(Unit* /*victim*/)
@@ -714,6 +724,7 @@ class boss_flame_leviathan : public CreatureScript
                 uint64 pursueTarget;
                 Vehicle* vehicle;
                 uint8 Shutdown;
+                uint32 TowerCount;
                 bool towerOfStorms, towerOfLife, towerOfFlames, towerOfFrost, Shutout, Unbroken, Pursued, checkUnbrokenOnReset;
         };
 

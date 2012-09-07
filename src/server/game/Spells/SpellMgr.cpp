@@ -3583,6 +3583,12 @@ void SpellMgr::LoadDbcDataCorrections()
                 spellInfo->manaCost = 0;
                 spellInfo->manaPerSecond = 0;
                 break;
+            case 65076: // Leviathan auras
+            case 65075: // Leviathan auras
+            case 64482: // Leviathan auras
+                spellInfo->EffectRadiusIndex[EFFECT_1] = EFFECT_RADIUS_50_YARDS;
+                spellInfo->EffectRadiusIndex[EFFECT_2] = EFFECT_RADIUS_50_YARDS;
+                break;
             case 45524: // Chains of Ice
                 spellInfo->EffectImplicitTargetA[2] = TARGET_UNIT_TARGET_ENEMY;
                 break;

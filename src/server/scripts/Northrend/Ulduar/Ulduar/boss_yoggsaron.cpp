@@ -50,7 +50,7 @@ enum YoggSaron_Yells
     SAY_PHASE2_5                                = -1603334,
     SAY_PHASE3                                  = -1603335,
     SAY_VISION                                  = -1603336,
-    SAY_LUNCATIC_GLAZE                          = -1603337,
+    SAY_SLAY                                    = -1603337,
     SAY_DEAFENING_ROAR                          = -1603338,
     WHISP_INSANITY_1                            = -1603339,
     WHISP_INSANITY_2                            = -1603340,
@@ -182,7 +182,6 @@ enum MindlessSpell
 
 enum EncounterConstants
 {
-    CONSTANT_MAX_NOVA_HITS                      = 8,
     CONSTANT_MAX_LLIANE_TENTACLE_SPAWNS         = 8,
     CONSTANT_MAX_LICHKING_TENTACLE_SPAWNS       = 9,
     CONSTANT_MAX_DRAGONSOUL_TENTACLE_SPAWNS     = 8
@@ -191,15 +190,15 @@ enum EncounterConstants
 enum Actions
 {
     ACTION_ENTER_COMBAT = 0,
+    ACTION_WIPE,
+    ACTION_ACTIVATE_YOGG,
     ACTION_START_SARA,
     ACTION_DO_CHANGE_PHASE,     // Used with SetData
     ACTION_MADNESS_STARTED,
     ACTION_APPLY_SHATTERED_ILLUSIONS,
     ACTION_REMOVE_SHATTERED_ILLUSIONS,
     ACTION_REMOVE_SHATTERED_ILLUSIONS_PHASE_CHANGE,
-    ACTION_NOVA_HIT,
     ACTION_ACTIVATE_CLOUDS,
-    ACTION_DEACTIVATE_CLOUDS,
     ACTION_PORTAL_TO_MADNESS_STORMWIND,
     ACTION_PORTAL_TO_MADNESS_DRAGON,
     ACTION_PORTAL_TO_MADNESS_LICHKING,
@@ -250,7 +249,8 @@ enum Spells
     //  Guardians of Yogg-Saron
     SPELL_DOMINATE_MIND                         = 63042, // Removed by blizz, Needs Sanity Scripting
     SPELL_DARK_VOLLEY                           = 63038, // Needs Sanity Scripting
-    SPELL_SHADOW_NOVA                           = 65209, // On Death
+    SPELL_SHADOW_NOVA                           = 62714, // On Death
+    SPELL_SHADOW_NOVA_SARA                      = 65719, // this Shadow Nova hits only Sara
     //Phase 2:64146
     SPELL_SARA_TRANSFORMATION                   = 65157,
     //  Sara - She spams Psychosis without pause on random raid members unless she casts something else. The other three abilities each have a 30 second cooldown, and are used randomly when available.
@@ -328,7 +328,7 @@ enum BossPhase
     PHASE_NONE  = 0,
     PHASE_SARA  = 1,
     PHASE_BRAIN = 2,
-    PHASE_YOGG  = 3,
+    PHASE_YOGG  = 3,    
 };
 
 enum TentacleType
@@ -531,8 +531,8 @@ const EventSpeech EventNpcSpeaching[19] =
 };
 
 enum Disabler
-{
-    SPELL_DEATH_GRIP = 49560
+{ 
+    SPELL_DEATH_GRIP = 49560 
 };
 
 /************************************************************************/
@@ -560,25 +560,25 @@ uint32 Entry_2_ID(uint32 entry)
     return 0;
 }
 
-bool IsPlayerInBrainRoom(const Player* player)
+bool IsPlayerInBrainRoom(const Player* pPlayer)
 {
-    return player->GetPositionZ() < 300.0f;
+    return pPlayer->GetPositionZ() < 300.0f;
 }
 
-class DontLooksDirectlyInGazeCheck : public std::unary_function<WorldObject*, bool>
+class IsNotLookingDirectlyInGaze : public std::unary_function<WorldObject*, bool>
 {
     public:
-        DontLooksDirectlyInGazeCheck(Unit* caster) : __caster(caster) {}
+        IsNotLookingDirectlyInGaze(WorldObject* caster) : __caster(caster) {}
 
-        bool operator() (WorldObject* target)
+        bool operator() (WorldObject* unit)
         {
             Position pos;
             __caster->GetPosition(&pos);
-            return !target->HasInArc(static_cast<float>(M_PI), &pos);
+            return !unit->HasInArc(static_cast<float>(M_PI), &pos);
         }
 
     private:
-        Unit* __caster;
+        WorldObject* __caster;
 };
 
 class NotIsWeakenedImmortalCheck : public std::unary_function<WorldObject*, bool>
@@ -586,25 +586,22 @@ class NotIsWeakenedImmortalCheck : public std::unary_function<WorldObject*, bool
     public:
         NotIsWeakenedImmortalCheck() {}
 
-        bool operator() (WorldObject* target)
+        bool operator() (WorldObject* unit)
         {
-            if (Unit* unit = target->ToUnit())
-                return !(unit->HasAura(SPELL_WEAKENED));
-
-            return true;
+            return !(unit->ToUnit()->HasAura(SPELL_WEAKENED));
         }
 };
 
-class BrainLinkTargetSelector : public std::unary_function<WorldObject*, bool>
+class BrainLinkTargetSelector : public std::unary_function<WorldObject*, bool> 
 {
     public:
-        bool operator() (WorldObject* target)
+        bool operator() (WorldObject* unit)
         {
-            return target->GetPositionZ() < 300.0f;
+            return unit->GetPositionZ() < 300.0f;
         }
 };
 
-class DistancePredicate : public std::binary_function<Player*, Player*, bool>
+class DistancePredicate : std::binary_function<Player*, Player*, bool>
 {
     public:
         DistancePredicate(Unit* base, bool descending, bool dim3) : __base(base), __descending(descending), __dim3(dim3) {}   // descending = absteigend
@@ -631,7 +628,7 @@ class DistancePredicate : public std::binary_function<Player*, Player*, bool>
         bool __dim3;
 };
 
-class GetNearestPlayers 
+class GetNearestPlayers : std::binary_function<std::list<Player*>&, Creature*, void>
 {
     public:
         GetNearestPlayers(float distance, uint32 cap) : __distance(distance), __cap(cap) {}
@@ -666,7 +663,7 @@ class GetNearestPlayers
         float __distance;
 };
 
-struct InsaneCandidatePredicate : public std::unary_function<Player*, bool>
+struct InsaneCandidatePredicate : std::unary_function<Player*, bool>
 {
     bool operator()(Player* p)
     {
@@ -677,7 +674,7 @@ struct InsaneCandidatePredicate : public std::unary_function<Player*, bool>
 };
 
 template<typename Predicate>
-class GetPlayersByCondition
+class GetPlayersByCondition : std::unary_function<Creature*, void>
 {
     public:
         GetPlayersByCondition(std::list<Player*>& plist) : __plist(plist) {}
@@ -693,7 +690,7 @@ class GetPlayersByCondition
                         if ( __pred(it->getSource()) )
                             __plist.push_back(it->getSource());
                     }
-                }
+                }            
         }
 
     private:
@@ -701,7 +698,7 @@ class GetPlayersByCondition
         std::list<Player*>& __plist;
 };
 
-class AllSaronitCreaturesInRange
+class AllSaronitCreaturesInRange : std::unary_function<Unit*, bool>
 {
     public:
         AllSaronitCreaturesInRange(const WorldObject* pObject, float fMaxRange) : m_pObject(pObject), m_fRange(fMaxRange) {}
@@ -744,7 +741,7 @@ class npc_yogg_saron_encounter_controller : public CreatureScript   // Should be
             EVENT_ENRAGE = 1,
             EVENT_DESCENT_TO_MADNESS_BEGIN,
             EVENT_DESCENT_TO_MADNESS_END,
-        };
+        };        
     public:
         npc_yogg_saron_encounter_controller() : CreatureScript("npc_yogg_saron_encounter_controller") {}
 
@@ -754,6 +751,8 @@ class npc_yogg_saron_encounter_controller : public CreatureScript   // Should be
             {
                 me->SetCanFly(true);
                 me->SetVisible(false);
+                guidYogg = 0;
+                guidYoggBrain = 0;
             }
 
             void DoAction(int32 const action)
@@ -784,7 +783,7 @@ class npc_yogg_saron_encounter_controller : public CreatureScript   // Should be
                             case 3:
                                 instance->DoCompleteAchievement(RAID_MODE(ACHIEVMENT_THREE_LIGHTS_IN_THE_DARKNESS_10, ACHIEVMENT_THREE_LIGHTS_IN_THE_DARKNESS_25));
                                 break;
-                            default:
+                            default: 
                                 break;
                         }
                         me->Kill(me);   // Should call JustDied();
@@ -795,13 +794,33 @@ class npc_yogg_saron_encounter_controller : public CreatureScript   // Should be
                     case ACTION_USED_MINDCONTROL:
                         usedMindcontrol = true;
                         break;
+                    case ACTION_WIPE:
+                        instance->SetBossState(BOSS_YOGGSARON, FAIL);
+                        if (Creature* yogg = ObjectAccessor::GetCreature(*me, guidYogg))
+                            yogg->DespawnOrUnsummon();
+                        if (Creature* yoggbrain = ObjectAccessor::GetCreature(*me, guidYoggBrain))
+                            yoggbrain->DespawnOrUnsummon();
+                        break;
+                    case ACTION_ACTIVATE_YOGG:
+                        if (Creature* yogg = ObjectAccessor::GetCreature(*me, guidYogg))
+                        {
+                            yogg->AI()->SetData(ACTION_DO_CHANGE_PHASE, PHASE_BRAIN);
+                            yogg->CastSpell(yogg, SPELL_SHADOWY_BARRIER, false);
+                            yogg->SetStandState(UNIT_STAND_STATE_STAND);
+                            yogg->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
+                            yogg->CastSpell(yogg, SPELL_SUMMON_CURRUPTOR_TENTACLE, true);
+                            DoScriptText(SAY_PHASE2_5, yogg);
+                        }
+
+                        OnRemove_ShatteredIllusions(false);
+                        break;
                 }
             }
 
             void EnterCombat(Unit* /*who*/)
             {
                 _EnterCombat();
-                events.ScheduleEvent(EVENT_ENRAGE, 900000);
+                events.ScheduleEvent(EVENT_ENRAGE, 900000); 
             }
 
             uint32 GetData(uint32 data)
@@ -829,7 +848,7 @@ class npc_yogg_saron_encounter_controller : public CreatureScript   // Should be
             {
                 _JustDied();
                 SetSanityAura(true);
-            }
+            } 
 
             void JustSummoned(Creature* summon)
             {
@@ -842,7 +861,7 @@ class npc_yogg_saron_encounter_controller : public CreatureScript   // Should be
                         summon->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
                         summon->SetFloatValue(UNIT_FIELD_COMBATREACH, 20.0f);
                         summon->SetFloatValue(UNIT_FIELD_BOUNDINGRADIUS, 20.0f);
-                        return;
+                        return; 
                     case NPC_BRAIN_OF_YOGG_SARON:
                         guidYoggBrain = summon->GetGUID();
                         summon->setActive(true);
@@ -855,10 +874,11 @@ class npc_yogg_saron_encounter_controller : public CreatureScript   // Should be
                     case NPC_KEEPER_MIMIRON:
                     case NPC_KEEPER_THORIM:
                         summon->setActive(true);
-                    case NPC_GUARDIAN_OF_YOGG_SARON:
-                        summon->setFaction(14);
-                        summon->AI()->AttackStart(SelectPlayerTargetInRange(me, 100.0f));
                         break;
+                    case NPC_GUARDIAN_OF_YOGG_SARON:
+                        summon->setFaction(FACTION_HOSTILE_ALL);
+                        summon->AI()->AttackStart(SelectPlayerTargetInRange(me, 100.0f));
+                        break;                    
                     case NPC_RUBY_CONSORT:
                     case NPC_OBSIDIAN_CONSORT:
                     case NPC_AZURE_CONSORT:
@@ -869,7 +889,7 @@ class npc_yogg_saron_encounter_controller : public CreatureScript   // Should be
                         summon->setFaction(15);
                         break;
                     case NPC_LAUGHING_SKULL:
-                        summon->setFaction(14);
+                        summon->setFaction(FACTION_HOSTILE_ALL);
                         summon->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
                         break;
                 }
@@ -881,21 +901,20 @@ class npc_yogg_saron_encounter_controller : public CreatureScript   // Should be
             {
                 if (myPhase == PHASE_NONE)
                 {
-                    // LoS-distance should be ~30.0f, since the players should be able to talk to the keepers; Combat-reach gets increased in UpdatePhase()
-                    if (target && me->GetDistance2d(target) <= 30.0f && target->ToPlayer() && !target->ToPlayer()->isGameMaster() && me->IsWithinLOSInMap(target))
+                    if (target && me->GetDistance2d(target) <= 40.0f && target->ToPlayer() && !target->ToPlayer()->isGameMaster() && me->IsWithinLOSInMap(target))
                     {
                         if (instance->GetBossState(BOSS_VEZAX) == DONE)
                         {
                             UpdatePhase(PHASE_SARA);
-                            if (Creature* yogg = ObjectAccessor::GetCreature(*me, guidYogg))
-                            {
-                                yogg->AI()->DoAction(ACTION_ENTER_COMBAT);  // Workaround, since we cannot attack players.
-                                DoZoneInCombat(yogg);
-                                EnterCombat(target);
-                            }
 
                             if (Creature* sara = ObjectAccessor::GetCreature(*me, instance->GetData64(BOSS_SARA)))
                                 sara->AI()->DoAction(ACTION_START_SARA);
+
+                            if (Creature* yogg = ObjectAccessor::GetCreature(*me, guidYogg)) 
+                            {
+                                yogg->AI()->DoAction(ACTION_ENTER_COMBAT);  // Workaround, since we cannot attack players.
+                                EnterCombat(target);
+                            }
                         }
                     }
                 }
@@ -905,22 +924,17 @@ class npc_yogg_saron_encounter_controller : public CreatureScript   // Should be
             {
                 _Reset();
                 myPhase = PHASE_NONE;
-                CloudHandling(false);
+                CloudHandling(true);
 
-                if (Creature* sara = ObjectAccessor::GetCreature(*me, instance->GetData64(BOSS_SARA)))
-                    sara->AI()->EnterEvadeMode();
                 if (Creature* yogg = ObjectAccessor::GetCreature(*me, guidYogg))
                     yogg->DespawnOrUnsummon();
                 if (Creature* yogg = DoSummon(NPC_YOGG_SARON, SaraLocation, 0, TEMPSUMMON_MANUAL_DESPAWN))
                     yogg->SetLootMode(LOOT_MODE_DEFAULT);
-
                 if (Creature* yoggbrain = ObjectAccessor::GetCreature(*me, guidYoggBrain))
                     yoggbrain->DespawnOrUnsummon();
                 DoSummon(NPC_BRAIN_OF_YOGG_SARON, BrainLocation, 0, TEMPSUMMON_MANUAL_DESPAWN);
 
                 usedMindcontrol = false;
-                guidYogg = 0;
-                guidYoggBrain = 0;
                 lastBrainAction = Actions(0);
                 listEventNPCs.clear();
                 guidEventSkulls.DespawnAll();
@@ -946,7 +960,8 @@ class npc_yogg_saron_encounter_controller : public CreatureScript   // Should be
 
             void SummonedCreatureDespawn(Creature* creature)
             {
-                if (!creature) return;
+                if (!creature)
+                    return;
 
                 switch (creature->GetEntry())
                 {
@@ -956,6 +971,7 @@ class npc_yogg_saron_encounter_controller : public CreatureScript   // Should be
                     case NPC_EMERALD_CONSORT:
                     case NPC_DEATHSWORN_ZEALOT:   // From phase PORTAL_PHASE_LICH_KING
                     case NPC_SUIT_OF_ARMOR:       // From phase PORTAL_PHASE_KING_LLIANE
+                    case NPC_INFULENCE_TENTACLE:
                         guidEventTentacles.Despawn(creature);
                         if (guidEventTentacles.empty()) // All are dead or despawned
                         {
@@ -965,15 +981,15 @@ class npc_yogg_saron_encounter_controller : public CreatureScript   // Should be
                                 {
                                     switch (currentBrainEventPhase)
                                     {
-                                    case PORTAL_PHASE_DRAGON_SOUL:
-                                        instance->HandleGameObject(instance->GetData64(DATA_BRAIN_DOOR_1), true);
-                                        break;
-                                    case PORTAL_PHASE_LICH_KING:
-                                        instance->HandleGameObject(instance->GetData64(DATA_BRAIN_DOOR_2), true);
-                                        break;
-                                    case PORTAL_PHASE_KING_LLIANE:
-                                        instance->HandleGameObject(instance->GetData64(DATA_BRAIN_DOOR_3), true);
-                                        break;
+                                        case PORTAL_PHASE_DRAGON_SOUL:
+                                            instance->HandleGameObject(instance->GetData64(DATA_BRAIN_DOOR_1), true);
+                                            break;
+                                        case PORTAL_PHASE_LICH_KING:
+                                            instance->HandleGameObject(instance->GetData64(DATA_BRAIN_DOOR_2), true);
+                                            break;
+                                        case PORTAL_PHASE_KING_LLIANE:
+                                            instance->HandleGameObject(instance->GetData64(DATA_BRAIN_DOOR_3), true);
+                                            break;
                                     }
                                     currentBrainEventPhase = PORTAL_PHASE_BRAIN_NONE;
 
@@ -985,13 +1001,13 @@ class npc_yogg_saron_encounter_controller : public CreatureScript   // Should be
                         break;
                     case NPC_LAUGHING_SKULL:      // From all phases
                         guidEventSkulls.Despawn(creature);
-                        break;
+                        break; 
                 }
             }
 
             void UpdateAI(uint32 const diff)
             {
-                if (!UpdateVictim())
+                if (!UpdateVictim() && myPhase == PHASE_NONE)
                     return;
 
                 events.Update(diff);
@@ -1008,7 +1024,7 @@ class npc_yogg_saron_encounter_controller : public CreatureScript   // Should be
                                 if (SelectPlayerTargetInRange(me, 500.0f))  // If anyone survived this, try again :)
                                     events.ScheduleEvent(EVENT_ENRAGE, 1000);
                             }
-                            break;
+                            return;
                         case EVENT_DESCENT_TO_MADNESS_BEGIN:
                             if (Creature* yogg = ObjectAccessor::GetCreature(*me, guidYogg))
                             {
@@ -1017,10 +1033,10 @@ class npc_yogg_saron_encounter_controller : public CreatureScript   // Should be
                             }
                             events.ScheduleEvent(EVENT_DESCENT_TO_MADNESS_BEGIN, 90000, 0, PHASE_BRAIN);
                             events.ScheduleEvent(EVENT_DESCENT_TO_MADNESS_END, 60000, 0, PHASE_BRAIN); // End of cast SPELL_INDUCE_MADNESS
-                            break;
+                            return;
                         case EVENT_DESCENT_TO_MADNESS_END:
                             OnRemove_ShatteredIllusions(false);
-                            break;
+                            return;
                     }
                 }
 
@@ -1031,17 +1047,22 @@ class npc_yogg_saron_encounter_controller : public CreatureScript   // Should be
             /************************************************************************/
             /*                         Custom stuff                                 */
             /************************************************************************/
-            void CloudHandling(bool remove)
+            void CloudHandling(bool spawn)
             {
-                std::list<Creature*> CloudList;
-                me->GetCreatureListWithEntryInGrid(CloudList, NPC_OMINOUS_CLOUD, 100.0f);
-                if (!CloudList.empty())
+                if (spawn)
                 {
-                    for (std::list<Creature*>::iterator itr = CloudList.begin(); itr != CloudList.end(); itr++)
-                    {
-                        if(remove) (*itr)->AI()->DoAction(ACTION_DEACTIVATE_CLOUDS);
-                        else (*itr)->AI()->DoAction(ACTION_ACTIVATE_CLOUDS);
-                    }
+                    // spawn 6 clouds randomly around Sara
+                    for (uint8 i = 0; i < 6; i++)
+                        if (Creature* summon = me->SummonCreature(NPC_OMINOUS_CLOUD, me->GetPositionX() + frand(0.f, 80.f) - 40.f , me->GetPositionY() + frand(0.f,80.f) - 40.f, me->GetPositionZ()))
+                            summon->AI()->DoAction(ACTION_ACTIVATE_CLOUDS);
+                }
+                else
+                {
+                    std::list<Creature*> CloudList;
+                    me->GetCreatureListWithEntryInGrid(CloudList, NPC_OMINOUS_CLOUD, 100.0f);
+                    if (!CloudList.empty())
+                        for (std::list<Creature*>::iterator itr = CloudList.begin(); itr != CloudList.end(); itr++)
+                            (*itr)->DespawnOrUnsummon();
                 }
             }
 
@@ -1070,31 +1091,44 @@ class npc_yogg_saron_encounter_controller : public CreatureScript   // Should be
                 Actions tempAction;
                 switch (lastBrainAction)
                 {
-                case ACTION_PORTAL_TO_MADNESS_STORMWIND:
-                    tempAction = ACTION_PORTAL_TO_MADNESS_DRAGON;
-                    break;
-                case ACTION_PORTAL_TO_MADNESS_DRAGON:
-                    tempAction = ACTION_PORTAL_TO_MADNESS_LICHKING;
-                    break;
-                case ACTION_PORTAL_TO_MADNESS_LICHKING:
-                    tempAction = ACTION_PORTAL_TO_MADNESS_STORMWIND;
-                    break;
-                default:
-                    tempAction = RAND(ACTION_PORTAL_TO_MADNESS_STORMWIND, ACTION_PORTAL_TO_MADNESS_DRAGON, ACTION_PORTAL_TO_MADNESS_LICHKING);
-                    break;
+                    case ACTION_PORTAL_TO_MADNESS_STORMWIND:
+                        tempAction = ACTION_PORTAL_TO_MADNESS_DRAGON;
+                        break;
+                    case ACTION_PORTAL_TO_MADNESS_DRAGON:
+                        tempAction = ACTION_PORTAL_TO_MADNESS_LICHKING;
+                        break;
+                    case ACTION_PORTAL_TO_MADNESS_LICHKING:
+                        tempAction = ACTION_PORTAL_TO_MADNESS_STORMWIND;
+                        break;
+                    default:
+                        tempAction = RAND(ACTION_PORTAL_TO_MADNESS_STORMWIND, ACTION_PORTAL_TO_MADNESS_DRAGON, ACTION_PORTAL_TO_MADNESS_LICHKING);
+                        break;
                 }
                 lastBrainAction = tempAction;
 
                 // Spawn Portal
                 for(uint8 i = 0; i < RAID_MODE(4, 10); i++)
-                {
-                    if(Creature* portal = DoSummon(NPC_BRAIN_PORTAL, BrainPortalLocation[i], 40000, TEMPSUMMON_TIMED_DESPAWN))
+                    if (Creature* portal = DoSummon(NPC_BRAIN_PORTAL, BrainPortalLocation[i], 40000, TEMPSUMMON_TIMED_DESPAWN))
                         portal->AI()->DoAction(tempAction);
-                }
 
                 // Spawn Event Tentacle
                 switch (tempAction)
                 {
+                    case ACTION_PORTAL_TO_MADNESS_STORMWIND:
+                        currentBrainEventPhase = PORTAL_PHASE_KING_LLIANE;
+                        guidEventTentacles.DespawnAll();
+                        guidEventSkulls.DespawnAll();
+                        for (uint32 i = 0; i < CONSTANT_MAX_LLIANE_TENTACLE_SPAWNS; i++)
+                        {
+                            if (Creature* summon = DoSummon(NPC_SUIT_OF_ARMOR, KingLlaneTentacleLocation[i], 60000, TEMPSUMMON_TIMED_DESPAWN))
+                                guidEventTentacles.Summon(summon);
+                        }
+                        for (uint8 i = 0; i < 3; i++)
+                        {
+                            if(Creature* summon = DoSummon(NPC_LAUGHING_SKULL, KingLlaneSkullLocation[i], 60000, TEMPSUMMON_TIMED_DESPAWN))
+                                guidEventSkulls.Summon(summon);
+                        }
+                        break;
                     case ACTION_PORTAL_TO_MADNESS_DRAGON:
                         currentBrainEventPhase = PORTAL_PHASE_DRAGON_SOUL;
                         guidEventTentacles.DespawnAll();
@@ -1137,21 +1171,6 @@ class npc_yogg_saron_encounter_controller : public CreatureScript   // Should be
                                 guidEventSkulls.Summon(summon);
                         }
                         break;
-                    case ACTION_PORTAL_TO_MADNESS_STORMWIND:
-                        currentBrainEventPhase = PORTAL_PHASE_KING_LLIANE;
-                        guidEventTentacles.DespawnAll();
-                        guidEventSkulls.DespawnAll();
-                        for (uint32 i = 0; i < CONSTANT_MAX_LLIANE_TENTACLE_SPAWNS; i++)
-                        {
-                            if (Creature* summon = DoSummon(NPC_SUIT_OF_ARMOR, KingLlaneTentacleLocation[i], 60000, TEMPSUMMON_TIMED_DESPAWN))
-                                guidEventTentacles.Summon(summon);
-                        }
-                        for (uint8 i = 0; i < 3; i++)
-                        {
-                            if(Creature* summon = DoSummon(NPC_LAUGHING_SKULL, KingLlaneSkullLocation[i], 60000, TEMPSUMMON_TIMED_DESPAWN))
-                                guidEventSkulls.Summon(summon);
-                        }
-                        break;
                 }
 
                 if (Creature* yoggbrain = ObjectAccessor::GetCreature(*me, guidYoggBrain))
@@ -1161,8 +1180,8 @@ class npc_yogg_saron_encounter_controller : public CreatureScript   // Should be
                 }
 
                 SummonMadnessEventNPCs();
-                if (Creature* sara = ObjectAccessor::GetCreature(*me, instance->GetData64(BOSS_SARA)))
-                    sara->AI()->DoAction(ACTION_MADNESS_STARTED);
+                if (Creature* sara = ObjectAccessor::GetCreature(*me, instance->GetData64(BOSS_SARA))) 
+                    sara->AI()->DoAction(ACTION_MADNESS_STARTED);               
                 brainEventsCount++;
             }
 
@@ -1192,19 +1211,21 @@ class npc_yogg_saron_encounter_controller : public CreatureScript   // Should be
 
             bool IsEncounterInProgress()
             {
-                if (me->isInCombat())   // The checks below are only making sense if we are in combat.
-                    if (me->GetMap())
-                        if (me->GetMap()->IsDungeon())
-                        {
-                            Map::PlayerList const& players = me->GetMap()->GetPlayers();
-                            if (!players.isEmpty())
-                                for (Map::PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr)
-                                    if (Player* plr = itr->getSource())
-                                        if (plr->isAlive() && !plr->isGameMaster() && !plr->HasAura(SPELL_INSANE))
-                                            return true;
-                        }
-                        return false;
-            }
+                if (me->GetMap())
+                {
+                    if (me->GetMap()->IsDungeon())
+                    {
+                        Map::PlayerList const& players = me->GetMap()->GetPlayers();
+                        if (!players.isEmpty())
+                            for (Map::PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr)
+                                if (Player* plr = itr->getSource())
+                                    if (plr->isAlive() && !plr->isGameMaster() && !plr->HasAura(SPELL_INSANE))
+                                        return true;
+                    }
+                }
+
+                return false;
+            } 
 
             void ModifySanity(Player* target, int8 amount)  // TODO: Check if stack-amount-handling by Freyas Well works correctly
             {
@@ -1232,9 +1253,9 @@ class npc_yogg_saron_encounter_controller : public CreatureScript   // Should be
             void OnApply_ShatteredIllusions()
             {
                 if (myPhase == PHASE_BRAIN)
-                {
+                {                   
                     // Apply aura to all npc in the area except the brain, since this is still casting. The aura can only be applied in Phase 2.
-                    if (Creature* yogg = ObjectAccessor::GetCreature(*me, guidYogg))
+                    if (Creature* yogg = ObjectAccessor::GetCreature(*me, guidYogg)) 
                         yogg->AI()->DoAction(ACTION_APPLY_SHATTERED_ILLUSIONS);
 
                     if (Creature* yoggbrain = ObjectAccessor::GetCreature(*me, guidYoggBrain))
@@ -1243,18 +1264,15 @@ class npc_yogg_saron_encounter_controller : public CreatureScript   // Should be
                     if (Creature* sara = ObjectAccessor::GetCreature(*me, instance->GetData64(BOSS_SARA)))
                         sara->AI()->DoAction(ACTION_APPLY_SHATTERED_ILLUSIONS);
 
-                    for (std::list<uint64>::iterator itr = summons.begin(); itr != summons.end(); ++itr)
-                        if (Creature* temp = ObjectAccessor::GetCreature(*me, *itr))
-                        {
-                            switch (temp->GetEntry())
-                            {
-                                case NPC_CONSTRICTOR_TENTACLE:
-                                case NPC_CORRUPTOR_TENTACLE:
-                                case NPC_CRUSHER_TENTACLE:
-                                    me->AddAura(SPELL_SHATTERED_ILLUSIONS, temp);
-                                    break;
-                            }
-                        }
+                    // search for tentacles manually, they have been summoned by spells
+                    std::list<Creature*> TentacleList;
+                    me->GetCreatureListWithEntryInGrid(TentacleList, NPC_CORRUPTOR_TENTACLE, 100.0f);
+                    me->GetCreatureListWithEntryInGrid(TentacleList, NPC_CRUSHER_TENTACLE, 100.0f);
+                    me->GetCreatureListWithEntryInGrid(TentacleList, NPC_CONSTRICTOR_TENTACLE, 100.0f);
+
+                    if (!TentacleList.empty())
+                        for (std::list<Creature*>::iterator itr = TentacleList.begin(); itr != TentacleList.end(); itr++)
+                            me->AddAura(SPELL_SHATTERED_ILLUSIONS, (*itr));
                 }
             }
 
@@ -1263,28 +1281,23 @@ class npc_yogg_saron_encounter_controller : public CreatureScript   // Should be
                 if (myPhase == PHASE_BRAIN)
                 {
                     if (Creature* yoggbrain = ObjectAccessor::GetCreature(*me, guidYoggBrain))
-                        yoggbrain->AI()->DoAction(causedByPhaseChange? ACTION_REMOVE_SHATTERED_ILLUSIONS_PHASE_CHANGE : ACTION_REMOVE_SHATTERED_ILLUSIONS);
+                        yoggbrain->AI()->DoAction(causedByPhaseChange ? ACTION_REMOVE_SHATTERED_ILLUSIONS_PHASE_CHANGE : ACTION_REMOVE_SHATTERED_ILLUSIONS);
 
                     if (Creature* yogg = ObjectAccessor::GetCreature(*me, guidYogg))
-                        yogg->AI()->DoAction(causedByPhaseChange? ACTION_REMOVE_SHATTERED_ILLUSIONS_PHASE_CHANGE : ACTION_REMOVE_SHATTERED_ILLUSIONS);
-
+                        yogg->AI()->DoAction(causedByPhaseChange ? ACTION_REMOVE_SHATTERED_ILLUSIONS_PHASE_CHANGE : ACTION_REMOVE_SHATTERED_ILLUSIONS);
+                    
                     if (Creature* sara = ObjectAccessor::GetCreature(*me, instance->GetData64(BOSS_SARA)))
-                        sara->AI()->DoAction(causedByPhaseChange? ACTION_REMOVE_SHATTERED_ILLUSIONS_PHASE_CHANGE : ACTION_REMOVE_SHATTERED_ILLUSIONS);
+                        sara->AI()->DoAction(causedByPhaseChange ? ACTION_REMOVE_SHATTERED_ILLUSIONS_PHASE_CHANGE : ACTION_REMOVE_SHATTERED_ILLUSIONS);
 
-                    for (SummonList::iterator itr = summons.begin(); itr != summons.end(); ++itr)
-                    {
-                        if (Creature* temp = ObjectAccessor::GetCreature(*me, *itr))
-                        {
-                            switch(temp->GetEntry())
-                            {
-                                case NPC_CONSTRICTOR_TENTACLE:
-                                case NPC_CORRUPTOR_TENTACLE:
-                                case NPC_CRUSHER_TENTACLE:
-                                    temp->RemoveAurasDueToSpell(SPELL_SHATTERED_ILLUSIONS);
-                                    break;
-                            }
-                        }
-                    }
+                    // search for tentacles manually, they have been summoned by spells
+                    std::list<Creature*> TentacleList;
+                    me->GetCreatureListWithEntryInGrid(TentacleList, NPC_CORRUPTOR_TENTACLE, 100.0f);
+                    me->GetCreatureListWithEntryInGrid(TentacleList, NPC_CRUSHER_TENTACLE, 100.0f);
+                    me->GetCreatureListWithEntryInGrid(TentacleList, NPC_CONSTRICTOR_TENTACLE, 100.0f);
+
+                    if (!TentacleList.empty())
+                        for (std::list<Creature*>::iterator itr = TentacleList.begin(); itr != TentacleList.end(); itr++)
+                            (*itr)->RemoveAurasDueToSpell(SPELL_SHATTERED_ILLUSIONS);
                 }
             }
 
@@ -1297,7 +1310,9 @@ class npc_yogg_saron_encounter_controller : public CreatureScript   // Should be
                         if (!players.isEmpty())
                             for(Map::PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr)
                                 if (Player* player = itr->getSource())
+                                {
                                     if (player->isAlive())
+                                    {
                                         if (!remove)
                                         {
                                             me->AddAura(SPELL_SANITY, player);
@@ -1307,6 +1322,8 @@ class npc_yogg_saron_encounter_controller : public CreatureScript   // Should be
                                         {
                                             player->RemoveAurasDueToSpell(SPELL_SANITY);
                                         }
+                                    }
+                                }
                     }
             }
 
@@ -1338,7 +1355,7 @@ class npc_yogg_saron_encounter_controller : public CreatureScript   // Should be
                         if(GameObject* obj = me->SummonGameObject(EventNpcEntrys[npcIndex+i], EventNpcLocation[npcIndex+i].GetPositionX(), EventNpcLocation[npcIndex+i].GetPositionY(), EventNpcLocation[npcIndex+i].GetPositionZ(), 0, 0, 0, 0, 0, 40000))
                         {
                             obj->setActive(true);
-                            EventNPC info = { obj->GetEntry(), obj->GetGUID() };
+                            EventNPC info = { obj->GetEntry(), obj->GetGUID() };  
                             listEventNPCs.push_back(info);
                         }
                     }
@@ -1347,7 +1364,7 @@ class npc_yogg_saron_encounter_controller : public CreatureScript   // Should be
                         if (Creature* temp = DoSummon(EventNpcEntrys[npcIndex+i], EventNpcLocation[npcIndex+i], 40000, TEMPSUMMON_TIMED_DESPAWN))
                         {
                             temp->setActive(true);
-                            EventNPC info = { temp->GetEntry(), temp->GetGUID() };
+                            EventNPC info = { temp->GetEntry(), temp->GetGUID() };    
                             switch (info.entry)
                             {
                             case NPC_BUNNY_GARONA_VISION:
@@ -1374,7 +1391,7 @@ class npc_yogg_saron_encounter_controller : public CreatureScript   // Should be
                         {
                             DoSpawnKeeperForSupport();
                             SetSanityAura();
-                            uint32 keeperActiveCnt = CountKeepersActive();
+                            keeperActiveCnt = CountKeepersActive();
                             if (Creature* yogg = ObjectAccessor::GetCreature(*me, guidYogg))
                             {
                                 yogg->SetLootMode(LOOT_MODE_DEFAULT);
@@ -1384,14 +1401,11 @@ class npc_yogg_saron_encounter_controller : public CreatureScript   // Should be
                                     yogg->AddLootMode(LOOT_MODE_HARD_MODE_2);
                                 yogg->AI()->SetData(ACTION_DO_CHANGE_PHASE, PHASE_SARA);
                             }
-                            me->SetFloatValue(UNIT_FIELD_COMBATREACH, 100.0f);
                         }
                         break;
                     case PHASE_BRAIN:
-                        CloudHandling(true);
+                        CloudHandling(false);
                         brainEventsCount = 0;
-                        if (Creature* yogg = ObjectAccessor::GetCreature(*me, guidYogg))
-                            yogg->AI()->SetData(ACTION_DO_CHANGE_PHASE, PHASE_BRAIN);
                         events.ScheduleEvent(EVENT_DESCENT_TO_MADNESS_BEGIN, 90000, 0, newPhase);
                         break;
                     case PHASE_YOGG:
@@ -1400,7 +1414,7 @@ class npc_yogg_saron_encounter_controller : public CreatureScript   // Should be
                         if (Creature* yogg = ObjectAccessor::GetCreature(*me, guidYogg))
                             yogg->AI()->SetData(ACTION_DO_CHANGE_PHASE, PHASE_YOGG);
                         if (Creature* yoggbrain = ObjectAccessor::GetCreature(*me, guidYoggBrain))
-                            yoggbrain->InterruptNonMeleeSpells(true);
+                            yoggbrain->InterruptNonMeleeSpells(true); 
                         OnRemove_ShatteredIllusions(true);
                         break;
                 }
@@ -1415,7 +1429,7 @@ class npc_yogg_saron_encounter_controller : public CreatureScript   // Should be
                 bool usedMindcontrol;
                 uint64 guidYogg;
                 uint64 guidYoggBrain;
-                //uint32 keeperActiveCnt;
+                uint32 keeperActiveCnt;
 
                 // Phase 2
                 Actions lastBrainAction;
@@ -1439,14 +1453,13 @@ class boss_sara : public CreatureScript
         enum MyEvents
         {
             EVENT_SARAHS_HELP       = 1,
-            EVENT_SUMMON_GUARDIAN,
             EVENT_PSYCHOSIS,
             EVENT_MINDSPELL,
             EVENT_RANDOM_YELL,
             EVENT_SPEAKING,
             EVENT_EVTSPEAKING,
         };
-
+                
     public:
         boss_sara() : CreatureScript("boss_sara") {}
 
@@ -1456,7 +1469,7 @@ class boss_sara : public CreatureScript
             {
                 me->SetCanFly(true);
                 me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
-                me->ApplySpellImmune(0, IMMUNITY_ID, SPELL_DEATH_GRIP, true);
+                me->ApplySpellImmune(0, IMMUNITY_ID, SPELL_DEATH_GRIP, true); 
             }
 
             void Reset()
@@ -1486,9 +1499,6 @@ class boss_sara : public CreatureScript
                 // Reset Phase
                 myPhase = PHASE_NONE;
 
-                // Reset HitCounter Phase 1
-                NovaHitCounter = CONSTANT_MAX_NOVA_HITS;
-
                 if (instance->GetBossState(BOSS_VEZAX) == DONE)
                     events.ScheduleEvent(EVENT_RANDOM_YELL, urand(10000,20000));
             }
@@ -1496,7 +1506,7 @@ class boss_sara : public CreatureScript
             void JustDied(Unit* /*killer*/)
             {
                 _JustDied();
-            }
+            }            
 
             void ReceiveEmote(Player* pPlayer, uint32 emote)
             {
@@ -1509,7 +1519,7 @@ class boss_sara : public CreatureScript
 
                         if (me->IsWithinLOS(pPlayer->GetPositionX(), pPlayer->GetPositionY(), pPlayer->GetPositionZ()) && me->IsWithinDistInMap(pPlayer, 30.0f))
                         {
-                            if (AchievementEntry const* achievKissAndMakeUp = sAchievementStore.LookupEntry(RAID_MODE(ACHIEVMENT_KISS_AND_MAKE_UP_10, ACHIEVMENT_KISS_AND_MAKE_UP_25)))
+                            if (AchievementEntry const* achievKissAndMakeUp = GetAchievementStore()->LookupEntry(RAID_MODE(ACHIEVMENT_KISS_AND_MAKE_UP_10, ACHIEVMENT_KISS_AND_MAKE_UP_25)))
                                 pPlayer->CompletedAchievement(achievKissAndMakeUp);
                         }
                     }
@@ -1518,15 +1528,9 @@ class boss_sara : public CreatureScript
 
             void DamageTaken(Unit* dealer, uint32 &damage)
             {
-                if (dealer->GetEntry() == NPC_GUARDIAN_OF_YOGG_SARON)
-                {
-                    damage = 0;
-                    return;
-                }
-
                 if (damage > me->GetHealth())
                     damage = me->GetHealth() - 1;
-            }
+            }                        
 
             void EnterCombat(Unit* /*target*/)
             {
@@ -1557,6 +1561,28 @@ class boss_sara : public CreatureScript
                     }
             }
 
+            void SpellHit(Unit* /*caster*/, SpellInfo const* spell)
+            {
+                if (!spell)
+                    return;
+
+                if (spell->Id == SPELL_SHADOW_NOVA_SARA)
+                {
+                    if (myPhase != PHASE_SARA)
+                        return;
+
+                    if (Creature* sara = ObjectAccessor::GetCreature(*me, instance->GetData64(BOSS_SARA)))
+                    {
+                        if (sara->GetHealth() <= 1.f)
+                        {
+                            if (Creature* ctrl = ObjectAccessor::GetCreature(*me, instance->GetData64(NPC_YOGGSARON_CTRL)))
+                                ctrl->AI()->SetData(ACTION_DO_CHANGE_PHASE, PHASE_BRAIN);
+                            UpdatePhase(PHASE_BRAIN);
+                        }
+                    }
+                }
+            }
+
             void MovementInform(uint32 type, uint32 i)
             {
                 if (type == POINT_MOTION_TYPE && i == 1)
@@ -1573,23 +1599,10 @@ class boss_sara : public CreatureScript
                     case ACTION_START_SARA:
                         UpdatePhase(PHASE_SARA);
                         break;
-                    case ACTION_NOVA_HIT:
-                        if (myPhase != PHASE_SARA)
-                            return;
-                        NovaHitCounter--;
-                        if (NovaHitCounter <= 0)
-                        {
-                            if (Creature* ctrl = ObjectAccessor::GetCreature(*me, instance->GetData64(NPC_YOGGSARON_CTRL)))
-                                ctrl->AI()->SetData(ACTION_DO_CHANGE_PHASE, PHASE_BRAIN);
-                            UpdatePhase(PHASE_BRAIN);
-                        }
-                        else
-                            me->ModifyHealth(-25000);
-                        break;
                     case ACTION_MADNESS_STARTED:
                         IsEventSpeaking = true;
                         EventSpeakingPhase = 0;
-                        break;
+                        break;  
                     case ACTION_APPLY_SHATTERED_ILLUSIONS:
                         me->AddAura(SPELL_SHATTERED_ILLUSIONS, me);
                         IsEventSpeaking = false;
@@ -1602,7 +1615,7 @@ class boss_sara : public CreatureScript
                         break;
                     case ACTION_REMOVE_SHATTERED_ILLUSIONS_PHASE_CHANGE:    // Nothing special to be done
                         me->RemoveAurasDueToSpell(SPELL_SHATTERED_ILLUSIONS);
-                        break;
+                        break;                  
                 }
             }
 
@@ -1615,7 +1628,7 @@ class boss_sara : public CreatureScript
                         break;
                 }
             }
-
+            
             void UpdatePhase(BossPhase newPhase)
             {
                 if (myPhase == newPhase)
@@ -1628,20 +1641,16 @@ class boss_sara : public CreatureScript
                 {
                     case PHASE_SARA:
                         DoScriptText(SAY_SARA_AGGRO_1, me);
-                        // For PHASE_SARA
-                        me->SetFloatValue(UNIT_FIELD_COMBATREACH, 100.0f);
                         me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
-                        events.ScheduleEvent(EVENT_SARAHS_HELP, urand(5000, 6000), PHASE_SARA);
-                        events.ScheduleEvent(EVENT_SUMMON_GUARDIAN, 10000, 0, PHASE_SARA);
+                        events.ScheduleEvent(EVENT_SARAHS_HELP, urand(5000, 6000), 0, PHASE_SARA);
                         break;
                     case PHASE_BRAIN:
-                        me->setFaction(FACTION_HOSTILE_ALL);
                         me->SetHealth(me->GetMaxHealth());
                         SpeakingPhase = 0;
                         events.CancelEvent(EVENT_EVTSPEAKING);
-                        events.RescheduleEvent(EVENT_SPEAKING, 1000, 0, myPhase);
+                        events.ScheduleEvent(EVENT_SPEAKING, 1000, 0, newPhase);
                         IsEventSpeaking = false;
-                        EventSpeakingPhase = 0;
+                        EventSpeakingPhase = 0;                        
                         events.ScheduleEvent(EVENT_RANDOM_YELL, 35000);
                         if (Player* target = SelectPlayerTargetInRange(me, 100.0f))
                             EnterCombat(target);
@@ -1658,17 +1667,17 @@ class boss_sara : public CreatureScript
             {
                 switch (myPhase)
                 {
-                    case PHASE_NONE:
+                    case PHASE_NONE: 
                         DoScriptText(RAND(SAY_SARA_PREFIGHT_1, SAY_SARA_PREFIGHT_2), me);
                         break;
-                    case PHASE_SARA:
+                    case PHASE_SARA: 
                         DoScriptText(RAND(SAY_SARA_AGGRO_2, SAY_SARA_AGGRO_3), me);
                         break;
                     case PHASE_BRAIN:
-                        DoScriptText(RAND(SAY_SARA_PHASE2_1 ,SAY_SARA_PHASE2_2, SAY_SARA_AGGRO_3), me);
+                        DoScriptText(RAND(SAY_SARA_PHASE2_1 ,SAY_SARA_PHASE2_2), me);
                         break;
                 }
-            }
+            }                                  
 
             Creature* GetRandomEntryTarget(uint32 entry, float range = 100.0f)
             {
@@ -1710,14 +1719,18 @@ class boss_sara : public CreatureScript
                 if (Creature* speaker = ObjectAccessor::GetCreature(*me, npcguid))
                     DoScriptText(EventNpcSpeaching[speachindex+part].speech_entry, speaker);
                 return EventNpcSpeaching[speachindex+part].next_speech;
-            }
+            }                       
 
             void UpdateAI(const uint32 diff)
             {
-                if (myPhase == PHASE_NONE || me->HasUnitState(UNIT_STATE_CASTING))
+                if (myPhase == PHASE_NONE)
                     return;
 
                 events.Update(diff);
+
+                if (me->HasUnitState(UNIT_STATE_CASTING))
+                    return;
+
                 while (uint32 event = events.ExecuteEvent())
                 {
                     switch (event)
@@ -1726,41 +1739,36 @@ class boss_sara : public CreatureScript
                         case EVENT_RANDOM_YELL:
                             SaraRandomYell();
                             events.ScheduleEvent(EVENT_RANDOM_YELL, urand(40000, 60000));
-                            break;
-
+                            return;
+                        
                         // Events in PHASE_SARA
-                        case EVENT_SUMMON_GUARDIAN:
-                            {
-                                if(Creature* target = GetRandomEntryTarget(NPC_OMINOUS_CLOUD, 500.0f))
-                                    target->CastSpell(target, SPELL_SUMMON_GUARDIAN, true);
-                                events.ScheduleEvent(EVENT_SUMMON_GUARDIAN, 15000, 0, PHASE_SARA);
-                            }
-                            break;
                         case EVENT_SARAHS_HELP:
                             switch (urand(0,2))
                             {
                                 case 0:
                                     if (Player* target = SelectPlayerTargetInRange(me, 500.0f))
                                         if(!IsPlayerInBrainRoom(target))
-                                            DoCast(target, SPELL_SARAS_FERVOR, false);
+                                            DoCast(target, SPELL_SARAS_FERVOR, true);
                                     break;
                                 case 1:
                                     if (Player* target = SelectPlayerTargetInRange(me, 500.0f))
                                         if(!IsPlayerInBrainRoom(target))
-                                            DoCast(target, SPELL_SARAS_BLESSING, false);
+                                            DoCast(target, SPELL_SARAS_BLESSING, true);
+                                    break;
                                 case 2:
                                     if (Unit* target = GetRandomEntryTarget(NPC_GUARDIAN_OF_YOGG_SARON, 500.0f))
-                                        DoCast(target, SPELL_SARAS_ANGER, false);
+                                        DoCast(target, SPELL_SARAS_ANGER, true);
                                     break;
-                                default:
+                                default: 
                                     break;
                             }
                             events.ScheduleEvent(EVENT_SARAHS_HELP, urand(5000, 6000), 0, PHASE_SARA);
-                            break;
+                            return;
 
                         // events in PHASE_BRAIN
                         case EVENT_SPEAKING:
                             {
+                                events.CancelEvent(EVENT_RANDOM_YELL);
                                 uint32 nextEventTime = 0;
                                 switch (SpeakingPhase)
                                 {
@@ -1784,59 +1792,53 @@ class boss_sara : public CreatureScript
                                         me->AddAura(SPELL_SARA_TRANSFORMATION, me);
                                         DoCast(me,SPELL_SARA_SHADOWY_BARRIER, false);
                                         me->GetMotionMaster()->MovePoint(1, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ()+20);
-                                        if(Creature* yogg = ObjectAccessor::GetCreature(*me, guidYogg))
-                                        {
-                                            yogg->CastSpell(yogg, SPELL_SHADOWY_BARRIER, false);
-                                            yogg->SetStandState(UNIT_STAND_STATE_STAND);
-                                            yogg->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
-                                            DoScriptText(SAY_PHASE2_5, yogg);
+                                        me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
+                                        if (Creature* ctrl = ObjectAccessor::GetCreature(*me, instance->GetData64(NPC_YOGGSARON_CTRL)))
+                                            ctrl->AI()->DoAction(ACTION_ACTIVATE_YOGG);
 
-                                            yogg->CastSpell(yogg, SPELL_SUMMON_CURRUPTOR_TENTACLE, true);
-                                        }
-                                        me->setFaction(14);
+                                        me->setFaction(FACTION_HOSTILE_ALL);
                                         break;
                                 }
                                 if (SpeakingPhase < 4)
                                     events.ScheduleEvent(EVENT_SPEAKING, nextEventTime);
+                                SpeakingPhase++;
                             }
-                            break;
+                            return;
                         case EVENT_EVTSPEAKING:
                             if (Creature* ctrl = ObjectAccessor::GetCreature(*me, instance->GetData64(NPC_YOGGSARON_CTRL)))
                                 events.RescheduleEvent(EVENT_EVTSPEAKING, DoEventSpeaking(static_cast<BrainEventPhase>(ctrl->AI()->GetData(DATA_PORTAL_PHASE)), EventSpeakingPhase), 0, PHASE_BRAIN);
                             EventSpeakingPhase++;
-                            break;
+                            return;
                         case EVENT_PSYCHOSIS:
                             if (Player* target = SelectPlayerTargetInRange(me, 500.0f))
                                 if (!IsPlayerInBrainRoom(target))
                                     DoCast(target, SPELL_PSYCHOSIS, false);
                             events.ScheduleEvent(EVENT_PSYCHOSIS, 5000, 0, PHASE_BRAIN);
-                            break;
+                            return;
                         case EVENT_MINDSPELL:
-                            if (!me->IsNonMeleeSpellCasted(false))
+                            switch (urand(0, 2))
                             {
-                                switch (urand(0, 2))
-                                {
-                                    case 0:
-                                        DoCast(SPELL_MALADY_OF_MIND);
-                                        break;
-                                    case 1:
-                                        DoCast(SPELL_BRAIN_LINK);
-                                        break;
-                                    case 2:
-                                        DoCast(SPELL_DEATH_RAY_SUMMON);
-                                        break;
-                                }
-                                events.ScheduleEvent(EVENT_MINDSPELL, 30000, 0, PHASE_BRAIN);
+                                case 0:
+                                    DoCast(SPELL_MALADY_OF_MIND);
+                                    break;
+                                case 1:
+                                    DoCast(SPELL_BRAIN_LINK);
+                                    break;
+                                case 2:
+                                    DoCast(SPELL_DEATH_RAY_SUMMON);
+                                    break;
                             }
-                            else
-                                events.ScheduleEvent(EVENT_MINDSPELL, 3000, 0, PHASE_BRAIN);
-                            break;
+                            events.ScheduleEvent(EVENT_MINDSPELL, 30000, 0, PHASE_BRAIN);
+                            return;
                     }
                 }
 
                 if (Creature* ctrl = ObjectAccessor::GetCreature(*me, instance->GetData64(NPC_YOGGSARON_CTRL)))
-                    if(myPhase != PHASE_NONE && !(ctrl->AI()->GetData(DATA_IS_ENCOUNTER_IN_PROGRESS)))
+                    if (myPhase != PHASE_NONE && !(ctrl->AI()->GetData(DATA_IS_ENCOUNTER_IN_PROGRESS)))
+                    {
+                        ctrl->AI()->DoAction(ACTION_WIPE);
                         EnterEvadeMode();
+                    }
 
                 // temporary
                 if (myPhase == PHASE_NONE && me->isInCombat())
@@ -1848,10 +1850,6 @@ class boss_sara : public CreatureScript
 
                 uint64 guidYogg;
                 uint64 guidYoggBrain;
-
-
-                // Phase 1
-                uint32 NovaHitCounter;
 
                 // Phase 2
                 uint32 SpeakingPhase;
@@ -1876,14 +1874,14 @@ class npc_ominous_cloud : public CreatureScript
             npc_ominous_cloudAI(Creature* c) : ScriptedAI(c)
             {
                 me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
-                me->ApplySpellImmune(0, IMMUNITY_ID, SPELL_DEATH_GRIP, true);
+                me->ApplySpellImmune(0, IMMUNITY_ID, SPELL_DEATH_GRIP, true); 
                 instance = c->GetInstanceScript();
-            }
+            }            
 
             void MoveInLineOfSight(Unit* target)
             {
                 if(instance && instance->GetBossState(BOSS_YOGGSARON) == IN_PROGRESS)
-                    if(target && me->GetDistance2d(target) <= 20.0f && target->ToPlayer() && !target->ToPlayer()->isGameMaster() && !target->HasAura(SPELL_FLASH_FREEZE))
+                    if(target && me->GetDistance2d(target) <= 11.f && target->ToPlayer() && !target->ToPlayer()->isGameMaster() && !target->HasAura(SPELL_FLASH_FREEZE))
                         TriggerGuardianSpawn();
             }
 
@@ -1893,14 +1891,10 @@ class npc_ominous_cloud : public CreatureScript
             {
                 switch(action)
                 {
-                    case ACTION_DEACTIVATE_CLOUDS:
-                        me->RemoveAurasDueToSpell(SPELL_SUMMON_GUARDIAN);
-                        me->RemoveAurasDueToSpell(SPELL_OMINOUS_CLOUD_EFFECT);
-                        me->SetReactState(REACT_PASSIVE);
-                        break;
                     case ACTION_ACTIVATE_CLOUDS:
                         Reset();
                         me->SetReactState(REACT_AGGRESSIVE);
+                        DoCast(me, SPELL_OMINOUS_CLOUD_EFFECT, true);
                         break;
                 }
             }
@@ -1913,11 +1907,10 @@ class npc_ominous_cloud : public CreatureScript
 
             void Reset()
             {
-                DoCast(me, SPELL_OMINOUS_CLOUD_EFFECT, true);
                 me->RemoveAurasDueToSpell(SPELL_SUMMON_GUARDIAN);
+                me->RemoveAurasDueToSpell(SPELL_OMINOUS_CLOUD_EFFECT);
+                me->SetReactState(REACT_PASSIVE);
                 me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_NON_ATTACKABLE);
-                //me->SetReactState(REACT_PASSIVE); //Prevent MoveInLineOfSight
-
                 me->GetMotionMaster()->MoveRandom(25.0f);
             }
 
@@ -1943,7 +1936,7 @@ class npc_guardian_of_yogg_saron : public CreatureScript
             npc_guardian_of_yogg_saronAI(Creature *c) : ScriptedAI(c)
             {
                 instance = c->GetInstanceScript();
-                me->setFaction(14);
+                me->setFaction(FACTION_HOSTILE_ALL);
             }
 
             void SpellHitTarget(Unit* target, const SpellInfo* spell)
@@ -1964,12 +1957,7 @@ class npc_guardian_of_yogg_saron : public CreatureScript
             void JustDied(Unit* /*killer*/)
             {
                 DoCast(me, SPELL_SHADOW_NOVA, true);
-                if (instance)
-                {
-                    if (Creature* cSara = ObjectAccessor::GetCreature(*me,instance->GetData64(BOSS_SARA)))
-                        if (me->GetDistance2d(cSara) <= 100.0f)
-                            cSara->AI()->DoAction(ACTION_NOVA_HIT);
-                }
+                DoCast(me, SPELL_SHADOW_NOVA_SARA, true);
                 me->DespawnOrUnsummon(5000);
             }
 
@@ -1982,21 +1970,19 @@ class npc_guardian_of_yogg_saron : public CreatureScript
 
             void UpdateAI(const uint32 diff)
             {
-                if(instance && instance->GetBossState(BOSS_YOGGSARON) != IN_PROGRESS)
+                if (!UpdateVictim())
                 {
                     me->DealDamage(me, me->GetMaxHealth());
                     me->RemoveCorpse();
-                }
-
-                if (!UpdateVictim())
                     return;
+                }
 
                 if (darkVolleyTimer <= diff)
                 {
                     DoCast(SPELL_DARK_VOLLEY);
                     darkVolleyTimer = urand(20000, 30000);
                 }
-                else
+                else 
                     darkVolleyTimer -= diff;
 
                 DoMeleeAttackIfReady();
@@ -2025,25 +2011,25 @@ class npc_yogg_saron_tentacle : public CreatureScript
                 instance = c->GetInstanceScript();
                 SetTentacleType(c->GetEntry());
                 once = false;
-                me->setFaction(14);
+                me->setFaction(FACTION_HOSTILE_ALL);
                 me->SetCanFly(true);
             }
-
+        
             void SetTentacleType(uint32 entry)
             {
                 switch(entry)
                 {
-                    case NPC_CRUSHER_TENTACLE:
-                        t_Type = CRUSHER_TENTACLE;
+                    case NPC_CRUSHER_TENTACLE: 
+                        t_Type = CRUSHER_TENTACLE; 
                         break;
-                    case NPC_CORRUPTOR_TENTACLE:
-                        t_Type = CORRUPTOR_TENTACLE;
+                    case NPC_CORRUPTOR_TENTACLE: 
+                        t_Type = CORRUPTOR_TENTACLE; 
                         break;
-                    case NPC_CONSTRICTOR_TENTACLE:
-                        t_Type = CONSTRICTOR_TENTACLE;
+                    case NPC_CONSTRICTOR_TENTACLE: 
+                        t_Type = CONSTRICTOR_TENTACLE; 
                         break;
-                    default:
-                        t_Type = CORRUPTOR_TENTACLE;
+                    default: 
+                        t_Type = CORRUPTOR_TENTACLE; 
                         break;
                 }
             }
@@ -2108,32 +2094,32 @@ class npc_yogg_saron_tentacle : public CreatureScript
                     once = true;
                 }
 
-                if (!UpdateVictim())
+                if (!UpdateVictim() || me->HasUnitState(UNIT_STATE_CASTING))
                     return;
 
-                if(tentacleSpellTimer <= diff)
+                if (tentacleSpellTimer <= diff)
                 {
                     switch(t_Type)
                     {
                         case CRUSHER_TENTACLE:
                             if(!me->HasAura(SPELL_DIMISH_POWER))
                                 DoCast(SPELL_DIMISH_POWER);
-                            break;
+                            return;
                         case CORRUPTOR_TENTACLE:
                             if(Unit* target = SelectPlayerTargetInRange(me, 500.0f))
                                 DoCast(target, RAND(SPELL_DRAINING_POISON, SPELL_BLACK_PLAGUE, SPELL_APATHY, SPELL_CURSE_OF_DOOM), false);
-                            break;
+                            return;
                         case CONSTRICTOR_TENTACLE:
                             if (Unit* target =  SelectPlayerTargetInRange(me, 50.0f))
                                 target->CastSpell(me, SPELL_LUNGE, true);
-                            break;
+                            return;
                     }
                     tentacleSpellTimer = urand(5000, 7000);
                 }
-                else
+                else 
                     tentacleSpellTimer -= diff;
 
-                if(t_Type == CRUSHER_TENTACLE)
+                if (t_Type == CRUSHER_TENTACLE)
                     DoMeleeAttackIfReady();
             }
 
@@ -2174,8 +2160,8 @@ class npc_descend_into_madness : public CreatureScript
                     AcceptTeleport = true;
                     posTeleportPosition = InnerBrainLocation[pTemp];
                     break;
-                default:
-                    AcceptTeleport = false;
+                default: 
+                    AcceptTeleport = false; 
                     break;
             }
 
@@ -2249,17 +2235,18 @@ class boss_brain_of_yogg_saron : public CreatureScript
             {
                 instance = c->GetInstanceScript();
                 me->SetReactState(REACT_PASSIVE);
-                me->setFaction(14);
+                me->setFaction(FACTION_HOSTILE_ALL);
                 me->SetCanFly(true);
+                me->SetUnitMovementFlags(MOVEMENTFLAG_DISABLE_GRAVITY);
             }
 
             void Reset()
             {
                 if (Creature* ctrl = ObjectAccessor::GetCreature(*me, instance->GetData64(NPC_YOGGSARON_CTRL)))
+                {
                     if (ctrl->isInCombat())
                         EnterCombat(ctrl->getVictim());
-                else
-                    return;
+                }
             }
 
             void DamageTaken(Unit* /*dealer*/, uint32 &damage)
@@ -2274,9 +2261,7 @@ class boss_brain_of_yogg_saron : public CreatureScript
                 switch (action)
                 {
                     case ACTION_APPLY_SHATTERED_ILLUSIONS:
-                        me->AddAura(SPELL_SHATTERED_ILLUSIONS, me);
                         me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-                        me->InterruptNonMeleeSpells(true);
                         break;
                     case ACTION_REMOVE_SHATTERED_ILLUSIONS:
                     case ACTION_REMOVE_SHATTERED_ILLUSIONS_PHASE_CHANGE:
@@ -2297,7 +2282,7 @@ class boss_brain_of_yogg_saron : public CreatureScript
                     if (IsPlayerInBrainRoom(target->ToPlayer()))
                         target->RemoveAurasDueToSpell(SPELL_SANITY);
                 }
-            }
+            }            
 
             void UpdateAI(uint32 const /*diff*/)
             {
@@ -2329,8 +2314,8 @@ class boss_brain_of_yogg_saron : public CreatureScript
 class boss_yogg_saron : public CreatureScript
 {
     private:
-        enum
-        {
+        enum 
+        { 
             EVENT_SANITY_CHECK = 1,
             EVENT_TENTACLE,
             EVENT_TENTACLE_1,
@@ -2340,7 +2325,7 @@ class boss_yogg_saron : public CreatureScript
             EVENT_LUNATIC_GAZE,
         };
     public:
-        boss_yogg_saron() : CreatureScript("boss_yogg_saron") {}
+        boss_yogg_saron() : CreatureScript("boss_yogg_saron") {}    
 
         struct boss_yogg_saronAI : public Scripted_NoMovementAI
         {
@@ -2349,7 +2334,7 @@ class boss_yogg_saron : public CreatureScript
                 instance = c->GetInstanceScript();
                 me->SetReactState(REACT_PASSIVE);
                 me->SetUnitMovementFlags(MOVEMENTFLAG_DISABLE_GRAVITY | MOVEMENTFLAG_SWIMMING);
-            }
+            }            
 
             void Reset()
             {
@@ -2358,13 +2343,13 @@ class boss_yogg_saron : public CreatureScript
                 UsedMindControl = false;
                 myphase = PHASE_NONE;
                 events.ScheduleEvent(EVENT_SANITY_CHECK, 1000);
+                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
             }
 
             void JustDied(Unit* killer)
             {
                 if (Creature* ctrl = ObjectAccessor::GetCreature(*me, instance->GetData64(NPC_YOGGSARON_CTRL)))
                     ctrl->AI()->DoAction(ACTION_YOGGSARON_KILLED);
-
                 DoScriptText(SAY_DEATH, me);
             }
 
@@ -2388,6 +2373,11 @@ class boss_yogg_saron : public CreatureScript
                 }
             }
 
+            void KilledUnit(Unit* /*who*/)
+            {
+                DoScriptText(SAY_SLAY, me);
+            }
+
             void SetData(uint32 type, uint32 val)
             {
                 switch (type)
@@ -2402,7 +2392,7 @@ class boss_yogg_saron : public CreatureScript
                                 myphase = PHASE_BRAIN;
                                 events.SetPhase(myphase);
                                 events.ScheduleEvent(EVENT_TENTACLE, urand(3000, 5000), ID_GROUP_NON_SHATTERED, PHASE_BRAIN);
-                                events.ScheduleEvent(EVENT_TENTACLE_1, 1000, ID_GROUP_NON_SHATTERED, PHASE_BRAIN);
+                                events.ScheduleEvent(EVENT_TENTACLE_1, 1000, ID_GROUP_NON_SHATTERED, PHASE_BRAIN); 
                                 break;
                             case PHASE_YOGG:
                                 // Publicly visible phase-change
@@ -2410,6 +2400,7 @@ class boss_yogg_saron : public CreatureScript
                                 me->LowerPlayerDamageReq(static_cast<uint32>(me->GetMaxHealth() * 0.3f));
                                 me->SetHealth(me->CountPctFromMaxHealth(30));
                                 me->RemoveAurasDueToSpell(SPELL_SHADOWY_BARRIER);
+                                me->RemoveAurasDueToSpell(SPELL_SHATTERED_ILLUSIONS);
                                 DoScriptText(SAY_PHASE3, me);
                                 me->AddAura(SPELL_YOGG_SARON_TRANSFORMATION, me);
 
@@ -2421,7 +2412,7 @@ class boss_yogg_saron : public CreatureScript
                                     if (GetDifficulty() == RAID_DIFFICULTY_25MAN_NORMAL && ctrl->AI()->GetData(DATA_KEEPER_CNT) < 4)
                                         events.ScheduleEvent(EVENT_DEAFENING_ROAR, urand(30000, 60000), 0, myphase);
                                 events.ScheduleEvent(EVENT_SHADOW_BEACON, 30000, 0, myphase);
-                                events.ScheduleEvent(EVENT_SUMMON_GUARDIAN_YOGG, 20000, 0, myphase);
+                                events.ScheduleEvent(EVENT_SUMMON_GUARDIAN_YOGG, 20000, 0, myphase); 
                                 break;
                         }
                         break;
@@ -2430,7 +2421,8 @@ class boss_yogg_saron : public CreatureScript
 
             void SpellHitTarget(Unit* target, const SpellInfo* spell)
             {
-                if(!instance) return;
+                if(!instance)
+                    return;
 
                 if (target)
                     if (target->ToPlayer())
@@ -2496,7 +2488,7 @@ class boss_yogg_saron : public CreatureScript
                                         }
                                 }
                             events.ScheduleEvent(EVENT_SANITY_CHECK, 1000);
-                            break;
+                            return;
                         case EVENT_TENTACLE:
                             if (urand(0, 1) == 0)
                             {
@@ -2507,41 +2499,44 @@ class boss_yogg_saron : public CreatureScript
                             else
                                 me->CastSpell(me, SPELL_SUMMON_CURRUPTOR_TENTACLE, true);
                             if (Creature* ctrl = ObjectAccessor::GetCreature(*me, instance->GetData64(NPC_YOGGSARON_CTRL)))
+                            {
                                 if (ctrl->AI()->GetData(DATA_BRAIN_EVT_CNT) < 4)
                                     events.ScheduleEvent(EVENT_TENTACLE, urand(5000, 10000), 0, PHASE_BRAIN);
                                 else
-                                    events.ScheduleEvent(EVENT_TENTACLE, urand(2000, 5000), 0, PHASE_BRAIN);
+                                    events.ScheduleEvent(EVENT_TENTACLE, urand(2000, 5000), 0, PHASE_BRAIN);  
+                            }
                             else
                                 events.ScheduleEvent(EVENT_TENTACLE, urand(3500, 7500), 0, PHASE_BRAIN);
-                            break;
+                            return;
                         case EVENT_TENTACLE_1:
                             me->CastSpell(me, SPELL_SUMMON_CRUSHER_TENTACLE, true);
                             if (Creature* ctrl = ObjectAccessor::GetCreature(*me, instance->GetData64(NPC_YOGGSARON_CTRL)))
+                            {
                                 if (ctrl->AI()->GetData(DATA_BRAIN_EVT_CNT) < 4)
                                     events.ScheduleEvent(EVENT_TENTACLE_1, urand(30000, 40000), 0, PHASE_BRAIN);
                                 else
-                                    events.ScheduleEvent(EVENT_TENTACLE_1, urand(10000, 15000), 0, PHASE_BRAIN);
+                                    events.ScheduleEvent(EVENT_TENTACLE_1, urand(10000, 15000), 0, PHASE_BRAIN);  
+                            }
                             else
                                 events.ScheduleEvent(EVENT_TENTACLE_1, urand(20000, 27500), 0, PHASE_BRAIN);
-                            break;
+                            return;
                         case EVENT_SUMMON_GUARDIAN_YOGG:
                             me->CastSpell(me, SPELL_SUMMON_IMMORTAL_GUARDIAN, true);
                             events.ScheduleEvent(EVENT_SUMMON_GUARDIAN_YOGG, 15000, 0, PHASE_YOGG);
-                            break;
+                            return;
                         case EVENT_LUNATIC_GAZE:
-                            DoScriptText(SAY_LUNCATIC_GLAZE, me, 0);
                             me->CastSpell(me, SPELL_LUNATIC_GAZE, me);
                             events.ScheduleEvent(EVENT_LUNATIC_GAZE, 12000, 0, PHASE_YOGG);
-                            break;
+                            return;
                         case EVENT_DEAFENING_ROAR:
                             DoScriptText(SAY_DEAFENING_ROAR, me, 0);
                             me->CastSpell(me, SPELL_DEAFENING_ROAR, false);
                             events.ScheduleEvent(EVENT_DEAFENING_ROAR, 60000, 0, PHASE_YOGG);
-                            break;
+                            return;
                         case EVENT_SHADOW_BEACON:
                             me->CastSpell(me, SPELL_SHADOW_BEACON, false);
                             events.ScheduleEvent(EVENT_SHADOW_BEACON, 3000, 0, PHASE_YOGG);
-                            break;
+                            return;
                     }
                 }
             }
@@ -2589,7 +2584,7 @@ class npc_influence_tentacle : public CreatureScript
                 if(me->GetEntry() != NPC_INFULENCE_TENTACLE)
                 {
                     me->UpdateEntry(NPC_INFULENCE_TENTACLE);
-                    me->setFaction(14);
+                    me->setFaction(FACTION_HOSTILE_ALL);
                     //me->setRegeneratingHealth(false); // TODO: Maybe add this function
                     DoCast(SPELL_GRIM_REPRISAL);
 
@@ -2614,10 +2609,10 @@ class npc_immortal_guardian : public CreatureScript
             npc_immortal_guardianAI(Creature *c) : ScriptedAI(c)
             {
                 instance = c->GetInstanceScript();
-                me->setFaction(14);
+                me->setFaction(FACTION_HOSTILE_ALL);
                 me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
                 me->ApplySpellImmune(0, IMMUNITY_ID, SPELL_DEATH_GRIP, true);
-            }
+            }            
 
             void Reset()
             {
@@ -2685,7 +2680,7 @@ class npc_immortal_guardian : public CreatureScript
                     DoCast(me->getVictim(), RAID_MODE(SPELL_DRAIN_LIFE_10, SPELL_DRAIN_LIFE_25));
                     drainLifeTimer = 35000;
                 }
-                else
+                else 
                     drainLifeTimer -= diff;
 
                 DoMeleeAttackIfReady();
@@ -2712,12 +2707,15 @@ class npc_support_keeper : public CreatureScript
             npc_support_keeperAI(Creature *c) : Scripted_NoMovementAI(c) , Summons(me)
             {
                 instance = c->GetInstanceScript();
-            }
+            }            
 
             void AttackStart(Unit *attacker) {}
 
             void Reset()
             {
+                me->SetVisible(true);
+                me->setActive(true);
+
                 uint32 auraspell = 0;
                 switch(me->GetEntry())
                 {
@@ -2768,11 +2766,14 @@ class npc_support_keeper : public CreatureScript
 
             void UpdateAI(const uint32 diff)
             {
-                if(uiSecondarySpell_Timer <= diff)
+                if (instance->GetBossState(BOSS_YOGGSARON) != IN_PROGRESS)
+                    me->DespawnOrUnsummon();
+
+                if (uiSecondarySpell_Timer <= diff)
                 {
                     switch (me->GetEntry())
                     {
-                        case NPC_KEEPER_THORIM:   // Hm... what's up with killing the Undying in Phase 3? Dealt with by spell ?
+                        case NPC_KEEPER_THORIM:   // Hm... what's up with killing the Undying in Phase 3? Dealt with by spell ? 
                             if(!me->HasAura(SPELL_TITANIC_STORM))
                                 DoCast(SPELL_TITANIC_STORM);
                             uiSecondarySpell_Timer = 10000;
@@ -2783,7 +2784,7 @@ class npc_support_keeper : public CreatureScript
                                 if(!summoning)
                                 {
                                     DoCast(SPELL_SANITY_WELL);
-                                    uiSecondarySpell_Timer = 3000;
+                                    uiSecondarySpell_Timer = 5000;
                                     summoning = true;
                                 }
                                 else
@@ -2822,7 +2823,7 @@ class npc_support_keeper : public CreatureScript
                         if(!me->HasAura(SPELL_HODIRS_PROTECTIVE_GAZE))  // In this case, the timer works as a cooldown manager ... check if this is correct :s
                             uiSecondarySpell_Timer -= diff;
                     }
-                    else
+                    else 
                         uiSecondarySpell_Timer -= diff;
                 }
             }
@@ -2851,31 +2852,17 @@ class npc_sanity_well : public CreatureScript
             npc_sanity_wellAI(Creature *c) : Scripted_NoMovementAI(c)
             {
                 instance = c->GetInstanceScript();
-            }
+            }            
 
             void Reset()
             {
                 DoCast(SPELL_SANITY_WELL_OPTIC);
                 sanityTick_Timer = 2000;
+                me->AddAura(SPELL_SANITY_WELL_DEBUFF, me);
+                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
             }
 
             void AttackStart(Unit* /*who*/) {}
-
-            void MoveInLineOfSight(Unit *mover)
-            {
-                if (mover)
-                    if (mover->ToPlayer())
-                        if (me->IsWithinDist2d(mover, 6.0f))
-                        {
-                            if (!mover->HasAura(SPELL_SANITY_WELL_DEBUFF))
-                                me->AddAura(SPELL_SANITY_WELL_DEBUFF, mover);
-                        }
-                        else
-                        {
-                            if (mover->HasAura(SPELL_SANITY_WELL_DEBUFF))
-                                mover->RemoveAurasDueToSpell(SPELL_SANITY_WELL_DEBUFF);
-                        }
-            }
 
             void UpdateAI(const uint32 diff)
             {
@@ -2903,7 +2890,7 @@ class npc_sanity_well : public CreatureScript
                     }
                     sanityTick_Timer = 2000;
                 }
-                else
+                else 
                     sanityTick_Timer -= diff;
             }
 
@@ -2921,14 +2908,14 @@ class npc_sanity_well : public CreatureScript
 class npc_laughting_skull : public CreatureScript
 {
     public:
-        npc_laughting_skull() : CreatureScript("npc_laughting_skull") {}
+        npc_laughting_skull() : CreatureScript("npc_laughting_skull") {}    
 
         struct npc_laughting_skullAI : public Scripted_NoMovementAI
         {
             npc_laughting_skullAI(Creature *c) : Scripted_NoMovementAI(c)
             {
                 instance = c->GetInstanceScript();
-            }
+            }        
 
             void Reset()
             {
@@ -2977,12 +2964,12 @@ class npc_death_orb : public CreatureScript
                 m_pInstance = c->GetInstanceScript();
                 me->SetReactState(REACT_PASSIVE);
                 me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
-            }
+            }        
 
             void Reset()
             {
                 me->SetCanFly(true);
-                me->setFaction(14);
+                me->setFaction(FACTION_HOSTILE_ALL);
                 prepaired = false;
                 Summons.DespawnAll();
                 SummonDeathRays();
@@ -3012,7 +2999,7 @@ class npc_death_orb : public CreatureScript
                 switch(pSummoned->GetEntry())
                 {
                     case NPC_BUNNY_DEATH_RAY:
-                        pSummoned->setFaction(14);
+                        pSummoned->setFaction(FACTION_HOSTILE_ALL);
                         pSummoned->CastSpell(pSummoned, SPELL_DEATH_RAY_WARNING_VISUAL, true, 0, 0, me->GetGUID());
                         pSummoned->SetReactState(REACT_PASSIVE);
                         pSummoned->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
@@ -3038,7 +3025,7 @@ class npc_death_orb : public CreatureScript
                     }
                     uiReathRayEffekt_Timer = 30000;
                 }
-                else
+                else 
                     uiReathRayEffekt_Timer -= diff;
             }
 
@@ -3175,7 +3162,7 @@ class spell_lunatic_gaze_targeting : public SpellScriptLoader
 
             void FilterTargets(std::list<WorldObject*>& targets)
             {
-                targets.remove_if(DontLooksDirectlyInGazeCheck(GetCaster()));
+                targets.remove_if(IsNotLookingDirectlyInGaze(GetCaster()));
             }
 
             void Register()
@@ -3228,19 +3215,26 @@ class spell_brain_link_periodic_dummy : public SpellScriptLoader
 
                         Map::PlayerList const &players = trigger->GetMap()->GetPlayers();
                         for (Map::PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr)
+                        {
                             if (Player* player = itr->getSource())
-                                if(player->HasAura(SPELL_BRAIN_LINK) && player->GetGUID()!=trigger->GetGUID())
+                            {
+                                if (player->HasAura(SPELL_BRAIN_LINK) && player->GetGUID() != trigger->GetGUID())
                                 {
-                                    trigger->CastSpell(player, SPELL_BRAIN_LINK_DUMMY, true);
-                                    if(Unit* caster = GetCaster())
-                                    if (!player->IsWithinDist(trigger, float(aurEff->GetAmount())))
+                                    if (Unit* caster = GetCaster())
                                     {
-                                        caster->CastSpell(trigger, SPELL_BRAIN_LINK_DAMAGE, true);
-                                        if(InstanceScript* pInstance = caster->GetInstanceScript())
-                                            if(caster->ToCreature() && caster->GetGUID() == pInstance->GetData64(NPC_YOGGSARON_CTRL))
-                                                CAST_AI(npc_yogg_saron_encounter_controller::npc_yogg_saron_encounter_controllerAI, caster->ToCreature()->AI())->ModifySanity(player,-2);
+                                        if (!player->IsWithinDist(trigger, float(aurEff->GetAmount())))
+                                        {
+                                            trigger->CastSpell(player, SPELL_BRAIN_LINK_DAMAGE, true);
+                                            if (InstanceScript* pInstance = caster->GetInstanceScript())
+                                                if (caster->ToCreature() && caster->GetGUID() == pInstance->GetData64(NPC_YOGGSARON_CTRL))
+                                                    CAST_AI(npc_yogg_saron_encounter_controller::npc_yogg_saron_encounter_controllerAI, caster->ToCreature()->AI())->ModifySanity(player,-2);
+                                        }
+                                        else
+                                            trigger->CastSpell(player, SPELL_BRAIN_LINK_DUMMY, true);
                                     }
                                 }
+                            }
+                        }
                     }
                 }
             }
@@ -3401,8 +3395,8 @@ class spell_hodir_protective_gaze : public SpellScriptLoader
                 std::list<Unit*> targetList;
                 aurEff->GetTargetList(targetList);
 
-                for(std::list<Unit*>::iterator iter = targetList.begin(); iter != targetList.end(); ++iter)
-                    if(!(*iter)->ToPlayer() && (*iter)->GetGUID() != GetCasterGUID())
+                for (std::list<Unit*>::iterator iter = targetList.begin(); iter != targetList.end(); ++iter)
+                    if (!(*iter)->ToPlayer() && (*iter)->GetGUID() != GetCasterGUID())
                         (*iter)->RemoveAurasDueToSpell(GetSpellInfo()->Id);
             }
 
@@ -3415,8 +3409,12 @@ class spell_hodir_protective_gaze : public SpellScriptLoader
             void Absorb(AuraEffect* /*aurEff*/, DamageInfo& dmgInfo, uint32& absorbAmount)
             {
                 Unit* target = GetTarget();
+
                 if (dmgInfo.GetDamage() < target->GetHealth())
+                {
+                    absorbAmount = 0;
                     return;
+                }
 
                 target->CastSpell(target, SPELL_FLASH_FREEZE, true);
 
@@ -3424,7 +3422,7 @@ class spell_hodir_protective_gaze : public SpellScriptLoader
                 absorbAmount = dmgInfo.GetDamage() - target->GetHealth() + 1;
 
                 // Remove Aura from Hodir
-                if (GetCaster())
+                if (GetCaster()) 
                     if (GetCaster()->ToCreature())
                         GetCaster()->ToCreature()->RemoveAurasDueToSpell(SPELL_HODIRS_PROTECTIVE_GAZE);
             }
@@ -3455,6 +3453,7 @@ class npc_keeper_help : public CreatureScript
             if(InstanceScript* instance = creature->GetInstanceScript())
             {
                 uint32 supportFlag = instance->GetData(DATA_KEEPER_SUPPORT_YOGG);
+
                 switch (creature->GetEntry())
                 {
                     // Since the flags are binary, a simple bool check fulfills the requirements - no need to check against the flag again.
@@ -3508,10 +3507,11 @@ class npc_keeper_help : public CreatureScript
                             instance->SetData(DATA_ADD_HELP_FLAG, HODIR_SUPPORT);
                             break;
                     }
+                    instance->SaveToDB();
                 }
 
             return true;
-        }
+        }    
 
         struct npc_keeper_helpAI : public Scripted_NoMovementAI
         {
@@ -3519,7 +3519,7 @@ class npc_keeper_help : public CreatureScript
             {
                 instance = c->GetInstanceScript();
                 me->setFaction(FACTION_FRIENDLY_ALL);
-            }
+            }            
 
             void AttackStart(Unit *who) {} // Should be overwritten, but has no effect
 

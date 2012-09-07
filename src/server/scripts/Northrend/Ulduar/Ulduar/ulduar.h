@@ -231,10 +231,30 @@ enum UlduarNPCs // TODO: Check if we also need the heroic-entries for the boss-N
     NPC_ALGALON_STALKER_ASTEROID_TARGET_01  = 33104,
     NPC_ALGALON_STALKER_ASTEROID_TARGET_02  = 33105,
     NPC_UNLEASHED_DARK_MATTER               = 34097,
+
+    //Ulduar Gauntlet
+    NPC_ULDUAR_WARMAGE                      = 33662,
+    NPC_RHYDIAN                             = 33696,
+    NPC_KEEPER_UNIT                         = 33721,
+    NPC_NORGANNON                           = 33686,
+    NPC_BRONZEBEARD_RADIO                   = 34054,    
+    NPC_LOREKEEPER                          = 33686, // Hard mode starter
+    NPC_BRANN_BRONZBEARD                    = 33579,
+    NPC_BRANZ_BRONZBEARD                    = 33579,
+    NPC_DELORAH                             = 33701,
+    NPC_ULDUAR_GAUNTLET_GENERATOR           = 33571, // Trigger tied to towers
 };
 
 enum UlduarGameObjects
 {
+    GO_TOWER_OF_STORMS          = 194377,
+    GO_TOWER_OF_FLAMES          = 194371,
+    GO_TOWER_OF_FROST           = 194370,
+    GO_TOWER_OF_LIFE            = 194375,
+    GO_REPAIR_STATION           = 194261,
+    GO_TELEPORTER               = 194569,
+    GO_CUPOLE                   = 194484,
+
     GO_IRON_COUNCIL_ENTRANCE    = 194554,
     GO_ARCHIVUM_DOOR            = 194556,
 
@@ -264,6 +284,7 @@ enum UlduarGameObjects
     GO_FREYA_CHEST_HERO_HARD    = 194331,
 
     GO_LEVIATHAN_DOOR           = 194905,
+    GO_LEVIATHAN_DOOR2          = 194416,
     GO_LEVIATHAN_GATE           = 194630,
 
     GO_XT_002_DOOR              = 194631,
@@ -319,6 +340,7 @@ enum LeviathanData
     ACTION_TOWER_OF_FLAMES_DESTROYED    = 3,
     ACTION_TOWER_OF_LIFE_DESTROYED      = 4,
     ACTION_MOVE_TO_CENTER_POSITION      = 10,
+    ACTION_ACTIVATE_HARD_MODE           = 12,
 };
 
 // TODO: Review those

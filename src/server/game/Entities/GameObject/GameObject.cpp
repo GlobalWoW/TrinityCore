@@ -1937,6 +1937,10 @@ void GameObject::SetLootState(LootState state, Unit* unit)
             EnableCollision(startOpen);
         else if (state == GO_READY)
             EnableCollision(!startOpen);
+
+        // platform at Mimiron shouldnt be a los obstacle when closed
+        if (this->GetEntry() == 194749)
+            EnableCollision(!startOpen);
     }
 }
 

@@ -23,9 +23,10 @@
 
 static DoorData const doorData[] =
 {
-    {   GO_LEVIATHAN_DOOR, BOSS_LEVIATHAN,    DOOR_TYPE_ROOM, BOUNDARY_S      },
-    {   GO_XT_002_DOOR,    BOSS_XT002,        DOOR_TYPE_ROOM, BOUNDARY_S      },
-    {   0,                 0,                 DOOR_TYPE_ROOM, BOUNDARY_NONE   },
+    {   GO_LEVIATHAN_DOOR,  BOSS_LEVIATHAN,    DOOR_TYPE_ROOM, BOUNDARY_S      },
+    {   GO_LEVIATHAN_DOOR2, BOSS_LEVIATHAN,    DOOR_TYPE_ROOM, BOUNDARY_S      },
+    {   GO_XT_002_DOOR,     BOSS_XT002,        DOOR_TYPE_ROOM, BOUNDARY_S      },
+    {   0,                  0,                 DOOR_TYPE_ROOM, BOUNDARY_NONE   },
 };
 
 // Used to map boss-identifier to "player-died-in-fight-against"-flag, since not all "bosses" are relevant
@@ -676,6 +677,9 @@ class instance_ulduar : public InstanceMapScript
                     case GO_LEVIATHAN_DOOR:
                         AddDoor(gameObject, true);
                         break;
+                    case GO_LEVIATHAN_DOOR2:
+                        AddDoor(gameObject, true);
+                        break;
                     case GO_LEVIATHAN_GATE:
                         LeviathanGateGUID = gameObject->GetGUID();
                         if (GetBossState(BOSS_LEVIATHAN) == DONE)
@@ -869,6 +873,9 @@ class instance_ulduar : public InstanceMapScript
                 switch (gameObject->GetEntry())
                 {
                     case GO_LEVIATHAN_DOOR:
+                        AddDoor(gameObject, false);
+                        break;
+                    case GO_LEVIATHAN_DOOR2:
                         AddDoor(gameObject, false);
                         break;
                     case GO_XT_002_DOOR:
@@ -1214,7 +1221,7 @@ class instance_ulduar : public InstanceMapScript
                 OUT_SAVE_INST_DATA;
 
                 std::ostringstream saveStream;
-                saveStream << "U U " << GetBossSaveData() << GetData(DATA_COLOSSUS) << " " << PlayerDeathFlag << " " << AlgalonCountdown;
+                saveStream << "U U " << GetBossSaveData() << GetData(DATA_COLOSSUS) << " " << SupportKeeperFlag << " " << PlayerDeathFlag << " " << AlgalonCountdown;
 
                 OUT_SAVE_INST_DATA_COMPLETE;
                 return saveStream.str();
@@ -1247,6 +1254,7 @@ class instance_ulduar : public InstanceMapScript
                     }
 
                     loadStream >> ColossusData;
+                    loadStream >> SupportKeeperFlag;
                     loadStream >> PlayerDeathFlag;
                     loadStream >> AlgalonCountdown;
                 }
