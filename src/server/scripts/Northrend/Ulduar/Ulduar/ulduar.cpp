@@ -25,9 +25,8 @@
 
 #define GOSSIP_ITEM_1               "Activer les systèmes de défense secondaires."
 #define GOSSIP_ITEM_2               "Confirmer."
-#define GOSSIP_ITEM_BRANN_1         "Nous sommes prêts !"
 
-#define GOSSIP_ITEM_BRANN_1 "¡Estamos listos!"
+#define GOSSIP_ITEM_BRANN_1 "Nous sommes prêts !"
 #define SAY_BRANN_1 "¡Pentarus, ya lo has oido, dile a tus magos que bajen el escudo y dejen pasar a estos valientes!"
 #define SAY_PENTARUS_1 "Por suppuesto Brann: Bajaremos los escudos momentaneamente."
 #define SAY_BRANN_2 "De acuerdo! Vamos a movernos. Subid a las maquinas; Os ire informando via radio."

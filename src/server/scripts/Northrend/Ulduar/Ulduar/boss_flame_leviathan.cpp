@@ -1608,95 +1608,95 @@ class npc_leviathan_player_vehicle : public CreatureScript
 };
 
 // npc lore keeper
-#define GOSSIP_ITEM_1  "Activate secondary defensive systems"
-#define GOSSIP_ITEM_2  "Confirmed"
+//#define GOSSIP_ITEM_1  "Activate secondary defensive systems"
+//#define GOSSIP_ITEM_2  "Confirmed"
 
-class npc_lorekeeper : public CreatureScript
-{
-    public:
-        npc_lorekeeper() : CreatureScript("npc_lorekeeper") {}
+//class npc_lorekeeper : public CreatureScript
+//{
+    //public:
+        //npc_lorekeeper() : CreatureScript("npc_lorekeeper") {}
+//
+        //struct npc_lorekeeperAI : public ScriptedAI
+        //{
+        //    npc_lorekeeperAI(Creature* creature) : ScriptedAI(creature) {}
+//
+        //    void DoAction(int32 const action)
+        //    {
+        //        // Start encounter
+        //        if (action == ACTION_SPAWN_VEHICLES)
+        //        {
+        //            for (int32 i = 0; i < RAID_MODE(2, 5); ++i)
+        //                DoSummon(VEHICLE_SIEGE, PosSiege[i], 3000, TEMPSUMMON_CORPSE_TIMED_DESPAWN);
+        //            for (int32 i = 0; i < RAID_MODE(2, 5); ++i)
+        //                DoSummon(VEHICLE_CHOPPER, PosChopper[i], 3000, TEMPSUMMON_CORPSE_TIMED_DESPAWN);
+        //            for (int32 i = 0; i < RAID_MODE(2, 5); ++i)
+        //                DoSummon(VEHICLE_DEMOLISHER, PosDemolisher[i], 3000, TEMPSUMMON_CORPSE_TIMED_DESPAWN);
+        //            return;
+        //        }
+        //    }
+        //};
+//
+        //bool OnGossipSelect(Player* player, Creature* creature, uint32 /*uiSender*/, uint32 action)
+        //{
+        //    player->PlayerTalkClass->ClearMenus();
+        //    InstanceScript* instance = creature->GetInstanceScript();
+        //    if (!instance)
+        //        return true;
+//
+        //    switch (action)
+        //    {
+        //        case GOSSIP_ACTION_INFO_DEF+1:
+        //            if (player)
+        //            {
+        //                player->PrepareGossipMenu(creature);
+        //                instance->instance->LoadGrid(364.0f, -16.0f); //make sure leviathan is loaded
+//
+        //                player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_ITEM_2, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+2);
+        //                player->SEND_GOSSIP_MENU(player->GetGossipTextId(creature), creature->GetGUID());
+        //            }
+        //            break;
+        //        case GOSSIP_ACTION_INFO_DEF+2:
+        //            if (player)
+        //                player->CLOSE_GOSSIP_MENU();
+//
+        //            if (Creature* leviathan = instance->instance->GetCreature(instance->GetData64(BOSS_LEVIATHAN)))
+        //            {
+        //                leviathan->AI()->DoAction(ACTION_ACTIVATE_HARD_MODE);
+        //                creature->SetVisible(false);
+        //                creature->AI()->DoAction(ACTION_SPAWN_VEHICLES); // spawn the vehicles
+        //                if (Creature* Delorah = creature->FindNearestCreature(NPC_DELORAH, 1000, true))
+        //                {
+        //                    if (Creature* Brann = creature->FindNearestCreature(NPC_BRANN_BRONZBEARD, 1000, true))
+        //                    {
+        //                        Delorah->GetMotionMaster()->MovePoint(0, Brann->GetPositionX()-4, Brann->GetPositionY(), Brann->GetPositionZ());
+        //                        //TODO DoScriptText(xxxx, Delorah, Branz); when reached at Brann
+        //                    }
+        //                }
+        //            }
+        //            break;
+        //    }
+//
+        //    return true;
+        //}
 
-        struct npc_lorekeeperAI : public ScriptedAI
-        {
-            npc_lorekeeperAI(Creature* creature) : ScriptedAI(creature) {}
+        //bool OnGossipHello(Player* player, Creature* creature)
+        //{
+        //    InstanceScript* instance = creature->GetInstanceScript();
+        //    if (instance && instance->GetData(BOSS_LEVIATHAN) !=DONE && player)
+        //    {
+        //        player->PrepareGossipMenu(creature);
 
-            void DoAction(int32 const action)
-            {
-                // Start encounter
-                if (action == ACTION_SPAWN_VEHICLES)
-                {
-                    for (int32 i = 0; i < RAID_MODE(2, 5); ++i)
-                        DoSummon(VEHICLE_SIEGE, PosSiege[i], 3000, TEMPSUMMON_CORPSE_TIMED_DESPAWN);
-                    for (int32 i = 0; i < RAID_MODE(2, 5); ++i)
-                        DoSummon(VEHICLE_CHOPPER, PosChopper[i], 3000, TEMPSUMMON_CORPSE_TIMED_DESPAWN);
-                    for (int32 i = 0; i < RAID_MODE(2, 5); ++i)
-                        DoSummon(VEHICLE_DEMOLISHER, PosDemolisher[i], 3000, TEMPSUMMON_CORPSE_TIMED_DESPAWN);
-                    return;
-                }
-            }
-        };
+        //        player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_ITEM_1, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+1);
+        //        player->SEND_GOSSIP_MENU(player->GetGossipTextId(creature), creature->GetGUID());
+        //    }
+        //    return true;
+        //}
 
-        bool OnGossipSelect(Player* player, Creature* creature, uint32 /*uiSender*/, uint32 action)
-        {
-            player->PlayerTalkClass->ClearMenus();
-            InstanceScript* instance = creature->GetInstanceScript();
-            if (!instance)
-                return true;
-
-            switch (action)
-            {
-                case GOSSIP_ACTION_INFO_DEF+1:
-                    if (player)
-                    {
-                        player->PrepareGossipMenu(creature);
-                        instance->instance->LoadGrid(364.0f, -16.0f); //make sure leviathan is loaded
-
-                        player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_ITEM_2, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+2);
-                        player->SEND_GOSSIP_MENU(player->GetGossipTextId(creature), creature->GetGUID());
-                    }
-                    break;
-                case GOSSIP_ACTION_INFO_DEF+2:
-                    if (player)
-                        player->CLOSE_GOSSIP_MENU();
-
-                    if (Creature* leviathan = instance->instance->GetCreature(instance->GetData64(BOSS_LEVIATHAN)))
-                    {
-                        leviathan->AI()->DoAction(ACTION_ACTIVATE_HARD_MODE);
-                        creature->SetVisible(false);
-                        creature->AI()->DoAction(ACTION_SPAWN_VEHICLES); // spawn the vehicles
-                        if (Creature* Delorah = creature->FindNearestCreature(NPC_DELORAH, 1000, true))
-                        {
-                            if (Creature* Brann = creature->FindNearestCreature(NPC_BRANN_BRONZBEARD, 1000, true))
-                            {
-                                Delorah->GetMotionMaster()->MovePoint(0, Brann->GetPositionX()-4, Brann->GetPositionY(), Brann->GetPositionZ());
-                                //TODO DoScriptText(xxxx, Delorah, Branz); when reached at Brann
-                            }
-                        }
-                    }
-                    break;
-            }
-
-            return true;
-        }
-
-        bool OnGossipHello(Player* player, Creature* creature)
-        {
-            InstanceScript* instance = creature->GetInstanceScript();
-            if (instance && instance->GetData(BOSS_LEVIATHAN) !=DONE && player)
-            {
-                player->PrepareGossipMenu(creature);
-
-                player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_ITEM_1, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+1);
-                player->SEND_GOSSIP_MENU(player->GetGossipTextId(creature), creature->GetGUID());
-            }
-            return true;
-        }
-
-        CreatureAI* GetAI(Creature* creature) const
-        {
-            return new npc_lorekeeperAI(creature);
-        }
-};
+        //CreatureAI* GetAI(Creature* creature) const
+        //{
+        //    return new npc_lorekeeperAI(creature);
+        //}
+//};
 
 
 //enable hardmode
@@ -2637,7 +2637,7 @@ void AddSC_boss_flame_leviathan()
     new npc_freyas_ward();                          // 33367
     new npc_freya_ward_of_life();                   // 34275
     // new npc_leviathan_player_vehicle(); // Temporary disabled, so it will not cause any startup errors
-    new npc_lorekeeper();                           // 33686
+    // new npc_lorekeeper();                           // 33686
     // new npc_brann_bronzebeard();
     new at_RX_214_repair_o_matic_station();         // Area-Trigger 5369/5423
     new go_ulduar_tower();                          // 194375: Tower of Life; 194371: Tower of Flames; 194370: Tower of Frost; 194377: Tower of Storms
