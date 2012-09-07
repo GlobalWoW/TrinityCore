@@ -1031,7 +1031,7 @@ class go_celestial_planetarium_access : public GameObjectScript
 
         GameObjectAI* GetAI(GameObject* go) const
         {
-            return new go_celestial_planetarium_accessAI(go);
+            return GetUlduarAI<go_celestial_planetarium_accessAI>(go);
         }
 };
 

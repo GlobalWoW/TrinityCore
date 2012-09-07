@@ -18,8 +18,11 @@
 #ifndef DEF_ULDUAR_H
 #define DEF_ULDUAR_H
 
-#include "ObjectMgr.h"
+#include "Creature.h"
+#include "GameObject.h"
 #define UlduarScriptName "instance_ulduar"
+
+extern Position const AlgalonLandPos;
 
 enum UlduarBosses
 {
@@ -86,8 +89,8 @@ enum UlduarBosses
     DATA_STONE_DOOR,
     DATA_HODIR_RARE_CHEST,
 
-    DATA_CALL_TRAM,
     // Mimiron
+    DATA_CALL_TRAM,
     DATA_LEVIATHAN_MK_II,
     DATA_VX_001,
     DATA_AERIAL_UNIT,
@@ -114,6 +117,12 @@ enum UlduarBosses
     DATA_BRANN_BRONZEBEARD_ALG,
 };
 
+enum UlduarWorldStates
+{
+    WORLD_STATE_ALGALON_DESPAWN_TIMER   = 4131,
+    WORLD_STATE_ALGALON_TIMER_ENABLED   = 4132,
+};
+ 
 enum UlduarBossDeadFlags
 {
     DEAD_NONE             =        0,   // Death is registered, but irrelevant
@@ -310,16 +319,18 @@ enum UlduarGameObjects
     GO_RAZOR_HARPOON_4          = 194519,
     GO_RAZOR_BROKEN_HARPOON     = 194565,
 
-    GO_ALGALON_ACCESS           = 194628,
-    GO_ALGALON_DOOR_1           = 194911,
-    GO_ALGALON_DOOR_2           = 194767,
-    GO_ALGALON_PLATFORM         = 194715,
-    GO_ALGALON_GLOBE            = 194148,
-    GO_ALGALON_BRIDGE           = 194253,
-    GO_ALGALON_B_VISUAL         = 194716,
-    GO_ALGALON_B_DOOR           = 194910,
-    GO_GIFT_OF_THE_OBSERVER_10  = 194821,
-    GO_GIFT_OF_THE_OBSERVER_25  = 194822,
+    GO_CELESTIAL_PLANETARIUM_ACCESS_10      = 194628,
+    GO_CELESTIAL_PLANETARIUM_ACCESS_25      = 194752,
+    GO_DOODAD_UL_SIGILDOOR_01               = 194767,
+    GO_DOODAD_UL_SIGILDOOR_02               = 194911,
+    GO_DOODAD_UL_SIGILDOOR_03               = 194910,
+    GO_DOODAD_UL_UNIVERSEFLOOR_01           = 194715,
+    GO_DOODAD_UL_UNIVERSEFLOOR_02           = 194716,
+    GO_DOODAD_UL_UNIVERSEGLOBE01            = 194148,
+    GO_DOODAD_UL_ULDUAR_TRAPDOOR_03         = 194253,
+    GO_GIFT_OF_THE_OBSERVER_10              = 194821,
+    GO_GIFT_OF_THE_OBSERVER_25              = 194822,
+
     // Dummies - not yet in db
     GO_LEVIATHAN_CHEST_10       = 555555,
     GO_LEVIATHAN_CHEST_25       = 444444
@@ -433,19 +444,12 @@ enum UlduarEvents
     ACTION_INIT_ALGALON         = 6,
 };
 
-enum UlduarWorldstates
-{
-    WORLD_STATE_ALGALON_DESPAWN_TIMER = 4131,
-    WORLD_STATE_ALGALON_TIMER_ENABLED = 4132
-};
-
 enum UlduarArea
 {
     MAP_ULDUAR              = 603,
     AREA_FORMATION_GROUNDS  = 4652
 };
 
-// Cute guard, really...
 template<class AI>
 CreatureAI* GetUlduarAI(Creature* creature)
 {
@@ -453,6 +457,17 @@ CreatureAI* GetUlduarAI(Creature* creature)
         if (instance->GetInstanceScript())
             if (instance->GetScriptId() == sObjectMgr->GetScriptId(UlduarScriptName))
                 return new AI(creature);
+
+    return NULL;
+}
+
+template<class AI>
+GameObjectAI* GetUlduarAI(GameObject* go)
+{
+    if (InstanceMap* instance = go->GetMap()->ToInstanceMap())
+        if (instance->GetInstanceScript())
+            if (instance->GetScriptId() == sObjectMgr->GetScriptId(UlduarScriptName))
+                return new AI(go);
 
     return NULL;
 }
