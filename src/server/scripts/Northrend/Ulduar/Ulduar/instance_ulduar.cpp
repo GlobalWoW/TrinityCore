@@ -110,6 +110,7 @@ class instance_ulduar : public InstanceMapScript
 
             // Hodir
             uint64 HodirGUID;
+            uint64 HodirInDoorGUID;
             uint64 HodirIceDoorGUID;
             uint64 HodirStoneDoorGUID;
             uint64 HodirEntranceDoorGUID;
@@ -229,6 +230,7 @@ class instance_ulduar : public InstanceMapScript
 
                 // Hodir
                 HodirGUID               = 0;
+                HodirInDoorGUID         = 0;
                 HodirIceDoorGUID        = 0;
                 HodirStoneDoorGUID      = 0;
                 HodirEntranceDoorGUID   = 0;
@@ -803,6 +805,9 @@ class instance_ulduar : public InstanceMapScript
                         if (GetBossState(BOSS_HODIR) == DONE)
                             HandleGameObject(HodirIceDoorGUID, true);
                         break;
+                    case GO_HODIR_IN_DOOR_STONE:
+                        HodirInDoorGUID = gameObject->GetGUID();
+                        break;
                     case GO_HODIR_OUT_DOOR_STONE:
                         HodirStoneDoorGUID = gameObject->GetGUID();
                         if (GetBossState(BOSS_HODIR) == DONE)
@@ -1032,6 +1037,7 @@ class instance_ulduar : public InstanceMapScript
                         {
                             HandleGameObject(HodirIceDoorGUID, true);
                             HandleGameObject(HodirStoneDoorGUID, true);
+                            HandleGameObject(HodirInDoorGUID, true);
                             if (GameObject* HodirRareCache = instance->GetGameObject(HodirRareCacheGUID))
                                 if (GetData(DATA_HODIR_RARE_CACHE))
                                     HodirRareCache->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_NOT_SELECTABLE);
@@ -1181,13 +1187,8 @@ class instance_ulduar : public InstanceMapScript
                 switch (data)
                 {
                     case BOSS_IGNIS:                     return IgnisGUID;
-                    case BOSS_KOLOGARN:                  return KologarnGUID;
                     case BOSS_AURIAYA:                   return AuriayaGUID;
-                    case BOSS_HODIR:                     return HodirGUID;
-                    case BOSS_THORIM:                    return ThorimGUID;
-                    case BOSS_FREYA:                     return FreyaGUID;
                     case BOSS_VEZAX:                     return VezaxGUID;
-                    case BOSS_ALGALON:                   return AlgalonGUID;
 
                     // Leviathan
                     case BOSS_LEVIATHAN:                 return LeviathanGUID;
@@ -1216,14 +1217,21 @@ class instance_ulduar : public InstanceMapScript
                     case BOSS_BRUNDIR:                   return AssemblyGUIDs[2];
 
                     // Kologarn
+                    case BOSS_KOLOGARN:                  return KologarnGUID;
                     case GO_KOLOGARN_DOOR:               return KologarnDoorGUID;
 
-                    // Freya's Keepers
+                    // Freya
+                    case BOSS_FREYA:                     return FreyaGUID;
                     case BOSS_BRIGHTLEAF:                return KeeperGUIDs[0];
                     case BOSS_IRONBRANCH:                return KeeperGUIDs[1];
                     case BOSS_STONEBARK:                 return KeeperGUIDs[2];
 
+                    // Hodir
+                    case BOSS_HODIR:                     return HodirGUID;
+                    case GO_HODIR_IN_DOOR_STONE:         return HodirInDoorGUID;
+
                     // Thorim
+                    case BOSS_THORIM:                    return ThorimGUID;
                     case GO_THORIM_DARK_IRON_PROTCULLIS: return ThorimDarkIronPortCullisGUID;
                     case GO_THORIM_LIGHTNING_FIELD:      return ThorimLightningFieldGUID;
                     case NPC_THORIM_CTRL:                return ThorimCtrlGUID;
@@ -1243,6 +1251,7 @@ class instance_ulduar : public InstanceMapScript
                     case DATA_BRAIN_DOOR_3 :             return YoggSaronBrainDoor3GUID;
 
                     // Algalon
+                    case BOSS_ALGALON:                   return AlgalonGUID;
                     case DATA_SIGILDOOR_01:              return AlgalonSigilDoorGUID[0];
                     case DATA_SIGILDOOR_02:              return AlgalonSigilDoorGUID[1];
                     case DATA_SIGILDOOR_03:              return AlgalonSigilDoorGUID[2];

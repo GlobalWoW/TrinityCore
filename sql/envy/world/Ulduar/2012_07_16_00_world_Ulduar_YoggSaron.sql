@@ -71,9 +71,9 @@ INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry
 
 -- Missing Says Vision
 UPDATE `script_texts` SET `npc_entry`=33134 WHERE `npc_entry`=33288 AND `entry` IN (-1603330,-1603331,-1603332,-1603333);
-DELETE FROM `script_texts` WHERE `entry` BETWEEN -1603360 AND -1603342;
-DELETE FROM `script_texts` WHERE `entry` BETWEEN -1603319 AND 1603310;
-INSERT INTO `script_texts` VALUES
+-- DELETE FROM `script_texts` WHERE `entry` BETWEEN -1603360 AND -1603342;
+-- DELETE FROM `script_texts` WHERE `entry` BETWEEN -1603319 AND 1603310;
+REPLACE INTO `script_texts` VALUES
 (33535, -1603359, 'It is a weapon like no other. It must be like no other.', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 15610, 0, 0, 0, 'Malygos DragonSoulVision_Say'),
 (33523, -1603356, 'It is done... All have been given that which must be given. I now seal the Dragon Soul forever...', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 15631, 0, 0, 0, 'Neltharion DragonSoulVision_Say1'),
 (33495, -1603357, 'That terrible glow... should that be?', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 15702, 0, 0, 0, 'Ysera DragonSoulVision_Say'),
