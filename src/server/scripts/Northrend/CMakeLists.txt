@@ -32,7 +32,6 @@ set(scripts_STAT_SRCS
   Northrend/Ulduar/Ulduar/boss_flame_leviathan.cpp
   Northrend/Ulduar/Ulduar/boss_xt002.cpp
   Northrend/Ulduar/Ulduar/boss_mimiron.cpp
-  Northrend/Ulduar/Ulduar/ulduar_trash.cpp
   Northrend/Ulduar/Ulduar/ulduar.cpp
   Northrend/Ulduar/Ulduar/ulduar.h
   Northrend/Ulduar/Ulduar/boss_freya.cpp
