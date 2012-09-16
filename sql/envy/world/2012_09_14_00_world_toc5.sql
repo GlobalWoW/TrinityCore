@@ -286,7 +286,7 @@ INSERT INTO `script_texts` (`npc_entry`,`entry`,`content_default`,`sound`,`type`
 (0,@SCRIPT_TEXTS_ID-04, 'The night elves of Darnassus cheer for%s.',13838,2,0,1, 'ToC5 Cheers'),
 (0,@SCRIPT_TEXTS_ID-06, 'The taurens of Thunder Bluff cheer for %s.',13839,2,0,1, 'ToC5 Cheers'),
 (0,@SCRIPT_TEXTS_ID-07, 'The gnomes of Gnomeregan cheer for %s.',13838,2,0,1, 'ToC5 Cheers'),
-(0,@SCRIPT_TEXTS_ID-08, 'The trols of Sen\'jin cheer for %s.',13839,2,0,1, 'ToC5 Cheers'),
+(0,@SCRIPT_TEXTS_ID-08, 'The trols of Sen''jin cheer for %s.',13839,2,0,1, 'ToC5 Cheers'),
 (0,@SCRIPT_TEXTS_ID-10, 'The blood elves of Silvermoon cheer for %s.',13839,2,0,1, 'ToC5 Cheers'),
 (0,@SCRIPT_TEXTS_ID-11, 'The draeneis of Exodar cheer for %s.',13838,2,0,1, 'ToC5 Cheers'),
 -- Waking nightmare warining
@@ -307,7 +307,7 @@ INSERT INTO creature_text (entry, groupid, id, TEXT, TYPE, LANGUAGE, probability
 /*.*/ (35005,0,0,'Silver Covenant is delighted to present their fighters for this event, High Lord.',14,0,100,1,0,0,'Announcer - Player Alliance Champions - Intro'),
 /*.*/ (@TIRION,0,0,'Welcome champions. Today, in the eyes of your fellow leaders and fighters will you prove as worthy.',14,0,100,1,0,0,'Tirion - Intro'),
 -- -- -- Horde Version
-/*....*/ (@THRALL,0,0,'Fight well, Horde! Lok\'tar Ogar!',14,0,100,1,0,0,'Thrall - Intro'),
+/*....*/ (@THRALL,0,0,'Fight well, Horde! Lok''tar Ogar!',14,0,100,1,0,0,'Thrall - Intro'),
 /*....*/ (@GARROSH,0,0,'Finally, a fight worth watching.',12,0,100,1,0,0,'Garrosh - Intro'),
 /*....*/ (@VARIAN,0,0,'I did not come here to watch animals tear at each other senselessly, Tirion',12,0,100,1,0,0,'Varian - Intro'),
 /*....*/ (@JAINA,0,0,'They are worthy fighters, I see.',12,0,100,1,0,0,'Jaina - Intro'),
@@ -329,14 +329,14 @@ INSERT INTO creature_text (entry, groupid, id, TEXT, TYPE, LANGUAGE, probability
 -- -- -- Alliance Version
 /*....*/ (35005,1,0,'Coming out of the gate is Eressea Dawnsinger, skilled mage and Grand Champion of Silvermoon!',14,0,100,1,0,0,'Announcer - Horde Champions - Intro Mage'),
 /*....*/ (35005,2,0,'Tall in the saddle of his kodo, here is the venerable Runok Wildmane, Grand Champion of Thunder Bluff!',14,0,100,1,0,0,'Announcer - Horde Champions - Intro Shaman'),
-/*....*/ (35005,3,0,'Entering the dry sand but dangerous Zul\'tore, Grand Champion of  Sen\'jin!',14,0,100,1,0,0,'Announcer - Horde Champions - Intro Hunter'),
+/*....*/ (35005,3,0,'Entering the dry sand but dangerous Zul''tore, Grand Champion of  Sen''jin!',14,0,100,1,0,0,'Announcer - Horde Champions - Intro Hunter'),
 /*....*/ (35005,4,0,'We presented the Grand Champion of Orgrimmar, the Mokra the Skullcrusher! ',14,0,100,1,0,0,'Announcer - Horde Champions - Intro Warrior'),
 /*....*/ (35005,5,0,'Representing the tenacity of the Forsaken, here is the Grand Champion of the Undercity, Deathstalker Visceri!',14,0,100,1,0,0,'Announcer - Horde Champions - Intro Rouge'),
 -- -- // Alliance version
 -- // Mounted Gauntlet
 
 -- -- Argent Challenge
-/*.*/ (@TIRION,2,0,'Well fought! Your next challange comes from the Crusader\'s own ranks. You will be tested against their considerable prowess.',14,0,100,1,0,0,'Tirion - Intro'),
+/*.*/ (@TIRION,2,0,'Well fought! Your next challange comes from the Crusader''s own ranks. You will be tested against their considerable prowess.',14,0,100,1,0,0,'Tirion - Intro'),
 -- -- -- Eadric
 /*....*/ (35004,11,0,'Entering the arena, a paladin who is no stranger to the battlefield or tournament ground, the Grand Champion of the Argent Crusade. Eadric the Pure!',14,0,100,1,0,0,'Announcer - Eadric - Intro'),
 /*....*/ (35005,11,0,'Entering the arena, a paladin who is no stranger to the battlefield or tournament ground, the Grand Champion of the Argent Crusade. Eadric the Pure!',14,0,100,1,0,0,'Announcer - Eadric - Intro'),
@@ -353,8 +353,8 @@ INSERT INTO creature_text (entry, groupid, id, TEXT, TYPE, LANGUAGE, probability
 
 -- -- Black Knight
 /*.*/ (@TIRION,4,0,'Well done. You have proven yourself today...',14,0,100,1,0,0,'Tirion - Intro'),
-/*.*/ (35004,13,0,'What\'s that. up near the rafters?',12,0,100,1,0,0,'Announcer - Black Knight - Intro'),
-/*.*/ (35005,13,0,'What\'s that. up near the rafters?',12,0,100,1,0,0,'Announcer - Black Knight - Intro'),
+/*.*/ (35004,13,0,'What''s that. up near the rafters?',12,0,100,1,0,0,'Announcer - Black Knight - Intro'),
+/*.*/ (35005,13,0,'What''s that. up near the rafters?',12,0,100,1,0,0,'Announcer - Black Knight - Intro'),
 /*.*/ (@BLACK_KNIGHT,10,0,'You spoiled my grand entrance. Rat.',12,0,100,1,0,16256,'Black Knight - Intro'),
 /*.*/ (@TIRION,5,0,'What is the meaning of this?',14,0,100,1,0,0,'Tirion - Intro'),
 /*.*/ (@BLACK_KNIGHT,11,0,'Did you honestly think an agent if the Kich King would be bested on the field of your pathetic little tournament?',12,0,100,1,0,16257,'Black Knight - Intro'),
