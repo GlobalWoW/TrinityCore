@@ -925,7 +925,7 @@ class boss_leviathan_mk : public CreatureScript
                 }
             }
 
-            void DamageTaken(Unit* /*who*/, uint32 &damage)
+            void DamageTaken(Unit* /*who*/, uint32& damage)
             {
                 if (damage >= me->GetHealth())
                 {
@@ -1474,6 +1474,7 @@ class boss_vx_001 : public CreatureScript
                         }
                         else
                             me->SetFacingTo(orient);
+                            me->SendMovementFlagUpdate();
 
                         float x, y;
                         me->GetNearPoint2D(x, y, 10.0f, me->GetOrientation());
@@ -2386,50 +2387,50 @@ public:
     }
 };
 
-class achievement_set_up_us_the_bomb__proximity_mines : public AchievementCriteriaScript
-{
-public:
-    achievement_set_up_us_the_bomb__proximity_mines(const char* name) : AchievementCriteriaScript(name) {}
+//class achievement_set_up_us_the_bomb__proximity_mines : public AchievementCriteriaScript
+//{
+//public:
+//    achievement_set_up_us_the_bomb__proximity_mines(const char* name) : AchievementCriteriaScript(name) {}
+//
+//    bool OnCheck(Player* player, Unit* /*target*/)
+//    {
+//        if (player)
+//            if (InstanceScript* instance = player->GetInstanceScript())
+//                if (Creature* mimiron = ObjectAccessor::GetCreature(*player, instance->GetData64(BOSS_MIMIRON)))
+//                    return (mimiron->AI()->GetData(DATA_AVOIDED_PROXIMITY_MINES));
+//        return false;
+//    }
+//};
 
-    bool OnCheck(Player* player, Unit* /*target*/)
-    {
-        if (player)
-            if (InstanceScript* instance = player->GetInstanceScript())
-                if (Creature* mimiron = ObjectAccessor::GetCreature(*player, instance->GetData64(BOSS_MIMIRON)))
-                    return (mimiron->AI()->GetData(DATA_AVOIDED_PROXIMITY_MINES));
-        return false;
-    }
-};
+//class achievement_set_up_us_the_bomb__rocket_strikes : public AchievementCriteriaScript
+//{
+//public:
+//    achievement_set_up_us_the_bomb__rocket_strikes(const char* name) : AchievementCriteriaScript(name) {}
+//
+//    bool OnCheck(Player* player, Unit* /*target*/)
+//    {
+//        if (player)
+//            if (InstanceScript* instance = player->GetInstanceScript())
+//                if (Creature* mimiron = ObjectAccessor::GetCreature(*player, instance->GetData64(BOSS_MIMIRON)))
+//                    return (mimiron->AI()->GetData(DATA_AVOIDED_ROCKET_STRIKES));
+//        return false;
+//    }
+//};
 
-class achievement_set_up_us_the_bomb__rocket_strikes : public AchievementCriteriaScript
-{
-public:
-    achievement_set_up_us_the_bomb__rocket_strikes(const char* name) : AchievementCriteriaScript(name) {}
-
-    bool OnCheck(Player* player, Unit* /*target*/)
-    {
-        if (player)
-            if (InstanceScript* instance = player->GetInstanceScript())
-                if (Creature* mimiron = ObjectAccessor::GetCreature(*player, instance->GetData64(BOSS_MIMIRON)))
-                    return (mimiron->AI()->GetData(DATA_AVOIDED_ROCKET_STRIKES));
-        return false;
-    }
-};
-
-class achievement_set_up_us_the_bomb__boombot_explosion : public AchievementCriteriaScript
-{
-public:
-    achievement_set_up_us_the_bomb__boombot_explosion(const char* name) : AchievementCriteriaScript(name) {}
-
-    bool OnCheck(Player* player, Unit* /*target*/)
-    {
-        if (player)
-            if (InstanceScript* instance = player->GetInstanceScript())
-                if (Creature* mimiron = ObjectAccessor::GetCreature(*player, instance->GetData64(BOSS_MIMIRON)))
-                    return (mimiron->AI()->GetData(DATA_AVOIDED_BOOM_BOT_EXPLOSION));
-        return false;
-    }
-};
+//class achievement_set_up_us_the_bomb__boombot_explosion : public AchievementCriteriaScript
+//{
+//public:
+//    achievement_set_up_us_the_bomb__boombot_explosion(const char* name) : AchievementCriteriaScript(name) {}
+//
+//    bool OnCheck(Player* player, Unit* /*target*/)
+//    {
+//        if (player)
+//            if (InstanceScript* instance = player->GetInstanceScript())
+//                if (Creature* mimiron = ObjectAccessor::GetCreature(*player, instance->GetData64(BOSS_MIMIRON)))
+//                    return (mimiron->AI()->GetData(DATA_AVOIDED_BOOM_BOT_EXPLOSION));
+//        return false;
+//    }
+//};
 
 void AddSC_boss_mimiron()
 {
@@ -2458,12 +2459,12 @@ void AddSC_boss_mimiron()
     new achievement_firefighter("achievement_firefighter_25");  // Achiev 3189 / Criteria 10463
 
     // TODO: Find correct criterias for the following achievements:
-    new achievement_set_up_us_the_bomb__boombot_explosion("achievement_set_up_us_the_bomb__boombot");
-    new achievement_set_up_us_the_bomb__boombot_explosion("achievement_set_up_us_the_bomb__boombot_25");
-    new achievement_set_up_us_the_bomb__proximity_mines("achievement_set_up_us_the_bomb__proximity");
-    new achievement_set_up_us_the_bomb__proximity_mines("achievement_set_up_us_the_bomb__proximity_25");
-    new achievement_set_up_us_the_bomb__rocket_strikes("achievement_set_up_us_the_bomb__rockets");
-    new achievement_set_up_us_the_bomb__rocket_strikes("achievement_set_up_us_the_bomb__rockets_25");
+    //new achievement_set_up_us_the_bomb__boombot_explosion("achievement_set_up_us_the_bomb__boombot");
+    //new achievement_set_up_us_the_bomb__boombot_explosion("achievement_set_up_us_the_bomb__boombot_25");
+    //new achievement_set_up_us_the_bomb__proximity_mines("achievement_set_up_us_the_bomb__proximity");
+    //new achievement_set_up_us_the_bomb__proximity_mines("achievement_set_up_us_the_bomb__proximity_25");
+    //new achievement_set_up_us_the_bomb__rocket_strikes("achievement_set_up_us_the_bomb__rockets");
+    //new achievement_set_up_us_the_bomb__rocket_strikes("achievement_set_up_us_the_bomb__rockets_25");
 }
 
 #undef SPELL_NAPALM_SHELL
