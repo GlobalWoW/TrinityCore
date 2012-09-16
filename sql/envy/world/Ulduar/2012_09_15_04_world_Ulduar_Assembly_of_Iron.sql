@@ -36,3 +36,6 @@ INSERT INTO `achievement_criteria_data` (`criteria_id`, `type`, `value1`, `value
 (10424, 12, 1, 0, ''),
 (10425, 11, 0, 0, 'achievement_cant_do_that_while_stunned_25'), -- achievement 2948
 (10425, 12, 1, 0, '');
+
+-- Stormcaller Brundir, immunities to stun and interrupt are gained infight.
+UPDATE `creature_template` SET `mechanic_immune_mask`=617296767, `flags_extra`=1 WHERE `entry` IN (32857);

@@ -51,14 +51,19 @@ INSERT INTO `spell_script_names` (`spell_id`,`ScriptName`) VALUES
 (62702,'spell_keeper_support_aura_targeting'),
 (62650,'spell_keeper_support_aura_targeting');
 
-DELETE FROM `conditions` WHERE `SourceEntry` IN (64184, 63882, 63886, 64172, 64465, 65719, 62714);
-INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `ConditionTypeOrReference`, `ConditionValue1`, `ConditionValue2`, `Comment`) VALUES 
-(13, 0, 64184, 31, 3, 33288, 'Effect on YoggSaron'), -- Create Val'anyr on Yogg-Saron
-(13, 0, 63882, 31, 3, 33882, 'Effect on Death Orb'), -- Deathray Effect on Death Orb
-(13, 0, 63886, 31, 3, 33882, 'Effect on Death Orb'),
-(13, 0, 64172, 31, 3, 33988, 'Effect only for Immortal Guardians'), -- Condition because NPCs need this else no hit
-(13, 0, 64465, 31, 3, 33988, 'Effect only for Immortal Guardians'),
-(13, 1, 65719, 31, 3, 33134, 'Spell should hit only Sara'),		-- Shadow Nova
+DELETE FROM `conditions` WHERE SourceEntry IN (64184, 63882, 63886, 64172, 64465, 65209);
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES
+(13, 1, 64184, 0, 0, 18, 0, 1, 33288, 0, 0, 0, '', 'Effect on YoggSaron'), -- Create Val'anyr on Yogg-Saron
+(13, 1, 63882, 0, 0, 18, 0, 1, 33882, 0, 0, 0, '', 'Effect on Death Orb'), -- Deathray Effekt on Death Orb
+(13, 1, 63886, 0, 0, 18, 0, 1, 33882, 0, 0, 0, '', 'Effect on Death Orb'),
+(13, 1, 64172, 0, 0, 18, 0, 1, 33988, 0, 0, 0, '', 'Effect only for Immortal Guardians'), -- Condition because NPCs need this else no hit
+(13, 1, 64465, 0, 0, 18, 0, 1, 33988, 0, 0, 0, '', 'Effect only for Immortal Guardians'),
+(13, 1, 65209, 0, 0, 18, 0, 1, 33136, 0, 0, 0, '', 'Effect only for Guardian of YoggSaron'), -- Second Damage Effekt of ShadowNova only on other Guardians or Sara
+(13, 1, 65209, 0, 0, 18, 0, 1, 33134, 0, 0, 0, '', 'Effect only for Sara');
+
+DELETE FROM `conditions` WHERE `SourceEntry` IN (65719, 62714);
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `ConditionTypeOrReference`, `ConditionValue1`, `ConditionValue2`, `Comment`) VALUES
+(13, 1, 65719, 31, 3, 33134, 'Spell should hit only Sara'),	-- Shadow Nova
 (13, 1, 62714, 31, 3, 33136, 'Effect should hit only Guardians'),
 (13, 2, 62714, 31, 4, 0, 'Effect should hit only Players');
 
@@ -72,17 +77,17 @@ REPLACE INTO `script_texts` VALUES
 (33495, -1603357, 'That terrible glow... should that be?', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 15702, 0, 0, 0, 'Ysera DragonSoulVision_Say'),
 (33523, -1603358, 'For it to be as it must, yes.', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 15632, 0, 0, 0, 'Neltharion DragonSoulVision_Say2'),
 (33288, -1603355, 'He will learn... no king rules forever, only death is eternal!', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 15767, 0, 0, 0, 'YoggSaron LichKingVision_Say2'),
-(33288, -1603354, 'Yrr n\'lyeth... shuul anagg!', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 15766, 0, 0, 0, 'YoggSaron LichKingVision_Say1'),
+(33288, -1603354, 'Yrr n''lyeth... shuul anagg!', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 15766, 0, 0, 0, 'YoggSaron LichKingVision_Say1'),
 (33441, -1603353, 'I will break you as I broke him.', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 15599, 0, 0, 0, 'TheLichKing LichKingVision_Say2'),
 (33442, -1603351, 'Arrrrrrgh!', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 15470, 1, 0, 0, 'ImmolatedChampion LichKingVision_Say1'),
-(33442, -1603352, 'I\'m not afraid of you!', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 15471, 0, 0, 0, 'ImmolatedChampion LichKingVision_Say2'),
+(33442, -1603352, 'I''m not afraid of you!', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 15471, 0, 0, 0, 'ImmolatedChampion LichKingVision_Say2'),
 (33436, -1603348, 'The orc leaders agree with your assessment.', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 15541, 0, 0, 0, 'Garona KingLlaneVision_Say4'),
 (33288, -1603349, 'Your petty quarrels only make me stronger!', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 15764, 0, 0, 0, 'YoggSaron KingLlaneVision_Say3'),
 (33288, -1603360, 'His brood learned their lesson before too long, you shall soon learn yours!', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 15765, 0, 0, 0, 'YoggSaron DragonSoulVision_Say1'),
 (33441, -1603350, 'Your resilience is admirable.', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 15598, 0, 0, 0, 'TheLichKing LichKingVision_Say1'),
 (33288, -1603346, '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 15763, 0, 0, 0, 'YoggSaron KingLlianeVision_Say2'),
 (33437, -1603347, 'We will hold until the reinforcements come. As long as men with stout hearts are manning the walls and throne Stormwind will hold.', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 15585, 0, 0, 0, 'KingLlane KingLlaneVision_Say'),
-(33436, -1603344, 'Gul\'dan is bringing up his warlocks by nightfall. Until then, the Blackrock clan will be trying to take the Eastern Wall.', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 15540, 0, 0, 0, 'Garona KingLlaneVision_Say3'),
+(33436, -1603344, 'Gul''dan is bringing up his warlocks by nightfall. Until then, the Blackrock clan will be trying to take the Eastern Wall.', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 15540, 0, 0, 0, 'Garona KingLlaneVision_Say3'),
 (33288, -1603345, 'A thousand deaths... or one murder.', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 15762, 0, 0, 0, 'YoggSaron KingLlaneVision_Say1'),
 (33436, -1603342, 'Bad news sire.', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 15538, 0, 0, 0, 'Garona KingLlaneVision_Say1'),
 (33436, -1603343, 'The clans are united under Blackhand in this assault. They will stand together until Stormwind has fallen.', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 15539, 0, 0, 0, 'Garona KingLlaneVision_Say2'),
