@@ -60,3 +60,6 @@ INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES
 DELETE FROM `spell_script_names` WHERE `spell_id`=62016;
 INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES
 (62016, 'spell_thorim_charge_orb_targeting');
+
+-- Thorims trap bunny shouldnt be able to move
+UPDATE `creature_template` SET `unit_flags`=`unit_flags` |4 WHERE `entry`=33054;
