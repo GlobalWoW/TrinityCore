@@ -22,116 +22,6 @@
 
 #include <limits>
 
-/* SQL
--- UPDATE `creature_template` SET `AIName`='', `ScriptName`= WHERE `entry`=;
-
--- TODO: 34194
-
-UPDATE `creature_template` SET `AIName`='', `ScriptName`='npc_steelforged_defender' WHERE `entry`=33236;
-UPDATE `creature_template` SET `AIName`='', `ScriptName`='npc_ironwork_cannon' WHERE `entry`=33264;
-UPDATE `creature_template` SET `AIName`='', `ScriptName`='npc_corrupted_servitor' WHERE `entry`=33354;
-UPDATE `creature_template` SET `AIName`='', `ScriptName`='npc_misguided_nymph' WHERE `entry`=33355;
-UPDATE `creature_template` SET `AIName`='', `ScriptName`='npc_guardian_lasher' WHERE `entry`=33430;
-UPDATE `creature_template` SET `AIName`='', `ScriptName`='npc_forest_swarmer' WHERE `entry`=33431;
-UPDATE `creature_template` SET `AIName`='', `ScriptName`='npc_mangrove_ent' WHERE `entry`=33525;
-UPDATE `creature_template` SET `AIName`='', `ScriptName`='npc_ironroot_lasher' WHERE `entry`=33526;
-UPDATE `creature_template` SET `AIName`='', `ScriptName`='npc_natures_blade' WHERE `entry`=33527;
-UPDATE `creature_template` SET `AIName`='', `ScriptName`='npc_guardian_of_life' WHERE `entry`=33528;
-UPDATE `creature_template` SET `AIName`='', `ScriptName`='npc_storm_tempered_keeper' WHERE `entry` IN (33699, 33722);
-UPDATE `creature_template` SET `AIName`='', `ScriptName`='npc_charged_sphere' WHERE `entry`=33715;
-UPDATE `creature_template` SET `AIName`='', `ScriptName`='npc_dark_rune_thunderer' WHERE `entry`=33754;
-UPDATE `creature_template` SET `AIName`='', `ScriptName`='npc_dark_rune_ravager' WHERE `entry`=33755;
-UPDATE `creature_template` SET `AIName`='', `ScriptName`='npc_faceless_horror' WHERE `entry`=33772;
-UPDATE `creature_template` SET `AIName`='', `ScriptName`='npc_twilight_adherent' WHERE `entry`=33818;
-UPDATE `creature_template` SET `AIName`='', `ScriptName`='npc_twilight_frost_mage' WHERE `entry`=33819;
-UPDATE `creature_template` SET `AIName`='', `ScriptName`='npc_twilight_pyromancer' WHERE `entry`=33820;
-UPDATE `creature_template` SET `AIName`='', `ScriptName`='npc_enslaved_fire_elemental' WHERE `entry`=33838;
-UPDATE `creature_template` SET `AIName`='', `ScriptName`='npc_twilight_guardian' WHERE `entry`=33822;
-UPDATE `creature_template` SET `AIName`='', `ScriptName`='npc_twilight_slayer' WHERE `entry`=33823;
-UPDATE `creature_template` SET `AIName`='', `ScriptName`='npc_twilight_shadowblade' WHERE `entry`=33824;
-UPDATE `creature_template` SET `AIName`='', `ScriptName`='npc_molten_colossus' WHERE `entry`=34069;   
-UPDATE `creature_template` SET `AIName`='', `ScriptName`='npc_forge_construct' WHERE `entry`=34085;  
-UPDATE `creature_template` SET `AIName`='', `ScriptName`='npc_magma_rager' WHERE `entry`=34086; 
-UPDATE `creature_template` SET `AIName`='', `ScriptName`='npc_champion_of_hodir' WHERE `entry`=34133; 
-UPDATE `creature_template` SET `AIName`='', `ScriptName`='npc_winter_revenant' WHERE `entry`=34134; 
-UPDATE `creature_template` SET `AIName`='', `ScriptName`='npc_winter_rumbler' WHERE `entry`=34135;
-UPDATE `creature_template` SET `AIName`='', `ScriptName`='npc_winter_jormungar' WHERE `entry`=34137;
-UPDATE `creature_template` SET `AIName`='', `ScriptName`='npc_mechagnome_battletank' WHERE `entry`=34164;
-UPDATE `creature_template` SET `AIName`='', `ScriptName`='npc_arachnopod_destroyer' WHERE `entry`=34183;
-UPDATE `creature_template` SET `AIName`='', `ScriptName`='npc_clockwork_mechanic' WHERE `entry`=34184;
-UPDATE `creature_template` SET `AIName`='', `ScriptName`='npc_ice_turret' WHERE `entry`=34224;
-UPDATE `creature_template` SET `AIName`='', `ScriptName`='npc_hardened_iron_golem' WHERE `entry`=34190; 
-UPDATE `creature_template` SET `AIName`='', `ScriptName`='npc_clockwork_sapper' WHERE `entry`=34193; 
-UPDATE `creature_template` SET `AIName`='', `ScriptName`='npc_rune_etched_forged_sentry' WHERE `entry` IN (34196, 34234); 
-UPDATE `creature_template` SET `AIName`='', `ScriptName`='npc_chamber_overseer' WHERE `entry`=34197; 
-UPDATE `creature_template` SET `AIName`='', `ScriptName`='npc_iron_mender' WHERE `entry`=34198; 
-UPDATE `creature_template` SET `AIName`='', `ScriptName`='npc_lightning_charged_iron_dwarf' WHERE `entry`=34199; 
-UPDATE `creature_template` SET `AIName`='', `ScriptName`='npc_parts_recovery_technician' WHERE `entry`=34267; 
-UPDATE `creature_template` SET `AIName`='', `ScriptName`='npc_XR949_salvagebot' WHERE `entry`=34269; 
-UPDATE `creature_template` SET `AIName`='', `ScriptName`='npc_salvagebot_sawblade' WHERE `entry`=34288;
-UPDATE `creature_template` SET `AIName`='', `ScriptName`='npc_XD175_compactobot' WHERE `entry`=34271; 
-UPDATE `creature_template` SET `AIName`='', `ScriptName`='npc_XB488_disposalbot' WHERE `entry`=34273; 
-
-DELETE FROM `spell_script_names` WHERE `spell_id`=63059;
-INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES (63059, 'spell_pollinate');
-
-DELETE FROM `spell_linked_spell` WHERE  `spell_trigger`=62317 AND `spell_effect`=57807 AND `type`=1;
-INSERT INTO `spell_linked_spell` (`spell_trigger`, `spell_effect`, `type`, `comment`) VALUES (62317, 57807, 1, 'Twilight Guardian - Link Devastate to Sunder Armor');
-
-
-*/
-// helper template - basic script stuff
-// class npc_ : public CreatureScript
-// {
-// private:
-//     enum MyEvents
-//     {
-//
-//     };
-//     enum Spells
-//     {
-//
-//     };
-// public:
-//     npc_ () : CreatureScript("") {}
-//
-//     struct npc_AI: public ScriptedAI
-//     {
-//         npc_AI(Creature* creature) : ScriptedAI(creature) {}
-//
-//         void Reset()
-//         {
-//             events.Reset();
-//         }
-//
-//         void UpdateAI(uint32 const diff)
-//         {
-//             if (!UpdateVictim())
-//                 return;
-//
-//             events.Update(diff);
-//
-//             while (uint32 event = events.ExecuteEvent())
-//             {
-//                 switch (event)
-//                 {
-//
-//                 }
-//             }
-//
-//             DoMeleeAttackIfReady();
-//         }
-//
-//     private:
-//         EventMap events;
-//     };
-//
-//     CreatureAI* GetAI(Creature* creature) const
-//     {
-//         return new npc_AI(creature);
-//     }
-// };
-
 /************************************************************************/
 /*                       Predicates                                     */
 /************************************************************************/
@@ -165,6 +55,32 @@ struct AuraAppliedCheck : public std::unary_function<Unit*, bool>
     }
     private:
         uint32 __spellId;
+};
+
+struct IsEqualWO : public std::unary_function<WorldObject*, bool>
+{
+    IsEqualWO (const WorldObject* base) : __baseGUID(base->GetGUID()) {}
+    bool operator()(const WorldObject* target) const
+    {
+        if (!target)
+            return false;
+        return (target->GetGUID() == __baseGUID);
+    }
+    private:
+        uint64 __baseGUID;
+};
+
+struct DeathStateCheck : public std::unary_function<Unit*, bool>
+{
+    DeathStateCheck(bool shouldBeDead) : __shouldBeDead(shouldBeDead) {}
+    bool operator()(const Unit* target) const
+    {
+        if (!target)
+            return false;
+        return (!target->isAlive() == __shouldBeDead);
+    }
+    private:
+        bool __shouldBeDead;
 };
 
 /************************************************************************/
@@ -1270,6 +1186,20 @@ class npc_storm_tempered_keeper : public CreatureScript
                 events.ScheduleEvent(EVENT_SUMMONS_CHARGED_SPHERE, 10*IN_MILLISECONDS);
             }
 
+            void EnterCombat(Unit* target)
+            {
+                ScriptedAI::AttackStart(target);
+                std::list<Creature*> targets;
+                GetCreatureListWithEntryInGrid(targets, me, NPC_STORM_TEMPERED_KEEPER_1, 30.0f);
+                GetCreatureListWithEntryInGrid(targets, me, NPC_STORM_TEMPERED_KEEPER_2, 30.0f);
+                for (std::list<Creature*>::iterator it = targets.begin(); it != targets.end(); ++it)
+                {
+                    if (Creature* c = (*it))
+                        if (c->IsAIEnabled && !c->isInCombat())
+                            c->AI()->EnterCombat(target);
+                }
+            }
+            
             void DoAction(int32 const action)
             {
                 switch (action)
@@ -1285,24 +1215,31 @@ class npc_storm_tempered_keeper : public CreatureScript
                 std::list<Creature*> targets;
                 GetCreatureListWithEntryInGrid(targets, me, NPC_STORM_TEMPERED_KEEPER_1, 30.0f);
                 GetCreatureListWithEntryInGrid(targets, me, NPC_STORM_TEMPERED_KEEPER_2, 30.0f);
+                targets.remove_if(DeathStateCheck(true));
                 for (std::list<Creature*>::iterator it = targets.begin(); it != targets.end(); ++it)
-                {
-                    if (Creature* c = (*it))
-                        if (c->IsAIEnabled)
-                            c->AI()->DoAction(ACTION_VENGEFUL_SURGE);
-                }
+                    if ((*it)->IsAIEnabled)
+                        (*it)->AI()->DoAction(ACTION_VENGEFUL_SURGE);
             }
 
             void DoSeparationCheck()
             {
                 if (me->HasAura(SPELL_SEPARATION_ANXIETY))
                     return;
+                    
+                /*
+                    Note: The code below is a horrible hack, but it does not work in another way.
+                    The main problem is that we are searching for a creature that may have the same
+                    entry as we do. Thus, me->FindNearestCreature(...) returns a pointer to ourself.
+                    Retrieving the list of creatures for both bounded ally-types, drop ourself from
+                    the list and remove dead foes seems to be the only usable option. 
+                */
                 std::list<Creature*> targets;
-                GetCreatureListWithEntryInGrid(targets, me, NPC_STORM_TEMPERED_KEEPER_1, 30.0f);
-                GetCreatureListWithEntryInGrid(targets, me, NPC_STORM_TEMPERED_KEEPER_2, 30.0f);
-                targets.sort(Trinity::ObjectDistanceOrderPred(me));
-                if ( !me->IsInRange( (*targets.begin()), 0.0f, 15.0f) )
-                    DoCast(SPELL_SEPARATION_ANXIETY);
+                GetCreatureListWithEntryInGrid(targets, me, NPC_STORM_TEMPERED_KEEPER_1, 15.0f);
+                GetCreatureListWithEntryInGrid(targets, me, NPC_STORM_TEMPERED_KEEPER_2, 15.0f);
+                targets.remove_if(IsEqualWO(me));
+                targets.remove_if(DeathStateCheck(true));
+                if (targets.empty())
+                    DoCast(me, SPELL_SEPARATION_ANXIETY);              
             }
 
             void UpdateAI(uint32 const diff)
