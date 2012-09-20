@@ -52,9 +52,9 @@ DELETE FROM `creature` WHERE `id`=34071;
 UPDATE `creature_template` SET `unit_flags`=`unit_flags` |2|33554432 WHERE `entry`=34143;
 
 DELETE FROM `npc_spellclick_spells` WHERE `npc_entry` IN (33432,33651);
--INSERT INTO `npc_spellclick_spells` (`npc_entry`,`spell_id`,`cast_flags`) VALUES
--(33432,46598,1), -- Leviatan MKII - Ride Vehicle Hardcoded
--(33651,46598,1); -- VX 001 - Ride Vehicle Hardcoded
+INSERT INTO `npc_spellclick_spells` (`npc_entry`,`spell_id`,`cast_flags`) VALUES
+(33432,46598,1), -- Leviatan MKII - Ride Vehicle Hardcoded
+(33651,46598,1); -- VX 001 - Ride Vehicle Hardcoded
 
 -- Achievement "Firefighter" (3180 / 3189)
 DELETE FROM `achievement_criteria_data` WHERE `criteria_id` IN (10450, 10463);
