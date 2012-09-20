@@ -41,8 +41,7 @@ enum Yells
     SAY_V07TRON_ACTIVATE                        = 11,
     SAY_V07TRON_SLAY                            = 12,
     SAY_V07TRON_DEATH                           = 13,
-    SAY_BERSERK                                 = 14,
-    SAY_YS_HELP                                 = 15
+    SAY_BERSERK                                 = 14
 };
 
 enum Spells
@@ -424,7 +423,7 @@ class boss_mimiron : public CreatureScript
                             events.ScheduleEvent(EVENT_CHECK_TARGET, 7000);
                             return;
                         case EVENT_ENRAGE:
-                            Talk(gotHardMode ? SAY_HARDMODE_ON : SAY_AGGRO);
+                            Talk(SAY_BERSERK);
                             for (uint8 data = DATA_LEVIATHAN_MK_II; data <= DATA_AERIAL_UNIT; ++data)
                                 if (Creature* creature = ObjectAccessor::GetCreature(*me, instance->GetData64(data)))
                                     creature->AI()->DoAction(DO_ENTER_ENRAGE);
@@ -445,7 +444,7 @@ class boss_mimiron : public CreatureScript
                             switch (phase)
                             {
                                 case PHASE_INTRO:
-                                    DoScriptText(gotHardMode ? SAY_HARDMODE_ON : SAY_AGGRO, me);
+                                    Talk(gotHardMode ? SAY_HARDMODE_ON : SAY_AGGRO);
                                     events.ScheduleEvent(EVENT_STEP_2, 10*IN_MILLISECONDS, 0, PHASE_INTRO);
                                     break;
                                 case PHASE_VX001_ACTIVATION:
@@ -902,9 +901,13 @@ class boss_leviathan_mk : public CreatureScript
                 if (uint64 Mimiron = instance->GetData64(BOSS_MIMIRON))
                 {
                     if (phase == PHASE_LEVIATHAN_SOLO__GLOBAL_1)
-                        Talk(SAY_MKII_SLAY, Mimiron);
+                    {
+                        if (!urand(0,5))
+                            Talk(SAY_MKII_SLAY, Mimiron);
+                    }
                     else
-                        Talk(SAY_V07TRON_SLAY, Mimiron);
+                        if (!urand(0,5))
+                            Talk(SAY_V07TRON_SLAY, Mimiron);
                 }
             }
 
@@ -1324,9 +1327,13 @@ class boss_vx_001 : public CreatureScript
                     if (uint64 Mimiron = instance->GetData64(BOSS_MIMIRON))
                     {
                         if (phase == PHASE_VX001_SOLO__GLOBAL_2)
-                            Talk(SAY_VX001_SLAY, Mimiron);
+                        {
+                            if (!urand(0,5))
+                                Talk(SAY_VX001_SLAY, Mimiron);
+                        }
                         else
-                            Talk(SAY_V07TRON_SLAY, Mimiron);
+                            if (!urand(0,5))
+                                Talk(SAY_V07TRON_SLAY, Mimiron);
                     }
             }
 
@@ -1472,7 +1479,7 @@ class boss_vx_001 : public CreatureScript
                         }
                         else
                             me->SetFacingTo(orient);
-                            me->SendMovementFlagUpdate();
+                            me->SendMovementFlagUpdate(); // Hope this will work...
 
                         float x, y;
                         me->GetNearPoint2D(x, y, 10.0f, me->GetOrientation());
@@ -1737,9 +1744,13 @@ class boss_aerial_unit : public CreatureScript
                     if (uint64 Mimiron = instance->GetData64(BOSS_MIMIRON))
                     {
                         if (phase == PHASE_AERIAL_SOLO__GLOBAL_3)
-                            Talk(SAY_AERIAL_SLAY, Mimiron);
+                        {
+                            if (!urand(0,5))
+                                Talk(SAY_AERIAL_SLAY, Mimiron);
+                        }
                         else
-                            Talk(SAY_V07TRON_SLAY, Mimiron);
+                            if (!urand(0,5))
+                                Talk(SAY_V07TRON_SLAY, Mimiron);
                     }
             }
 
