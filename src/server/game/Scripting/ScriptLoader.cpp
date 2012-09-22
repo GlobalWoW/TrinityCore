@@ -342,6 +342,7 @@ void AddSC_darkshore();
 void AddSC_desolace();
 void AddSC_durotar();
 void AddSC_dustwallow_marsh();
+void AddSC_exodar();
 void AddSC_felwood();
 void AddSC_feralas();
 void AddSC_moonglade();
@@ -977,6 +978,7 @@ void AddKalimdorScripts()
     AddSC_desolace();
     AddSC_durotar();
     AddSC_dustwallow_marsh();
+    AddSC_exodar();
     AddSC_felwood();
     AddSC_feralas();
     AddSC_moonglade();
