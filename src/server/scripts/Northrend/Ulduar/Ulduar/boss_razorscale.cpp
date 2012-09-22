@@ -455,7 +455,6 @@ class boss_razorscale : public CreatureScript
                                 phase = PHASE_FLIGHT;
                                 events.SetPhase(PHASE_FLIGHT);
                                 me->SetCanFly(true);
-                                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
                                 me->RemoveAllAuras();
                                 me->SetReactState(REACT_PASSIVE);
                                 me->AttackStop();
@@ -706,7 +705,7 @@ class npc_expedition_commander : public CreatureScript
                                 Engineer[n]->SetUInt32Value(UNIT_NPC_EMOTESTATE, EMOTE_STATE_USE_STANDING);
                             for (uint8 n = 0; n < 4; ++n)
                                 Defender[n]->SetUInt32Value(UNIT_NPC_EMOTESTATE, EMOTE_STATE_READY2H);
-                            me->MonsterYell(SAY_AGGRO_2, LANG_UNIVERSAL, 0);
+                            Engineer[0]->MonsterYell(SAY_AGGRO_2, LANG_UNIVERSAL, 0);
                             AttackStartTimer = 16000;
                             Phase = 5;
                             break;
