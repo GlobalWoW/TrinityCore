@@ -3,7 +3,7 @@ SET @respawn_time := 6*60*60; -- 6 hours
 
 -- boss templates, increase damage, set immunities and scripts, custom upscaling
 UPDATE creature_template SET mechanic_immune_mask = @boss_immunities, dmg_multiplier = 50, ScriptName = 'npc_magni_bronzebeard' WHERE entry = 2784;
-UPDATE creature_template SET mechanic_immune_mask = @boss_immunities, dmg_multiplier = 50, ScriptName = 'npc_high_tinker_mekkatorque' WHERE entry = 7937;
+UPDATE creature_template SET mechanic_immune_mask = @boss_immunities, dmg_multiplier = 50, unit_flags =`unit_flags`&~(262144|33554432), ScriptName = 'npc_high_tinker_mekkatorque' WHERE entry = 7937;
 UPDATE creature_template SET Mana_mod = 300, mechanic_immune_mask = @boss_immunities, dmg_multiplier = 50, ScriptName = 'npc_prophet_velen' WHERE entry = 17468;
 UPDATE creature_template SET Mana_mod = 400, mechanic_immune_mask = @boss_immunities, dmg_multiplier = 50, ScriptName = 'npc_tyrande_whisperwind_darnassus' WHERE entry = 7999;
 UPDATE creature_template SET Mana_mod = 188, mechanic_immune_mask = @boss_immunities, dmg_multiplier = 50, ScriptName = 'npc_fandral_staghelm' WHERE entry = 3516;
