@@ -3608,6 +3608,21 @@ void SpellMgr::LoadDbcDataCorrections()
             case 45524: // Chains of Ice
                 spellInfo->EffectImplicitTargetA[2] = TARGET_UNIT_TARGET_ENEMY;
                 break;
+            case 22741: // High Tinker Mekkatorque - Goblin Dragon Gun
+                spellInfo->EffectBasePoints[EFFECT_0] = 4200;
+                break;
+            case 20688: // Tyrande Whisperwind - Searing Arrow
+                spellInfo->EffectBasePoints[EFFECT_0] = 18000;
+                break;
+            case 59713: // Lady Sylvanas Windrunner - Multi-Shot
+                spellInfo->EffectBasePoints[EFFECT_0] = 13000;
+                break;
+            case 59710: // Lady Sylvanas Windrunner - Shoot
+                spellInfo->EffectBasePoints[EFFECT_0] = 18000;
+                break;
+            case 33385: // Lorthemar'Theron - Mana Burn
+                spellInfo->EffectValueMultiplier[EFFECT_0] = 7.0f;
+                break;
             default:
                 break;
         }

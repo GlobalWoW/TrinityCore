@@ -47,7 +47,7 @@ UPDATE `creature_template` SET `speed_walk`=0.15, `speed_run`=0.15, `ScriptName`
 UPDATE `creature_template` SET `ScriptName`='npc_mimiron_flame_spread' WHERE `entry`=34121;
 UPDATE `creature_template` SET `ScriptName`='npc_mimiron_bomb_bot' WHERE `entry`=33836;
 
--- CleanUp
+-- Cleaning up Leviathan Mk II
 DELETE FROM `creature` WHERE `id`=34071;
 UPDATE `creature_template` SET `unit_flags`=`unit_flags` |2|33554432 WHERE `entry`=34143;
 
