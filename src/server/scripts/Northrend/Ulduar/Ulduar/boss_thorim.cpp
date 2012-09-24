@@ -37,7 +37,8 @@ enum Spells
     SPELL_LIGHTNING_PILLAR      = 62976,
     SPELL_UNBALANCING_STRIKE    = 62130,
     SPELL_BERSERK_PHASE_1       = 62560,
-    SPELL_BERSERK_PHASE_2       = 26662
+    SPELL_BERSERK_PHASE_2       = 26662,
+    SPELL_ACHIEVEMENT_CHECK     = 64985
 };
 
 #define SPELL_CHAIN_LIGHTNING RAID_MODE(SPELL_CHAIN_LIGHTNING_10, SPELL_CHAIN_LIGHTNING_25)
@@ -181,7 +182,8 @@ enum ArenaAddEntries
     NPC_DARK_RUNE_WARBRINGER    = 32877,
     NPC_IRON_RING_GUARD         = 32874,
     NPC_IRON_HONOR_GUARD        = 32875,
-    NPC_DARK_RUNE_ACOLYTE_ARENA = 32886
+    NPC_DARK_RUNE_ACOLYTE_ARENA = 32886,
+    NPC_DARK_RUNE_ACOLYTE_TUNNEL= 33110
 };
 
 SummonLocation preAddLocations[]=
@@ -211,7 +213,7 @@ class HealerCheck
         bool __shouldBe;
         bool __IsHealer(const Unit* who)
         {
-            return (who->GetEntry() == NPC_DARK_RUNE_ACOLYTE || who->GetEntry() == NPC_DARK_RUNE_EVOKER || who->GetEntry() == NPC_DARK_RUNE_ACOLYTE_ARENA);
+            return (who->GetEntry() == NPC_DARK_RUNE_ACOLYTE || who->GetEntry() == NPC_DARK_RUNE_EVOKER || who->GetEntry() == NPC_DARK_RUNE_ACOLYTE_ARENA || who->GetEntry() == NPC_DARK_RUNE_ACOLYTE_TUNNEL);
         }
 };
 
@@ -237,7 +239,7 @@ struct BerserkSelector
     {
         if (unit->GetTypeId() != TYPEID_PLAYER)
         {
-            for (uint8 i = 0; i < 7; i++)
+            for (uint8 i = 0; i < 8; i++)
                 if (unit->GetEntry() == (uint32)ArenaAddEntries(i))
                     return false;
 
@@ -361,6 +363,16 @@ class npc_thorim_controller : public CreatureScript
                                     if (!spawnList.empty())
                                         for (std::list<Creature*>::iterator itr = spawnList.begin(); itr != spawnList.end(); itr++)
                                             (*itr)->DespawnOrUnsummon();
+
+                                    std::list<Creature*> addList;
+                                    me->GetCreatureListWithEntryInGrid(addList, NPC_IRON_RING_GUARD, 200.0f);
+                                    me->GetCreatureListWithEntryInGrid(addList, NPC_DARK_RUNE_ACOLYTE_TUNNEL, 200.0f);
+                                    me->GetCreatureListWithEntryInGrid(addList, NPC_RUNIC_COLOSSUS, 200.0f);
+                                    me->GetCreatureListWithEntryInGrid(addList, NPC_IRON_HONOR_GUARD, 200.0f);
+                                    me->GetCreatureListWithEntryInGrid(addList, NPC_RUNE_GIANT, 200.0f);
+                                    if (!addList.empty())
+                                        for (std::list<Creature*>::iterator itr = addList.begin(); itr != addList.end(); itr++)
+                                            (*itr)->RemoveAurasDueToSpell(SPELL_BERSERK_PHASE_1);
                                 }
                                 break;
                             }
@@ -384,7 +396,7 @@ class npc_thorim_controller : public CreatureScript
 };
 
 const uint32 ArenaAddEntries[]                  = { NPC_DARK_RUNE_CHAMPION, NPC_DARK_RUNE_COMMONER, NPC_DARK_RUNE_EVOKER, NPC_DARK_RUNE_WARBRINGER, 
-                                                    NPC_IRON_RING_GUARD, NPC_IRON_HONOR_GUARD, NPC_DARK_RUNE_ACOLYTE_ARENA };
+                                                    NPC_IRON_RING_GUARD, NPC_IRON_HONOR_GUARD, NPC_DARK_RUNE_ACOLYTE_ARENA, NPC_DARK_RUNE_ACOLYTE_TUNNEL };
 
 class boss_thorim : public CreatureScript
 {
@@ -467,8 +479,8 @@ class boss_thorim : public CreatureScript
                 if (Creature* ctrl = ObjectAccessor::GetCreature(*me, instance->GetData64(NPC_THORIM_CTRL)))
                     ctrl->DespawnOrUnsummon();
 
-                // Kill credit
-                instance->DoUpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_BE_SPELL_TARGET, 64985);
+                DoCast(me, SPELL_ACHIEVEMENT_CHECK, true); // For kill credit, due to wowhead
+
                 // Lose Your Illusion
                 if (HardMode)
                 {
@@ -506,7 +518,7 @@ class boss_thorim : public CreatureScript
                 events.ScheduleEvent(EVENT_SUMMON_WARBRINGER, 25000, 0, phase);
                 events.ScheduleEvent(EVENT_SUMMON_EVOKER, 30000, 0, phase);
                 events.ScheduleEvent(EVENT_SUMMON_COMMONER, 35000, 0, phase);
-                events.ScheduleEvent(EVENT_BERSERK_PHASE_1, 30000, 0, phase);
+                events.ScheduleEvent(EVENT_BERSERK_PHASE_1, 360000, 0, phase);
                 events.ScheduleEvent(EVENT_SAY_AGGRO_2, 10000, 0, phase);
 
                 if (Creature* runic = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_RUNIC_COLOSSUS)))
@@ -1061,7 +1073,7 @@ class ArenaPhaseAddHelper
 
         ArenaAddIndex operator[](uint32 creatureEntry)
         {
-            for (uint8 i = 0; i < 7; i++)
+            for (uint8 i = 0; i < 8; i++)
                 if (ArenaAddEntries[i] == creatureEntry)
                     return ArenaAddIndex(i);
             return INDEX_ARENA_ADD_NONE;
