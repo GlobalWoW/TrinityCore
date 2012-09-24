@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2008-2012 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2006-2009 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -2576,6 +2577,17 @@ class npc_faceless_horror : public CreatureScript
 
             void Reset()
             {
+                if (InstanceScript* instance = me->GetInstanceScript())
+                    if (instance->GetBossState(BOSS_VEZAX)==IN_PROGRESS)
+                    {
+                        me->SetRespawnDelay(30*60); // If the encounter is in progress, we will respawn in at least half an hour
+                        me->DespawnOrUnsummon();
+                    }
+                    else if (instance->GetBossState(BOSS_VEZAX)==DONE)
+                    {
+                        me->SetRespawnDelay(604800); // If the encounter is done, we will not respawn for a week
+                        me->DespawnOrUnsummon();
+                    }
                 DoCast(me, SPELL_VOID_WAVE);
                 events.Reset();
                 events.ScheduleEvent(EVENT_DEATH_GRIP, urand(8*IN_MILLISECONDS, 10*IN_MILLISECONDS));
@@ -2677,6 +2689,17 @@ class npc_twilight_adherent : public CreatureScript
 
             void Reset()
             {
+                if (InstanceScript* instance = me->GetInstanceScript())
+                    if (instance->GetBossState(BOSS_VEZAX)==IN_PROGRESS)
+                    {
+                        me->SetRespawnDelay(30*60); // If the encounter is in progress, we will respawn in at least half an hour
+                        me->DespawnOrUnsummon();
+                    }
+                    else if (instance->GetBossState(BOSS_VEZAX)==DONE)
+                    {
+                        me->SetRespawnDelay(604800); // If the encounter is done, we will not respawn for a week
+                        me->DespawnOrUnsummon();
+                    }
                 events.Reset();
                 events.ScheduleEvent(EVENT_BLINK, urand(8*IN_MILLISECONDS, 15*IN_MILLISECONDS));
                 events.ScheduleEvent(EVENT_GREATER_HEAL, urand(5*IN_MILLISECONDS, 7*IN_MILLISECONDS));
@@ -2765,6 +2788,17 @@ class npc_twilight_frost_mage : public CreatureScript
 
             void Reset()
             {
+                if (InstanceScript* instance = me->GetInstanceScript())
+                    if (instance->GetBossState(BOSS_VEZAX)==IN_PROGRESS)
+                    {
+                        me->SetRespawnDelay(30*60); // If the encounter is in progress, we will respawn in at least half an hour
+                        me->DespawnOrUnsummon();
+                    }
+                    else if (instance->GetBossState(BOSS_VEZAX)==DONE)
+                    {
+                        me->SetRespawnDelay(604800); // If the encounter is done, we will not respawn for a week
+                        me->DespawnOrUnsummon();
+                    }
                 events.Reset();
                 events.ScheduleEvent(EVENT_FROST_NOVA, urand(8*IN_MILLISECONDS, 15*IN_MILLISECONDS));
                 events.ScheduleEvent(EVENT_FROSTBOLT, urand(3*IN_MILLISECONDS, 5*IN_MILLISECONDS));
@@ -2852,6 +2886,17 @@ class npc_twilight_pyromancer : public CreatureScript
                 summons.DespawnAll();
                 events.Reset();
 
+                if (InstanceScript* instance = me->GetInstanceScript())
+                    if (instance->GetBossState(BOSS_VEZAX)==IN_PROGRESS)
+                    {
+                        me->SetRespawnDelay(30*60); // If the encounter is in progress, we will respawn in at least half an hour
+                        me->DespawnOrUnsummon();
+                    }
+                    else if (instance->GetBossState(BOSS_VEZAX)==DONE)
+                    {
+                        me->SetRespawnDelay(604800); // If the encounter is done, we will not respawn for a week
+                        me->DespawnOrUnsummon();
+                    }
                 DoCast(SPELL_SUMMON_FIRE_ELE);
 
                 events.ScheduleEvent(EVENT_BLINK, urand(8*IN_MILLISECONDS, 15*IN_MILLISECONDS));
@@ -2943,9 +2988,20 @@ class npc_enslaved_fire_elemental : public CreatureScript
 
             void Reset()
             {
+                if (InstanceScript* instance = me->GetInstanceScript())
+                    if (instance->GetBossState(BOSS_VEZAX)==IN_PROGRESS)
+                    {
+                        me->SetRespawnDelay(30*60); // If the encounter is in progress, we will respawn in at least half an hour
+                        me->DespawnOrUnsummon();
+                    }
+                    else if (instance->GetBossState(BOSS_VEZAX)==DONE)
+                    {
+                        me->SetRespawnDelay(604800); // If the encounter is done, we will not respawn for a week
+                        me->DespawnOrUnsummon();
+                    }
                 DoCast(me, SPELL_FIRE_SHIELD);
                 events.Reset();
-                events.ScheduleEvent(EVENT_FIRE_SHIELD_CHECK, 1*IN_MILLISECONDS);
+                events.ScheduleEvent(EVENT_FIRE_SHIELD_CHECK, 1*IN_MILLISECONDS, 1);
                 events.ScheduleEvent(EVENT_BLAST_WAVE, 6*IN_MILLISECONDS);
             }
 
@@ -2955,6 +3011,12 @@ class npc_enslaved_fire_elemental : public CreatureScript
                     return;
 
                 events.Update(diff);
+
+                if (!me->HasAura(SPELL_FIRE_SHIELD))
+                {
+                    DoCast(me, SPELL_FIRE_SHIELD);
+                    events.DelayEvents(2*IN_MILLISECONDS, 1);
+                }
 
                 while (uint32 event = events.ExecuteEvent())
                 {
@@ -2966,7 +3028,6 @@ class npc_enslaved_fire_elemental : public CreatureScript
                                 Trinity::AnyFriendlyUnitInObjectRangeCheck checker(me, me, 20.0f);
                                 Trinity::UnitListSearcher<Trinity::AnyFriendlyUnitInObjectRangeCheck> searcher(me, allies, checker);
                                 me->VisitNearbyObject(20.0f, searcher);
-                                allies.push_back(me->ToUnit());                // Add me to list
                                 allies.remove_if(Trinity::UnitAuraCheck(true, SPELL_FIRE_SHIELD)); // Fulfills here, since the call-to-predicate does not require a const one
                                 if (!allies.empty())
                                     DoCast(Trinity::Containers::SelectRandomContainerElement(allies), SPELL_FIRE_SHIELD);
@@ -3019,6 +3080,17 @@ class npc_twilight_guardian : public CreatureScript
 
             void Reset()
             {
+                if (InstanceScript* instance = me->GetInstanceScript())
+                    if (instance->GetBossState(BOSS_VEZAX)==IN_PROGRESS)
+                    {
+                        me->SetRespawnDelay(30*60); // If the encounter is in progress, we will respawn in at least half an hour
+                        me->DespawnOrUnsummon();
+                    }
+                    else if (instance->GetBossState(BOSS_VEZAX)==DONE)
+                    {
+                        me->SetRespawnDelay(604800); // If the encounter is done, we will not respawn for a week
+                        me->DespawnOrUnsummon();
+                    }
                 events.Reset();
                 events.ScheduleEvent(EVENT_CONCUSSION_BLOW, urand(3*IN_MILLISECONDS, 6*IN_MILLISECONDS));
                 events.ScheduleEvent(EVENT_DEVASTATE, urand(1500, 2500));
@@ -3093,6 +3165,17 @@ class npc_twilight_slayer : public CreatureScript
 
             void Reset()
             {
+                if (InstanceScript* instance = me->GetInstanceScript())
+                    if (instance->GetBossState(BOSS_VEZAX)==IN_PROGRESS)
+                    {
+                        me->SetRespawnDelay(30*60); // If the encounter is in progress, we will respawn in at least half an hour
+                        me->DespawnOrUnsummon();
+                    }
+                    else if (instance->GetBossState(BOSS_VEZAX)==DONE)
+                    {
+                        me->SetRespawnDelay(604800); // If the encounter is done, we will not respawn for a week
+                        me->DespawnOrUnsummon();
+                    }
                 events.Reset();
                 events.ScheduleEvent(EVENT_BLADESTORM, urand(4*IN_MILLISECONDS, 8*IN_MILLISECONDS));
                 events.ScheduleEvent(EVENT_MORTAL_STRIKE, urand(3*IN_MILLISECONDS, 6*IN_MILLISECONDS));
@@ -3164,6 +3247,17 @@ class npc_twilight_shadowblade : public CreatureScript
 
             void Reset()
             {
+                if (InstanceScript* instance = me->GetInstanceScript())
+                    if (instance->GetBossState(BOSS_VEZAX)==IN_PROGRESS)
+                    {
+                        me->SetRespawnDelay(30*60); // If the encounter is in progress, we will respawn in at least half an hour
+                        me->DespawnOrUnsummon();
+                    }
+                    else if (instance->GetBossState(BOSS_VEZAX)==DONE)
+                    {
+                        me->SetRespawnDelay(604800); // If the encounter is done, we will not respawn for a week
+                        me->DespawnOrUnsummon();
+                    }
                 me->SetReactState(REACT_DEFENSIVE);
                 events.Reset();
 
@@ -3175,14 +3269,19 @@ class npc_twilight_shadowblade : public CreatureScript
             {
                 if (Player* player = target->ToPlayer())
                     if (me->IsWithinDist(player, 25.0f))
+                    {
+                        me->SetReactState(REACT_AGGRESSIVE);
                         events.ScheduleEvent(EVENT_SHADOWSTEP, 500);
+                    }
             }
 
             void UpdateAI(uint32 const diff)
             {
                 if (!UpdateVictim())
+                {
+                    DoCast(me, SPELL_STEALTH);
                     return;
-
+                }
                 events.Update(diff);
 
                 while (uint32 event = events.ExecuteEvent())

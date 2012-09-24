@@ -62,8 +62,27 @@ UPDATE `gameobject_template` SET `ScriptName`='go_thorim_lever' WHERE `entry`=19
 UPDATE `gameobject_template` SET `size`=3, `data2`=6000, `flags`=16|32, `ScriptName`='go_thorim_lever' WHERE `entry`=179148;
 UPDATE `gameobject` SET `id`=179148 WHERE `guid`=55194;
 
--- Thorims trap bunny shouldnt be able to move
+-- Thorim trap bunny shouldnt be able to move
 UPDATE `creature_template` SET `unit_flags`=`unit_flags` |4 WHERE `entry`=33054;
+
+-- Thorim Lightning Destruction
+DELETE FROM `spell_script_names` WHERE `spell_id`=62392;
+INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES
+(62392, 'spell_thorim_lightning_destruction');
+
+-- Lightning orb scriptname and waypoints
+UPDATE `creature_template` SET `ScriptName`='npc_lightning_orb' WHERE `entry`=33138;
+DELETE FROM waypoint_data WHERE id = 33138;
+INSERT INTO waypoint_data (id, point, position_x, position_y, position_z) VALUES
+(33138, 1, 2227.6, -263.7, 412.2),
+(33138, 2, 2227.6, -432.6, 412.2),
+(33138, 3, 2199.3, -433.7, 420),
+(33138, 4, 2167.5 ,-440.2, 438.5),
+(33138, 5, 2134.8 ,-440.2, 438.5),
+(33138, 6, 2134.8 ,-303.4, 438.5);
+
+-- update faction of Dark Rune Acolyte so hes correctly affected by Berserk
+UPDATE `creature_template` SET `faction_A`=1692, `faction_H`=1692 WHERE `entry` IN (32886, 33159);
 
 -- creature text
 DELETE FROM `script_texts` WHERE `npc_entry` IN (33413, 32865, 32872);

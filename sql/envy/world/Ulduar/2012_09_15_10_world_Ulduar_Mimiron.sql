@@ -17,6 +17,7 @@ UPDATE `creature_template` SET `ScriptName`='boss_mimiron' WHERE `entry`=33350;
 -- Leviathan MKII
 UPDATE `creature_template` SET `vehicleid`=370, `ScriptName`='boss_leviathan_mk' WHERE `entry`=33432;
 UPDATE `creature_template` SET `vehicleid`=370, `flags_extra`=`flags_extra` |1 WHERE `entry`=34106;
+UPDATE `creature_template` SET `unit_flags`=`unit_flags`&~256 WHERE `entry`=34362; -- 2012/09/21 Mines should be able to get involved infight...
 -- Leviathan MKII Turret
 UPDATE `creature_template` SET `ScriptName`='boss_leviathan_mk_turret' WHERE `entry`=34071;
 DELETE FROM `vehicle_template_accessory` WHERE `entry`=33432;

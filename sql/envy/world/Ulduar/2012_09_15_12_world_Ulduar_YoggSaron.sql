@@ -33,7 +33,7 @@ INSERT INTO `gameobject` (`id`, `map`, `spawnMask`, `phaseMask`, `position_x`, `
 (194625, 603, 3, 1, 1941.61, -25.88, 244.98, 60, 100, 1),
 (194625, 603, 3, 1, 2001.18, 9.409, 245.24, 60, 100, 1);
 
-DELETE FROM `spell_script_names` WHERE `spell_id` IN (64466,64139,64143,64133,63120,64174,64172,63802,64164,64168,62670,62671,62702,62650);
+DELETE FROM `spell_script_names` WHERE `spell_id` IN (64466,64139,64143,64133,63120,64174,64172,63802,64164,64168,62670,62671,62702,62650,65301);
 INSERT INTO `spell_script_names` (`spell_id`,`ScriptName`) VALUES
 (64466,'spell_empowering_shadows'),    -- Heal Trigger for Empowering Shadows
 (64139,'spell_summon_tentacle_position'),  -- Correct Summon Position of Tentacle
@@ -48,7 +48,8 @@ INSERT INTO `spell_script_names` (`spell_id`,`ScriptName`) VALUES
 (62670,'spell_keeper_support_aura_targeting'), -- Auras shouldn't hit other friendly NPCs
 (62671,'spell_keeper_support_aura_targeting'),
 (62702,'spell_keeper_support_aura_targeting'),
-(62650,'spell_keeper_support_aura_targeting');
+(62650,'spell_keeper_support_aura_targeting'),
+(65301,'spell_sara_psychosis'); -- Sara Psychosis
 
 DELETE FROM `conditions` WHERE SourceEntry IN (64184, 63882, 63886, 64172, 64465, 65209);
 INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES
