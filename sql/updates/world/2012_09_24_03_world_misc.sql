@@ -34,15 +34,6 @@ UPDATE `item_template` SET `flagsCustom`=flagsCustom|2 WHERE `entry`=18706;
 -- https://www.youtube.com/watch?v=fkJ3vrwC4q4&feature=player_detailpage#t=170s
 UPDATE `quest_template` SET `SpecialFlags` = 1 WHERE `Id` = 7838;
 
-SET @CGUID:= xxxxx;
---  Spawn Dark Ranger Marrah author Vincent-Michael Closes #7681
-DELETE FROM `creature` WHERE `id` = @ENTRY;
-INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `MovementType`) VALUES
-(@CGUID, 24137, 574, 3, 1, 183.8515, -76.50119, 15.84287, 3.455082, 7200, 0, 0);
-DELETE FROM `creature_template_addon` WHERE `entry` = @ENTRY;
-INSERT INTO `creature_template_addon` (`entry`, `mount`, `bytes1`, `bytes2`, `auras`) VALUES
-(24137, 0, 0x20000, 0x1, '34189');
-
 -- Update DisenchantID's to proper values for items from Satchel of Helpful Goods (51999) author Exodius Closes #7572
 UPDATE `item_template` SET `DisenchantID`=41 WHERE `entry` IN (51964, 51968, 51978, 51994);
 
@@ -117,9 +108,9 @@ INSERT INTO `conditions` (`SourceTypeOrReferenceId`,`SourceGroup`,`SourceEntry`,
 -- Scripts
 DELETE FROM `smart_scripts` WHERE `entryorguid` IN (@NPC1,@NPC2,@NPC3) AND source_type=0;
 INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES
-(@NPC1,0,0,1,62,0,100,0,@GOSSIP1,0,0,0,11,25847,1,0,0,0,0,7,0,0,0,0,0,0,0,"Cenarion Scout Landion – on gossip option select – cast Create Hive'Regal Scout Report"),
-(@NPC1,0,1,0,61,0,100,0,0,0,0,0,72,0,0,0,0,0,0,7,0,0,0,0,0,0,0,"Cenarion Scout Landion – Link – close gossip"),
-(@NPC2,0,0,1,62,0,100,0,@GOSSIP2,0,0,0,11,25843,1,0,0,0,0,7,0,0,0,0,0,0,0,"Cenarion Scout Azenel – on gossip option select – cast Create Hive'Zora Scout Report"),
-(@NPC2,0,1,0,61,0,100,0,0,0,0,0,72,0,0,0,0,0,0,7,0,0,0,0,0,0,0,"Cenarion Scout Azenel – Link – close gossip"),
-(@NPC3,0,0,1,62,0,100,0,@GOSSIP3,0,0,0,11,25845,1,0,0,0,0,7,0,0,0,0,0,0,0,"Cenarion Scout Jalia – on gossip option select – ast Create Hive'Ashi Scout Report"),
-(@NPC3,0,1,0,61,0,100,0,0,0,0,0,72,0,0,0,0,0,0,7,0,0,0,0,0,0,0,"Cenarion Scout Jalia – Link – close gossip");
+(@NPC1,0,0,1,62,0,100,0,@GOSSIP1,0,0,0,11,25847,1,0,0,0,0,7,0,0,0,0,0,0,0,"Cenarion Scout Landion - on gossip option select - cast Create Hive'Regal Scout Report"),
+(@NPC1,0,1,0,61,0,100,0,0,0,0,0,72,0,0,0,0,0,0,7,0,0,0,0,0,0,0,"Cenarion Scout Landion - Link - close gossip"),
+(@NPC2,0,0,1,62,0,100,0,@GOSSIP2,0,0,0,11,25843,1,0,0,0,0,7,0,0,0,0,0,0,0,"Cenarion Scout Azenel - on gossip option select - cast Create Hive'Zora Scout Report"),
+(@NPC2,0,1,0,61,0,100,0,0,0,0,0,72,0,0,0,0,0,0,7,0,0,0,0,0,0,0,"Cenarion Scout Azenel - Link - close gossip"),
+(@NPC3,0,0,1,62,0,100,0,@GOSSIP3,0,0,0,11,25845,1,0,0,0,0,7,0,0,0,0,0,0,0,"Cenarion Scout Jalia - on gossip option select - ast Create Hive'Ashi Scout Report"),
+(@NPC3,0,1,0,61,0,100,0,0,0,0,0,72,0,0,0,0,0,0,7,0,0,0,0,0,0,0,"Cenarion Scout Jalia - Link - close gossip");
