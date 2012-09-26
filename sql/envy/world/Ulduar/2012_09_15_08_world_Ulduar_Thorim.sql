@@ -84,6 +84,14 @@ INSERT INTO waypoint_data (id, point, position_x, position_y, position_z) VALUES
 -- update faction of Dark Rune Acolyte so hes correctly affected by Berserk
 UPDATE `creature_template` SET `faction_A`=1692, `faction_H`=1692 WHERE `entry` IN (32886, 33159);
 
+-- Thorim Runic Fortification
+DELETE FROM `spell_script_names` WHERE `spell_id`=62942;
+INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES
+(62942, 'spell_thorim_runic_fortification');
+
+-- Thorim tunnel adds are spawned via scripts
+DELETE FROM `creature` WHERE `id` IN (33110, 32874, 32875);
+
 -- creature text
 DELETE FROM `script_texts` WHERE `npc_entry` IN (33413, 32865, 32872);
 DELETE FROM `creature_text` WHERE `entry` IN (33413, 32865, 32872);
