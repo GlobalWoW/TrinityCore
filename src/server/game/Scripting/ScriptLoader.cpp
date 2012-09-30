@@ -444,7 +444,6 @@ void AddSC_boss_freya();
 void AddSC_boss_yoggsaron();
 void AddSC_boss_algalon_the_observer();
 void AddSC_ulduar_trash();
-void AddSC_ulduar();
 void AddSC_ulduar_teleporter();
 void AddSC_instance_ulduar();
 void AddSC_boss_keleseth();              //Utgarde Keep
@@ -1173,7 +1172,6 @@ void AddNorthrendScripts()
     AddSC_boss_yoggsaron();
     AddSC_boss_algalon_the_observer();
     AddSC_ulduar_trash();
-    AddSC_ulduar();
     AddSC_ulduar_teleporter();
     AddSC_instance_ulduar();
     AddSC_boss_keleseth();              //Utgarde Keep
