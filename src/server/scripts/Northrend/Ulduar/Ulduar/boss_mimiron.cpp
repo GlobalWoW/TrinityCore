@@ -27,21 +27,22 @@
 
 enum Yells
 {
-    SAY_AGGRO                                   = 0,
-    SAY_HARDMODE_ON                             = 1,
-    SAY_MKII_ACTIVATE                           = 2,
-    SAY_MKII_SLAY                               = 3,
-    SAY_MKII_DEATH                              = 4,
-    SAY_VX001_ACTIVATE                          = 5,
-    SAY_VX001_SLAY                              = 6,
-    SAY_VX001_DEATH                             = 7,
-    SAY_AERIAL_ACTIVATE                         = 8,
-    SAY_AERIAL_SLAY                             = 9,
-    SAY_AERIAL_DEATH                            = 10,
-    SAY_V07TRON_ACTIVATE                        = 11,
-    SAY_V07TRON_SLAY                            = 12,
-    SAY_V07TRON_DEATH                           = 13,
-    SAY_BERSERK                                 = 14
+   SAY_AGGRO                                   = 0,
+   SAY_HARDMODE_ON                             = 1,
+   SAY_MKII_ACTIVATE                           = 2,
+   SAY_MKII_SLAY                               = 3,
+   SAY_MKII_DEATH                              = 4,
+   SAY_VX001_ACTIVATE                          = 5,
+   SAY_VX001_SLAY                              = 6,
+   SAY_VX001_DEATH                             = 7,
+   SAY_AERIAL_ACTIVATE                         = 8,
+   SAY_AERIAL_SLAY                             = 9,
+   SAY_AERIAL_DEATH                            = 10,
+   SAY_V07TRON_ACTIVATE                        = 11,
+   SAY_V07TRON_SLAY                            = 12,
+   SAY_V07TRON_DEATH                           = 13,
+   SAY_BERSERK                                 = 14,
+   SAY_YS_HELP                                 = 15
 };
 
 enum Spells
@@ -875,7 +876,6 @@ class boss_leviathan_mk : public CreatureScript
                 instance = me->GetInstanceScript();
                 me->ApplySpellImmune(0, IMMUNITY_ID, SPELL_ROCKET_STRIKE_DMG, true);
                 me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-                Reset();
             }
 
             void Reset()
@@ -924,7 +924,7 @@ class boss_leviathan_mk : public CreatureScript
                 }
             }
 
-            void DamageTaken(Unit* /*who*/, uint32& damage)
+            void DamageTaken(Unit* /*who*/, uint32 &damage)
             {
                 if (damage >= me->GetHealth())
                 {
@@ -1093,7 +1093,6 @@ class boss_leviathan_mk_turret : public CreatureScript
             {
                 me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
                 me->ApplySpellImmune(0, IMMUNITY_ID, SPELL_DEATH_GRIP, true);
-                Reset();
             }
 
             void Reset()
@@ -1171,9 +1170,9 @@ class npc_proximity_mine : public CreatureScript
             void InitializeAI()
             {
                 me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_PACIFIED);
+                me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC);
                 uiBoomTimer = 35000;
                 boomLocked = false;
-                Reset();
             }
 
             void SpellHitTarget(Unit* target, SpellInfo const* spell)
@@ -1195,7 +1194,7 @@ class npc_proximity_mine : public CreatureScript
 
                 if (Player* player = who->ToPlayer())
                     if (!player->isGameMaster())
-                        if (!boomLocked && me->GetDistance2d(player)<3.0f)
+                        if (!boomLocked && me->GetDistance2d(player) < 3.0f)
                         {
                             DoCastAOE(SPELL_EXPLOSION);
                             boomLocked = true;
@@ -1259,7 +1258,6 @@ class spell_proximity_mines : public SpellScriptLoader // Spell 63027
         }
 };
 
-
 /************************************************************************/
 /*                               VX-001                                 */
 /************************************************************************/
@@ -1303,7 +1301,6 @@ class boss_vx_001 : public CreatureScript
                 instance = me->GetInstanceScript();
                 me->ApplySpellImmune(0, IMMUNITY_ID, SPELL_ROCKET_STRIKE_DMG, true);
                 me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-                Reset();
             }            
 
             void Reset()
@@ -1479,7 +1476,6 @@ class boss_vx_001 : public CreatureScript
                         }
                         else
                             me->SetFacingTo(orient);
-                            me->SendMovementFlagUpdate(); // Hope this will work...
 
                         float x, y;
                         me->GetNearPoint2D(x, y, 10.0f, me->GetOrientation());
@@ -1615,7 +1611,6 @@ public:
             void InitializeAI()
             {
                 me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_ATTACKABLE_1 | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_PACIFIED);
-                Reset();
             }
 
             void Reset()
@@ -1720,7 +1715,6 @@ class boss_aerial_unit : public CreatureScript
                 me->ApplySpellImmune(0, IMMUNITY_ID, SPELL_ROCKET_STRIKE_DMG, true);
                 me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
                 me->SetUnitMovementFlags(MOVEMENTFLAG_FLYING);
-                Reset();
             }
 
             void Reset()
@@ -1814,7 +1808,7 @@ class boss_aerial_unit : public CreatureScript
                         }
                         break;
                     case DO_AERIAL_ASSEMBLED:
-                        me->SetHealth( (me->GetMaxHealth() >> 1) );               // Once again, re-assemble and repairing share some stuff, so the fallthrough is intended!
+                        me->SetHealth( (me->GetMaxHealth() >> 1) );               // Once again, re-assemble and repairing share some stuff, so the fallthrough is intended!                        
                     case DO_AERIAL_SELF_REPAIR_END:
                         if (gotMimironHardMode)
                             if (!me->HasAura(SPELL_EMERGENCY_MODE))
@@ -2117,7 +2111,7 @@ class npc_mimiron_bomb_bot : public CreatureScript
             {
                 despawn = false;
 
-                if (Unit* target = SelectPlayerTargetInRange(500.0f))
+                if (Unit* target = SelectPlayerTargetInRange(100.0f))
                 {
                     me->AddThreat(target, std::numeric_limits<float>::max());
                     me->GetMotionMaster()->MoveFollow(target, 100.0f, 0.0f);
@@ -2136,6 +2130,12 @@ class npc_mimiron_bomb_bot : public CreatureScript
                                 mimiron->AI()->DoAction(DATA_AVOIDED_BOOM_BOT_EXPLOSION);
             }
 
+            void SpellHit(Unit* /*caster*/, SpellInfo const* spell)
+            {
+                if (spell->Id == SPELL_BOOM_BOT_PERIODIC)
+                    me->DespawnOrUnsummon(1000);
+            }
+
             void JustDied(Unit* /*killer*/)
             {
                 DoCast(me, SPELL_BOOM_BOT, true);
@@ -2149,10 +2149,10 @@ class npc_mimiron_bomb_bot : public CreatureScript
                 if (!despawn && me->IsWithinMeleeRange(me->getVictim()))
                 {
                     despawn = true;
-                    // TODO: spell doesnt work for some reason
                     me->CastSpell(me, SPELL_BOOM_BOT, true);
-                    me->DespawnOrUnsummon(1500);
                 }
+                // suicide has procflag PROC_FLAG_DONE_MELEE_AUTO_ATTACK, they have to melee, even tho the spell is delayed if the npc misses
+                DoMeleeAttackIfReady();
             }
 
             private:
@@ -2349,7 +2349,6 @@ class npc_frost_bomb : public CreatureScript
             {
                 me->SetReactState(REACT_PASSIVE);
                 me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_ATTACKABLE_1 | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_PACIFIED);
-                Reset();
             }
 
             void Reset()
@@ -2398,50 +2397,50 @@ public:
     }
 };
 
-//class achievement_set_up_us_the_bomb__proximity_mines : public AchievementCriteriaScript
-//{
-//public:
-//    achievement_set_up_us_the_bomb__proximity_mines(const char* name) : AchievementCriteriaScript(name) {}
-//
-//    bool OnCheck(Player* player, Unit* /*target*/)
-//    {
-//        if (player)
-//            if (InstanceScript* instance = player->GetInstanceScript())
-//                if (Creature* mimiron = ObjectAccessor::GetCreature(*player, instance->GetData64(BOSS_MIMIRON)))
-//                    return (mimiron->AI()->GetData(DATA_AVOIDED_PROXIMITY_MINES));
-//        return false;
-//    }
-//};
+class achievement_set_up_us_the_bomb__proximity_mines : public AchievementCriteriaScript
+{
+public:
+    achievement_set_up_us_the_bomb__proximity_mines(const char* name) : AchievementCriteriaScript(name) {}
 
-//class achievement_set_up_us_the_bomb__rocket_strikes : public AchievementCriteriaScript
-//{
-//public:
-//    achievement_set_up_us_the_bomb__rocket_strikes(const char* name) : AchievementCriteriaScript(name) {}
-//
-//    bool OnCheck(Player* player, Unit* /*target*/)
-//    {
-//        if (player)
-//            if (InstanceScript* instance = player->GetInstanceScript())
-//                if (Creature* mimiron = ObjectAccessor::GetCreature(*player, instance->GetData64(BOSS_MIMIRON)))
-//                    return (mimiron->AI()->GetData(DATA_AVOIDED_ROCKET_STRIKES));
-//        return false;
-//    }
-//};
+    bool OnCheck(Player* player, Unit* /*target*/)
+    {
+        if (player)
+            if (InstanceScript* instance = player->GetInstanceScript())
+                if (Creature* mimiron = ObjectAccessor::GetCreature(*player, instance->GetData64(BOSS_MIMIRON)))
+                    return (mimiron->AI()->GetData(DATA_AVOIDED_PROXIMITY_MINES));
+        return false;
+    }
+};
 
-//class achievement_set_up_us_the_bomb__boombot_explosion : public AchievementCriteriaScript
-//{
-//public:
-//    achievement_set_up_us_the_bomb__boombot_explosion(const char* name) : AchievementCriteriaScript(name) {}
-//
-//    bool OnCheck(Player* player, Unit* /*target*/)
-//    {
-//        if (player)
-//            if (InstanceScript* instance = player->GetInstanceScript())
-//                if (Creature* mimiron = ObjectAccessor::GetCreature(*player, instance->GetData64(BOSS_MIMIRON)))
-//                    return (mimiron->AI()->GetData(DATA_AVOIDED_BOOM_BOT_EXPLOSION));
-//        return false;
-//    }
-//};
+class achievement_set_up_us_the_bomb__rocket_strikes : public AchievementCriteriaScript
+{
+public:
+    achievement_set_up_us_the_bomb__rocket_strikes(const char* name) : AchievementCriteriaScript(name) {}
+
+    bool OnCheck(Player* player, Unit* /*target*/)
+    {
+        if (player)
+            if (InstanceScript* instance = player->GetInstanceScript())
+                if (Creature* mimiron = ObjectAccessor::GetCreature(*player, instance->GetData64(BOSS_MIMIRON)))
+                    return (mimiron->AI()->GetData(DATA_AVOIDED_ROCKET_STRIKES));
+        return false;
+    }
+};
+
+class achievement_set_up_us_the_bomb__boombot_explosion : public AchievementCriteriaScript
+{
+public:
+    achievement_set_up_us_the_bomb__boombot_explosion(const char* name) : AchievementCriteriaScript(name) {}
+
+    bool OnCheck(Player* player, Unit* /*target*/)
+    {
+        if (player)
+            if (InstanceScript* instance = player->GetInstanceScript())
+                if (Creature* mimiron = ObjectAccessor::GetCreature(*player, instance->GetData64(BOSS_MIMIRON)))
+                    return (mimiron->AI()->GetData(DATA_AVOIDED_BOOM_BOT_EXPLOSION));
+        return false;
+    }
+};
 
 void AddSC_boss_mimiron()
 {
@@ -2470,12 +2469,12 @@ void AddSC_boss_mimiron()
     new achievement_firefighter("achievement_firefighter_25");  // Achiev 3189 / Criteria 10463
 
     // TODO: Find correct criterias for the following achievements:
-    //new achievement_set_up_us_the_bomb__boombot_explosion("achievement_set_up_us_the_bomb__boombot");
-    //new achievement_set_up_us_the_bomb__boombot_explosion("achievement_set_up_us_the_bomb__boombot_25");
-    //new achievement_set_up_us_the_bomb__proximity_mines("achievement_set_up_us_the_bomb__proximity");
-    //new achievement_set_up_us_the_bomb__proximity_mines("achievement_set_up_us_the_bomb__proximity_25");
-    //new achievement_set_up_us_the_bomb__rocket_strikes("achievement_set_up_us_the_bomb__rockets");
-    //new achievement_set_up_us_the_bomb__rocket_strikes("achievement_set_up_us_the_bomb__rockets_25");
+    new achievement_set_up_us_the_bomb__boombot_explosion("achievement_set_up_us_the_bomb__boombot");
+    new achievement_set_up_us_the_bomb__boombot_explosion("achievement_set_up_us_the_bomb__boombot_25");
+    new achievement_set_up_us_the_bomb__proximity_mines("achievement_set_up_us_the_bomb__proximity");
+    new achievement_set_up_us_the_bomb__proximity_mines("achievement_set_up_us_the_bomb__proximity_25");
+    new achievement_set_up_us_the_bomb__rocket_strikes("achievement_set_up_us_the_bomb__rockets");
+    new achievement_set_up_us_the_bomb__rocket_strikes("achievement_set_up_us_the_bomb__rockets_25");
 }
 
 #undef SPELL_NAPALM_SHELL
