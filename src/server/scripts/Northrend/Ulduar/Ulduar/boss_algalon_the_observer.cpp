@@ -342,7 +342,7 @@ class boss_algalon_the_observer : public CreatureScript
                         DoCast(me, SPELL_RIDE_THE_LIGHTNING, true);
                         me->GetMotionMaster()->MovePoint(POINT_ALGALON_LAND, AlgalonLandPos);
                         me->SetHomePosition(AlgalonLandPos);
-                        Movement::MoveSplineInit init(*me);
+                        Movement::MoveSplineInit init(me);
                         init.MoveTo(AlgalonLandPos.GetPositionX(), AlgalonLandPos.GetPositionY(), AlgalonLandPos.GetPositionZ());
                         init.SetOrientationFixed(true);
                         init.Launch();
@@ -872,9 +872,6 @@ class npc_brann_bronzebeard_algalon : public CreatureScript
                         _events.Reset();
                         me->SetWalk(false);
                         _events.ScheduleEvent(EVENT_BRANN_MOVE_INTRO, 1);
-
-                        if (InstanceScript* instance = me->GetInstanceScript())
-                            instance->SetBossState(BOSS_ALGALON, SPECIAL);
                         break;
                     case ACTION_FINISH_INTRO:
                         Talk(SAY_BRANN_ALGALON_INTRO_2);

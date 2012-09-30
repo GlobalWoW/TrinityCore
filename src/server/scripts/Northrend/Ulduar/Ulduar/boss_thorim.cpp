@@ -37,7 +37,8 @@ enum Spells
     SPELL_LIGHTNING_PILLAR      = 62976,
     SPELL_UNBALANCING_STRIKE    = 62130,
     SPELL_BERSERK_PHASE_1       = 62560,
-    SPELL_BERSERK_PHASE_2       = 26662
+    SPELL_BERSERK_PHASE_2       = 26662,
+    SPELL_ACHIEVEMENT_CHECK     = 64985
 };
 
 #define SPELL_CHAIN_LIGHTNING RAID_MODE(SPELL_CHAIN_LIGHTNING_10, SPELL_CHAIN_LIGHTNING_25)
@@ -373,17 +374,12 @@ class npc_thorim_controller : public CreatureScript
                                     std::list<Creature*> addList;
                                     me->GetCreatureListWithEntryInGrid(addList, NPC_IRON_RING_GUARD, 200.0f);
                                     me->GetCreatureListWithEntryInGrid(addList, NPC_DARK_RUNE_ACOLYTE_TUNNEL, 200.0f);
+                                    me->GetCreatureListWithEntryInGrid(addList, NPC_RUNIC_COLOSSUS, 200.0f);
                                     me->GetCreatureListWithEntryInGrid(addList, NPC_IRON_HONOR_GUARD, 200.0f);
-
+                                    me->GetCreatureListWithEntryInGrid(addList, NPC_RUNE_GIANT, 200.0f);
                                     if (!addList.empty())
                                         for (std::list<Creature*>::iterator itr = addList.begin(); itr != addList.end(); itr++)
                                             (*itr)->RemoveAurasDueToSpell(SPELL_BERSERK_PHASE_1);
-
-                                    if (Creature* colossus = me->FindNearestCreature(NPC_RUNIC_COLOSSUS, 200.0f))
-                                        colossus->AI()->Reset();
-
-                                    if (Creature* giant = me->FindNearestCreature(NPC_RUNE_GIANT, 200.0f))
-                                        giant->AI()->Reset();
                                 }
                                 break;
                             }
@@ -492,8 +488,7 @@ class boss_thorim : public CreatureScript
                 if (Creature* ctrl = ObjectAccessor::GetCreature(*me, instance->GetData64(NPC_THORIM_CTRL)))
                     ctrl->DespawnOrUnsummon();
 
-                // Kill credit
-                instance->DoUpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_BE_SPELL_TARGET, 64985);
+                DoCast(me, SPELL_ACHIEVEMENT_CHECK, true); // For kill credit, due to wowhead
                 // Lose Your Illusion
                 if (HardMode)
                 {
@@ -1278,13 +1273,6 @@ class npc_runic_colossus : public CreatureScript
             EMOTE_BARRIER   = 0
         };
 
-        enum Phases
-        {
-            PHASE_IDLE = 1,
-            PHASE_RUNIC_SMASH,
-            PHASE_MELEE
-        };
-
     public:
         npc_runic_colossus() : CreatureScript("npc_runic_colossus") {}
 
@@ -1303,8 +1291,7 @@ class npc_runic_colossus : public CreatureScript
                 me->GetMotionMaster()->MoveTargetedHome();
                 me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC);
                 me->RemoveAurasDueToSpell(SPELL_BERSERK_PHASE_1);
-                phase = PHASE_IDLE;
-                me->SetReactState(REACT_AGGRESSIVE);
+
                 // Runed Door closed
                 if (instance)
                     instance->SetData(DATA_RUNIC_DOOR, GO_STATE_READY);
@@ -1333,8 +1320,7 @@ class npc_runic_colossus : public CreatureScript
                 switch (action)
                 {
                     case ACTION_DOSCHEDULE_RUNIC_SMASH:
-                        events.ScheduleEvent(EVENT_RUNIC_SMASH, 1000, 0, PHASE_RUNIC_SMASH);
-                        phase = PHASE_RUNIC_SMASH;
+                        events.ScheduleEvent(EVENT_RUNIC_SMASH, 1000);
                         break;
                     default:
                         break;
@@ -1354,17 +1340,16 @@ class npc_runic_colossus : public CreatureScript
 
             void EnterCombat(Unit* /*who*/)
             {
-                phase = PHASE_MELEE;
-                events.ScheduleEvent(EVENT_BARRIER, urand(12000, 15000), 0, phase);
-                events.ScheduleEvent(EVENT_SMASH, urand (15000, 18000), 0, phase);
-                events.ScheduleEvent(EVENT_CHARGE, urand (20000, 24000), 0, phase);
+                events.ScheduleEvent(EVENT_BARRIER, urand(12000, 15000));
+                events.ScheduleEvent(EVENT_SMASH, urand (15000, 18000));
+                events.ScheduleEvent(EVENT_CHARGE, urand (20000, 24000));
 
                 me->InterruptNonMeleeSpells(true);
             }
 
             void UpdateAI(uint32 const diff)
             {
-                if (phase == PHASE_IDLE || (!UpdateVictim() && phase != PHASE_RUNIC_SMASH))
+                if (instance->GetBossState(BOSS_THORIM) != IN_PROGRESS)
                     return;
 
                 events.Update(diff);
@@ -1379,30 +1364,33 @@ class npc_runic_colossus : public CreatureScript
                         case EVENT_BARRIER:
                             Talk(EMOTE_BARRIER);
                             DoCast(me, SPELL_RUNIC_BARRIER);
-                            events.ScheduleEvent(EVENT_BARRIER, urand(35000, 45000), PHASE_MELEE);
+                            events.ScheduleEvent(EVENT_BARRIER, urand(35000, 45000));
                             return;
                         case EVENT_SMASH:
                             DoCast(me, SPELL_SMASH);
-                            events.ScheduleEvent(EVENT_SMASH, urand(15000, 18000), PHASE_MELEE);
+                            events.ScheduleEvent(EVENT_SMASH, urand(15000, 18000));
                             return;
                         case EVENT_CHARGE:
                             if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, -8.0f, true))
                             {
                                 DoCast(target, SPELL_RUNIC_CHARGE);
-                                events.ScheduleEvent(EVENT_CHARGE, 20000, 0, PHASE_MELEE);
+                                events.ScheduleEvent(EVENT_CHARGE, 20000);
                             }
                             else
-                                events.ScheduleEvent(EVENT_CHARGE, 2000, 0,PHASE_MELEE);
+                                events.ScheduleEvent(EVENT_CHARGE, 2000);
                             return;
                         case EVENT_RUNIC_SMASH:
+                            if (UpdateVictim())
+                                break;
+
                             side = urand(0, 1);
                             if (side == 0)
                                 DoCast(me, SPELL_RUNIC_SMASH_RIGHT);
                             else
                                 DoCast(me, SPELL_RUNIC_SMASH_LEFT);
 
-                            events.ScheduleEvent(EVENT_SMASH_WAVE, 5500, 0, PHASE_RUNIC_SMASH);
-                            events.ScheduleEvent(EVENT_RUNIC_SMASH, 8000, 0, PHASE_RUNIC_SMASH);
+                            events.ScheduleEvent(EVENT_SMASH_WAVE, 5500);
+                            events.ScheduleEvent(EVENT_RUNIC_SMASH, 8000);
                             return;
                         case EVENT_SMASH_WAVE:
                             if (!UpdateVictim())
@@ -1419,7 +1407,6 @@ class npc_runic_colossus : public CreatureScript
                 InstanceScript* instance;
                 SummonList summons;
                 EventMap events;
-                Phases phase;
 
                 bool side;
                 uint32 BarrierTimer;
