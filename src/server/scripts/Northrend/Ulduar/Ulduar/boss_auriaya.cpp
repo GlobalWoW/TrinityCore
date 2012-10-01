@@ -49,7 +49,7 @@ enum AuriayaSpells
     SPELL_SAVAGE_POUNCE_25          = 64374,
     SPELL_RIP_FLESH_10              = 64375,
     SPELL_RIP_FLESH_25              = 64667,
-    SPELL_STRENGHT_OF_THE_PACK      = 64369, // Triggers 64381
+    SPELL_STRENGHT_OF_THE_PACK      = 64369 // Triggers 64381
 };
 
 #define SPELL_SENTINEL_BLAST RAID_MODE(SPELL_SENTINEL_BLAST_10, SPELL_SENTINEL_BLAST_25)
@@ -68,21 +68,17 @@ enum AuriayaNPCs
     NPC_SANCTUM_SENTRY                           = 34014,
     NPC_FERAL_DEFENDER                           = 34035,
     NPC_FERAL_DEFENDER_TRIGGER                   = 34096,
-    NPC_SEEPING_TRIGGER                          = 34098,
+    NPC_SEEPING_TRIGGER                          = 34098
 };
 
 enum AuriayaYells
 {
-    // Yells
-    SAY_AGGRO                                    = -1603050,
-    SAY_SLAY_1                                   = -1603051,
-    SAY_SLAY_2                                   = -1603052,
-    SAY_DEATH                                    = -1603053,
-    SAY_BERSERK                                  = -1603054,
-
-    // Emotes
-    EMOTE_FEAR                                   = -1603055,
-    EMOTE_DEFENDER                               = -1603056,
+    SAY_AGGRO                                    = 0,
+    SAY_SLAY                                     = 1,
+    SAY_DEATH                                    = 2,
+    SAY_BERSERK                                  = 3,
+    EMOTE_FEAR                                   = 4,
+    EMOTE_DEFENDER                               = 5
 };
 
 enum AuriayaActions
@@ -92,8 +88,8 @@ enum AuriayaActions
 };
 
 #define SENTRY_NUMBER                            RAID_MODE<uint8>(2, 4)
-// #define DATA_NINE_LIVES                          30763077
-// #define DATA_CRAZY_CAT_LADY                      30063007
+//#define DATA_NINE_LIVES                         30763077
+//#define DATA_CRAZY_CAT_LADY                     30063007
 
 enum Data
 {
@@ -107,12 +103,12 @@ class boss_auriaya : public CreatureScript
     enum AuriayaEvents
     {
         // Auriaya
-        EVENT_SONIC_SCREECH          = 1,
+        EVENT_SONIC_SCREECH = 1,
         EVENT_SENTINEL_BLAST,
         EVENT_TERRIFYING_SCREECH,
         EVENT_SUMMON_SWARMING_GUARDIAN,
         EVENT_ACTIVATE_DEFENDER,
-        EVENT_BERSERK,
+        EVENT_BERSERK
     };
 
     public:
@@ -147,7 +143,7 @@ class boss_auriaya : public CreatureScript
             void EnterCombat(Unit* /*who*/)
             {
                 _EnterCombat();
-                DoScriptText(SAY_AGGRO, me);
+                Talk(SAY_AGGRO);
                 summons.DoZoneInCombat();
                 events.ScheduleEvent(EVENT_SONIC_SCREECH, urand(45000, 65000));
                 events.ScheduleEvent(EVENT_SENTINEL_BLAST, urand(20000, 25000));
@@ -159,7 +155,7 @@ class boss_auriaya : public CreatureScript
 
             void KilledUnit(Unit* /*who*/)
             {
-                DoScriptText(RAND(SAY_SLAY_1, SAY_SLAY_2), me);
+                Talk(SAY_SLAY);
             }
 
             void JustSummoned(Creature* summoned)
@@ -242,7 +238,7 @@ class boss_auriaya : public CreatureScript
 
             void JustDied(Unit* /*who*/)
             {
-                DoScriptText(SAY_DEATH, me);
+                Talk(SAY_DEATH);
                 _JustDied();
             }
 
@@ -265,7 +261,7 @@ class boss_auriaya : public CreatureScript
                             events.ScheduleEvent(EVENT_SONIC_SCREECH, urand(40000, 60000));
                             break;
                         case EVENT_TERRIFYING_SCREECH:
-                            DoScriptText(EMOTE_FEAR, me);
+                            Talk(EMOTE_FEAR);
                             DoCast(SPELL_TERRIFYING_SCREECH);
                             events.ScheduleEvent(EVENT_TERRIFYING_SCREECH, urand(20000, 30000));
                             break;
@@ -275,7 +271,7 @@ class boss_auriaya : public CreatureScript
                             break;
                         case EVENT_ACTIVATE_DEFENDER:
                             // TODO: Check if this works correctly. Otherwise, we will summon those directly.
-                            DoScriptText(EMOTE_DEFENDER, me);
+                            Talk(EMOTE_DEFENDER);
                             DoCast(SPELL_DEFENDER_TRIGGER);
                             if (Creature* trigger = me->FindNearestCreature(NPC_FERAL_DEFENDER_TRIGGER, 50.0f, true))
                                 DoCast(trigger, SPELL_ACTIVATE_DEFENDER, true);
@@ -287,7 +283,7 @@ class boss_auriaya : public CreatureScript
                             break;
                         case EVENT_BERSERK:
                             DoCast(me, SPELL_BERSERK, true);
-                            DoScriptText(SAY_BERSERK, me);
+                            Talk(SAY_BERSERK);
                             break;
                     }
                 }

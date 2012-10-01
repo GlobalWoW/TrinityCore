@@ -1,24 +1,16 @@
--- Register spell-scripts
-DELETE FROM `spell_script_names` WHERE `spell_id` IN (62692, 63276, 63278, 63322, 63323);
-INSERT INTO `spell_script_names` VALUES 
-(62692,'spell_aura_of_despair_aura'),
-(63276,'spell_mark_of_the_faceless_aura'),
-(63278,'spell_mark_of_the_faceless_drain'),
-(63323,'spell_saronite_vapors');
-
--- Update saronite animus entry. TODO: Check if its health-modifier is ok.
-UPDATE `creature_template` SET `minlevel`=83, `maxlevel`=83, `mindmg`=480, `maxdmg`=700, `flags_extra`=1 WHERE `entry`=33524;
-
--- Achievements "I love the smell of saronite in the morning" and "Shadowdodger"
-DELETE FROM `achievement_criteria_data` WHERE `criteria_id` IN (10451, 10462, 10173, 10306);
-INSERT INTO `achievement_criteria_data` (`criteria_id`, `type`, `value1`, `value2`, `ScriptName`) VALUES 
-(10451, 11, 0, 0, 'achievement_i_love_the_smell_of_saronite_in_the_morning'), 
-(10451, 12, 0, 0, ''), 
-(10462, 11, 0, 0, 'achievement_i_love_the_smell_of_saronite_in_the_morning_25'), 
-(10462, 12, 1, 0, ''),
-(10173, 11, 0, 0, 'achievement_shadowdodger'), 
-(10173, 12, 0, 0, ''), 
-(10306, 11, 0, 0, 'achievement_shadowdodger_25'), 
-(10306, 12, 1, 0, '');
-
-
+-- Creature_text
+-- General Vezax
+DELETE FROM `script_texts` WHERE `npc_entry` IN (33271, 33488);
+DELETE FROM `creature_text` WHERE `entry` IN (33271, 33488);
+INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language`, `probability`, `emote`, `duration`, `sound`, `comment`) VALUES
+(33271, 0, 0, 'Your destruction will herald a new age of suffering!', 14, 0, 100, 0, 0, 15542, 'General Vezax SAY_AGGRO'),
+(33271, 1, 0, 'You thought to stand before the legions of death... and survive?', 14, 0, 100, 0, 0, 15543, 'General Vezax SAY_SLAY_1'),
+(33271, 1, 1, 'Defiance... a flaw of mortality.', 14, 0, 100, 0, 0, 15544, 'General Vezax SAY_SLAY_2'),
+(33271, 2, 0, 'The black blood of Yogg-Saron courses through me! I. AM. UNSTOPPABLE!', 14, 0, 100, 0, 0, 15545, 'General Vezax SAY_SURGE_DARKNESS'),
+(33271, 3, 0, 'Oh, what horrors await....', 14, 0, 100, 0, 0, 15546, 'General Vezax SAY_DEATH'),
+(33271, 4, 0, 'Your defeat was inevitable!', 14, 0, 100, 0, 0, 15547, 'General Vezax SAY_BERSERK'),
+(33271, 5, 0, 'Behold, now! Terror, absolute!', 14, 0, 100, 0, 0, 15548, 'General Vezax SAY_HARDMODE_ON'),
+(33488, 6, 0, 'A cloud of saronite vapors coalesces nearby!', 41, 0, 100, 0, 0, 0, 'Saronite Vapor EMOTE_VAPOR'),
+(33271, 7, 0, 'The saronite vapors mass and swirl violently, merging into a monstrous form!', 41, 0, 100, 0, 0, 0, 'General Vezax EMOTE_ANIMUS'),
+(33271, 8, 0, 'A saronite barrier appears around General Vezax!', 41, 0, 100, 0, 0, 0, 'General Vezax EMOTE_BARRIER'),
+(33271, 9, 0, 'General Vezax roars and surges with dark might!', 41, 0, 100, 0, 0, 0, 'General Vezax EMOTE_SURGE_OF_DARKNESS');
