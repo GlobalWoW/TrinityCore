@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2010 Trinity <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2012 Trinity <http://www.trinitycore.org/>
  * Copyright (C) 2008-2010 EiloRepo <https://github.com/eilo/ReanEmu/>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -761,7 +761,7 @@ class npc_muradin_gunship : public CreatureScript
                     return true;
                 }
 
-                player->ADD_GOSSIP_ITEM(0, "Mes compagnons sont tous comptabilisés, Muradin. Allons-y!", 631, 1001);
+                player->ADD_GOSSIP_ITEM(0, "Mes compagnons sont tous present, Muradin. Allons-y!", 631, 1001);
                 player->SEND_GOSSIP_MENU(player->GetGossipTextId(pCreature), pCreature->GetGUID());
                 return true;
             }
@@ -1946,7 +1946,6 @@ class npc_zafod_boombox : public CreatureScript
         }
 };
 
-//
 class npc_saurfang_gunship : public CreatureScript
 {
     public:
@@ -1964,7 +1963,7 @@ class npc_saurfang_gunship : public CreatureScript
                     return true;
                 }
 
-                player->ADD_GOSSIP_ITEM(0, "Mes compagnons sont tous comptabilisés, Saurcroc. Allons-y!", 631, 1001);
+                player->ADD_GOSSIP_ITEM(0, "Mes compagnons sont tous present, Saurcroc. Allons-y!", 631, 1001);
                 player->SEND_GOSSIP_MENU(player->GetGossipTextId(pCreature), pCreature->GetGUID());
                 return true;
             }

@@ -742,6 +742,7 @@ class instance_icecrown_citadel : public InstanceMapScript
                 switch (type)
                 {
                     case DATA_LADY_DEATHWHISPER:
+                    SetBossState(DATA_GUNSHIP_EVENT, state);    // GunshipBattle is optionnel for player (script not finished)
                         if (state == DONE)
                         {
                             if (GameObject* elevator = instance->GetGameObject(LadyDeathwisperElevatorGUID))
