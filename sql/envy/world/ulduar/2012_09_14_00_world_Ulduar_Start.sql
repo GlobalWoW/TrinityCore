@@ -1,3 +1,4 @@
+-- World Cleanup
 UPDATE `creature_template` SET `modelid1`=169, `modelid2`=16946 WHERE `entry`=34854;
 UPDATE `creature_template` SET `modelid1`=1126 WHERE `entry` IN (34606, 34649);
 UPDATE `creature_template` SET `modelid1`=19725 WHERE `entry`=34854;
@@ -35,7 +36,7 @@ DELETE FROM `gameobject_template` WHERE `entry`=194438;
 DELETE FROM `gameobject` WHERE `id`=194438;
 DELETE FROM `waypoint_data` WHERE `id` IN (34496, 34497);
 DELETE FROM `creature` WHERE `id`=33856;
-INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `modelid`, `position_x`, `position_y`, `position_z`, `spawntimesecs`, `curhealth`) VALUES 
+INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `modelid`, `position_x`, `position_y`, `position_z`, `spawntimesecs`, `curhealth`) VALUES
 (137621,33856,603,3,1,16925,2703.93,2569.32,364.397,180,4120),
 (137622,33856,603,3,1,16925,2715.33,2569.23,364.397,180,4120),
 (137623,33856,603,3,1,16925,2726.85,2569.28,364.397,180,4120),
@@ -49,3 +50,4 @@ INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `modelid`
 UPDATE `gameobject_template` SET `type`=0, `faction`=0, `data1`=1845, `data4`=33914 WHERE `entry`=194264;
 DELETE FROM `gameobject_scripts` WHERE `id`=55194;
 UPDATE `gameobject` SET `rotation2`=0, `spawntimesecs`=180, `animprogress`=255 WHERE `id`=194264;
+DELETE FROM `spell_linked_spell` WHERE `spell_trigger` IN (66336, 67076, 67077, 67078);

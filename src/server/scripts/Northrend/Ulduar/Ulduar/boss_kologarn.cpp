@@ -22,13 +22,6 @@
 #include "ulduar.h"
 #include "Vehicle.h"
 
-/* ScriptData
-SDName: boss_kologarn
-SD%Complete: 90
-SDComment: TODO: Achievements
-SDCategory: Ulduar
-EndScriptData */
-
 // Maybe I will spent those manually...
 enum Achiev
 {

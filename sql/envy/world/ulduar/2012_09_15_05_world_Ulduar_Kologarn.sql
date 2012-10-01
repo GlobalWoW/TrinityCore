@@ -4,7 +4,7 @@ UPDATE `creature_template` SET `ScriptName`='npc_kologarn_arm' WHERE `entry` IN 
 
 -- Add achievement scripts to corresponding criterias
 DELETE FROM `achievement_criteria_data` WHERE `criteria_id` IN (10284, 10722, 10285, 10095, 10290, 10133);
-INSERT INTO `achievement_criteria_data` (`criteria_id`, `type`, `value1`, `value2`, `ScriptName`) VALUES 
+INSERT INTO `achievement_criteria_data` (`criteria_id`, `type`, `value1`, `value2`, `ScriptName`) VALUES
 (10284, 11, 0, 0, 'achievement_disarmed'),
 (10284, 12, 0, 0, ''),
 (10722, 11, 0, 0, 'achievement_disarmed_25'),
@@ -18,7 +18,7 @@ INSERT INTO `achievement_criteria_data` (`criteria_id`, `type`, `value1`, `value
 (10133, 11, 0, 0, 'achievement_rubble_and_roll_25'),
 (10133, 12, 1, 0, '');
 
--- Creature text
+-- Creature_text
 DELETE FROM `script_texts` WHERE `npc_entry`=32930;
 DELETE FROM `creature_text` WHERE `entry`=32930;
 INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language`, `probability`, `emote`, `duration`, `sound`, `comment`) VALUES

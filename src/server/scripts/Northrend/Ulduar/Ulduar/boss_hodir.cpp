@@ -25,23 +25,17 @@
 #include "GridNotifiersImpl.h"
 #include "ulduar.h"
 
-/* #TODO: Achievements
-          Storm Cloud (Shaman ability)
-          Destroying of Toasty Fires
-*/
-
 enum HodirYells
 {
-    SAY_AGGRO                                   = 0,
-    SAY_SLAY                                    = 1,
-    SAY_FLASH_FREEZE                            = 2,
-    SAY_STALACTITE                              = 3,
-    SAY_DEATH                                   = 4,
-    SAY_BERSERK                                 = 5,
-    SAY_HARD_MODE_FAILED                        = 6,
-
-    EMOTE_FREEZE                                = 7,
-    EMOTE_BLOW                                  = 8
+    SAY_AGGRO                                    = 0,
+    SAY_SLAY                                     = 1,
+    SAY_FLASH_FREEZE                             = 2,
+    SAY_STALACTITE                               = 3,
+    SAY_DEATH                                    = 4,
+    SAY_BERSERK                                  = 5,
+    SAY_HARD_MODE_FAILED                         = 6,
+    EMOTE_FREEZE                                 = 7,
+    EMOTE_BLOWS                                  = 8
 };
 
 enum HodirSpells
@@ -103,13 +97,13 @@ enum HodirNPC
     NPC_SNOWPACKED_ICICLE                        = 33174,
     NPC_ICICLE                                   = 33169,
     NPC_ICICLE_SNOWDRIFT                         = 33173,
-    NPC_TOASTY_FIRE                              = 33342
+    NPC_TOASTY_FIRE                              = 33342,
 };
 
 enum HodirGameObjects
 {
     GO_TOASTY_FIRE                               = 194300,
-    GO_SNOWDRIFT                                 = 194173
+    GO_SNOWDRIFT                                 = 194173,
 };
 
 enum HodirEvents
@@ -121,7 +115,7 @@ enum HodirEvents
     EVENT_ICICLE,
     EVENT_BLOWS,
     EVENT_RARE_CACHE,
-    EVENT_BERSERK
+    EVENT_BERSERK,
 };
 
 enum HodirActions
@@ -159,7 +153,7 @@ uint32 const Entry[8] =
     NPC_FIELD_MEDIC_JESSI,
     NPC_ELLIE_NIGHTFEATHER,
     NPC_ELEMENTALIST_AVUUN,
-    NPC_SISSY_FLAMECUFFS
+    NPC_SISSY_FLAMECUFFS,
 };
 
 class npc_flash_freeze : public CreatureScript
@@ -173,7 +167,7 @@ class npc_flash_freeze : public CreatureScript
             {
                 me->SetDisplayId(me->GetCreatureTemplate()->Modelid2);
                 me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_STUNNED | UNIT_FLAG_PACIFIED);
-            }            
+            }
 
             void Reset()
             {
@@ -205,26 +199,8 @@ class npc_flash_freeze : public CreatureScript
                 targetGUID = summoner->GetGUID();
                 me->SetInCombatWith(summoner);
                 me->AddThreat(summoner, 250.0f);
-
                 if (Unit* target = ObjectAccessor::GetUnit(*me, targetGUID))
                 {
-                    // Freeze only players and helper npcs
-                    bool freeze = false;
-
-                    if (target->GetTypeId() == TYPEID_PLAYER)
-                        freeze = true;
-
-                    if (target->GetTypeId() == TYPEID_UNIT)
-                        for (uint8 n = 0; n < FRIENDS_COUNT; ++n)
-                            if (target->GetEntry() == Entry[n])
-                            {
-                                freeze = true;
-                                break;
-                            }
-
-                    if (!freeze)
-                        return;
-
                     DoCast(target, SPELL_BLOCK_OF_ICE, true);
                     // Prevents to have Ice Block on other place than target is
                     me->NearTeleportTo(target->GetPositionX(), target->GetPositionY(), target->GetPositionZ(), target->GetOrientation());
@@ -259,7 +235,7 @@ class npc_ice_block : public CreatureScript
                 me->SetDisplayId(me->GetCreatureTemplate()->Modelid2);
                 me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_STUNNED | UNIT_FLAG_PACIFIED);
                 targetGUID = 0;
-            }            
+            }
 
             void IsSummonedBy(Unit* summoner)
             {
@@ -316,16 +292,15 @@ class boss_hodir : public CreatureScript
         {
             boss_hodirAI(Creature* creature) : BossAI(creature, BOSS_HODIR)
             {
-                me->SetReactState(REACT_DEFENSIVE);
+                me->SetReactState(REACT_PASSIVE);
                 gotEncounterFinished = false;
-            }            
+            }
 
             void Reset()
             {
                 _Reset();
-                me->SetReactState(REACT_DEFENSIVE);
+                me->SetReactState(REACT_PASSIVE);
                 gotEncounterFinished = gotEncounterFinished || (instance->GetBossState(BOSS_HODIR) == DONE);
-                instance->HandleGameObject(instance->GetData64(GO_HODIR_IN_DOOR_STONE), true);
 
                 // Note: NPC translation alliance -> horde is performed by OnCreatureCreate (instance-script)
                 for (uint8 n = 0; n < FRIENDS_COUNT; ++n)
@@ -344,7 +319,6 @@ class boss_hodir : public CreatureScript
                 cheeseTheFreeze = true;
                 iHaveTheCoolestFriends = true;
                 iCouldSayThatThisCacheWasRare = true;
-                instance->HandleGameObject(instance->GetData64(GO_HODIR_IN_DOOR_STONE), false);
 
                 events.ScheduleEvent(EVENT_ICICLE, 2000);
                 events.ScheduleEvent(EVENT_FREEZE, 25000);
@@ -357,7 +331,7 @@ class boss_hodir : public CreatureScript
 
             void KilledUnit(Unit* /*who*/)
             {
-                if (!urand(0,5))
+                if (!urand(0, 3))
                     Talk(SAY_SLAY);
             }
 
@@ -385,7 +359,7 @@ class boss_hodir : public CreatureScript
                     me->GetMotionMaster()->MoveIdle();
                     me->SetControlled(true, UNIT_STATE_STUNNED);
                     me->CombatStop(true);
-
+                    
                     DoCast(me, SPELL_ACHIEVEMENT_CHECK, true); // For hodir credit, due to wowhead
 
                     me->setFaction(35);
@@ -412,12 +386,12 @@ class boss_hodir : public CreatureScript
                         case EVENT_FREEZE:
                             DoCastAOE(SPELL_FREEZE);
                             events.ScheduleEvent(EVENT_FREEZE, urand(30000, 45000));
-                            return;
+                            break;
                         case EVENT_ICICLE:
                             if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100.0f, true))
                                 DoCast(target, SPELL_ICICLE);
                             events.ScheduleEvent(EVENT_ICICLE, RAID_MODE(5500, 3500));
-                            return;
+                            break;
                         case EVENT_FLASH_FREEZE:
                             Talk(SAY_FLASH_FREEZE);
                             Talk(EMOTE_FREEZE);
@@ -426,7 +400,7 @@ class boss_hodir : public CreatureScript
                                     target->CastSpell(target, SPELL_ICICLE_SNOWDRIFT, true);
                             DoCast(SPELL_FLASH_FREEZE);
                             events.ScheduleEvent(EVENT_FLASH_FREEZE_EFFECT, 500);
-                            return;
+                            break;
                         case EVENT_FLASH_FREEZE_EFFECT:
                         {
                             std::list<Creature*> IcicleSnowdriftList;
@@ -436,27 +410,25 @@ class boss_hodir : public CreatureScript
                             FlashFreeze();
                             events.CancelEvent(EVENT_FLASH_FREEZE_EFFECT);
                             events.ScheduleEvent(EVENT_FLASH_FREEZE, urand(25000, 35000));
-                            return;
+                            break;
                         }
                         case EVENT_BLOWS:
                             Talk(SAY_STALACTITE);
-                            Talk(EMOTE_BLOW);
+                            Talk(EMOTE_BLOWS);
                             DoCast(me, SPELL_FROZEN_BLOWS);
                             events.ScheduleEvent(EVENT_BLOWS, urand(60000, 65000));
-                            return;
+                            break;
                         case EVENT_RARE_CACHE:
                             Talk(SAY_HARD_MODE_FAILED);
                             iCouldSayThatThisCacheWasRare = false;
                             instance->SetData(DATA_HODIR_RARE_CACHE, 0);
                             events.CancelEvent(EVENT_RARE_CACHE);
-                            return;
+                            break;
                         case EVENT_BERSERK:
                             Talk(SAY_BERSERK);
                             DoCast(me, SPELL_BERSERK, true);
                             events.CancelEvent(EVENT_BERSERK);
-                            return;
-                        default:
-                            return;
+                            break;
                     }
                 }
 
@@ -540,7 +512,7 @@ class npc_icicle : public CreatureScript
                 me->SetDisplayId(me->GetCreatureTemplate()->Modelid1);
                 me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_PACIFIED | UNIT_FLAG_NOT_SELECTABLE);
                 me->SetReactState(REACT_PASSIVE);
-            }           
+            }
 
             void Reset()
             {
@@ -621,12 +593,7 @@ class npc_snowpacked_icicle : public CreatureScript
 class npc_hodir_priest : public CreatureScript
 {
     private:
-        enum
-        {
-            EVENT_HEAL = 1,
-            EVENT_DISPEL_MAGIC
-        };
-
+        enum { EVENT_HEAL = 1, EVENT_DISPEL_MAGIC };
     public:
         npc_hodir_priest() : CreatureScript("npc_hodir_priest") {}
 
@@ -666,7 +633,7 @@ class npc_hodir_priest : public CreatureScript
                         case EVENT_HEAL:
                             DoCastAOE(SPELL_GREATER_HEAL);
                             events.ScheduleEvent(EVENT_HEAL, urand(7500, 10000));
-                            return;
+                            break;
                         case EVENT_DISPEL_MAGIC:
                         {
                             std::list<Unit*> allies;
@@ -678,7 +645,7 @@ class npc_hodir_priest : public CreatureScript
                                 if ((*itr)->HasAura(SPELL_FREEZE))
                                     DoCast(*itr, SPELL_DISPEL_MAGIC, true);
                             events.ScheduleEvent(EVENT_DISPEL_MAGIC, urand(15000, 20000));
-                            return;
+                            break;
                         }
                         default:
                             break;
@@ -708,11 +675,7 @@ class npc_hodir_priest : public CreatureScript
 class npc_hodir_shaman : public CreatureScript
 {
     private:
-        enum
-        {
-            EVENT_STORM_CLOUD = 1
-        };
-
+        enum { EVENT_STORM_CLOUD = 1 };
     public:
         npc_hodir_shaman() : CreatureScript("npc_hodir_shaman") {}
 
@@ -759,7 +722,7 @@ class npc_hodir_shaman : public CreatureScript
                                 }
                                 else
                                     events.ScheduleEvent(EVENT_STORM_CLOUD, urand(2000, 3000)); // No target found, check again in a short period of time
-                            
+
                             }
                             break;
                         default:
@@ -859,12 +822,7 @@ class npc_hodir_druid : public CreatureScript
 class npc_hodir_mage : public CreatureScript
 {
     private:
-        enum
-        {
-            EVENT_CONJURE_FIRE = 1,
-            EVENT_MELT_ICE
-        };
-
+        enum { EVENT_CONJURE_FIRE = 1, EVENT_MELT_ICE };
     public:
         npc_hodir_mage() : CreatureScript("npc_hodir_mage") {}
 
@@ -920,14 +878,12 @@ class npc_hodir_mage : public CreatureScript
                             // The fire is gets positioned at a random coordinate.
                             DoCast(me, SPELL_CONJURE_FIRE, true);
                             events.ScheduleEvent(EVENT_CONJURE_FIRE, urand(15000, 20000));
-                            return;
+                            break;
                         case EVENT_MELT_ICE:
                             if (Creature* FlashFreeze = me->FindNearestCreature(NPC_FLASH_FREEZE, 50.0f, true))
                                 DoCast(FlashFreeze, SPELL_MELT_ICE, true);
                             events.ScheduleEvent(EVENT_MELT_ICE, urand(10000, 15000));
-                            return;
-                        default:
-                            return;
+                            break;
                     }
                 }
 
@@ -1096,7 +1052,6 @@ class achievement_staying_buffed_all_winter : public AchievementCriteriaScript
            return false;
        }
 };
-
 void AddSC_boss_hodir()
 {
     new boss_hodir();

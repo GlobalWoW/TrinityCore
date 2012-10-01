@@ -33,28 +33,28 @@ enum FreyaYells
     SAY_BERSERK                                  = 4,
     SAY_SUMMON_CONSERVATOR                       = 5,
     SAY_SUMMON_TRIO                              = 6,
-    SAY_SUMMON_LASHERS                           = 7,
+    SAY_SUMMON_LASHERS                           = 7
 };
 
 enum ElderBrightleafYells
 {
     SAY_BRIGHTLEAF_AGGRO                         = 0,
     SAY_BRIGHTLEAF_SLAY                          = 1,
-    SAY_BRIGHTLEAF_DEATH                         = 2,
+    SAY_BRIGHTLEAF_DEATH                         = 2
 };
 
 enum ElderIronbranchYells
 {
     SAY_IRONBRANCH_AGGRO                         = 0,
     SAY_IRONBRANCH_SLAY                          = 1,
-    SAY_IRONBRANCH_DEATH                         = 2,
+    SAY_IRONBRANCH_DEATH                         = 2
 };
 
 enum ElderStonebarkYells
 {
     SAY_STONEBARK_AGGRO                          = 0,
     SAY_STONEBARK_SLAY                           = 1,
-    SAY_STONEBARK_DEATH                          = 2,
+    SAY_STONEBARK_DEATH                          = 2
 };
 
 enum FreyaSpells
