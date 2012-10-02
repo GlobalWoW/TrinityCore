@@ -1,6 +1,6 @@
 -- Achievement: Stayin buffed all winter.
 
-DELETE FROM `achievement_criteria_data` WHERE `criteria_id` IN (10223, 10240, 10241);
+DELETE FROM `achievement_criteria_data` WHERE `criteria_id` IN (10223, 10240, 10241, 10229, 10238, 10239);
 INSERT INTO `achievement_criteria_data` (`criteria_id`, `type`, `value1`, `value2`, `ScriptName`) VALUES
 -- 10 man handling.
 (10223, 11, 0, 0, 'achievement_staying_buffed_all_winter_10'),
