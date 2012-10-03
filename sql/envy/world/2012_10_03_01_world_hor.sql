@@ -52,50 +52,6 @@ INSERT INTO `gameobject` (`id`, `map`, `spawnMask`, `phaseMask`, `position_x`, `
 (202396, 668, 3, 1, 5451.86, 1902.04, 747.268, 4.13171, 0, 0, 0.879941, -0.475084, 300, 0, 1),
 (201911, 668, 3, 1, 5347.53, 1773.17, 766.504, 3.92515, 0, 0, 0.924232, -0.381833, 300, 0, 1);
 
--- Texts
-DELETE FROM `script_texts` WHERE `entry` IN (-1594474, -1594473, -1594519, -1594520, -1594480, -1594488, -1594490, -1594496,
--1594497, -1594500, -1594501, -1594503, -1594521, -1594479, -1594487, -1594489, -1594494, -1594495, -1594498, -1594499, -1594502, -1594524, -1594525,
--1594486, -1594491, -1594491, -1594492, -1594493, -1594481, -1594482, -1594483, -1594504, -1594522, -1594523, -1594478, -1594477, -1594485, -1594526, -1594527);
-INSERT INTO `script_texts` (`npc_entry`, `entry`, `content_default` ,`comment`) VALUES
-(37226, -1594474, 'Sylvanas... just another little trick of yours...', 'LK_SYLVANAS_INTRO_END'), -- LK-Intro-Event
-(37226, -1594473, 'Jayna... do you really think that I am your prince any longer, in any way?', 'LK_JAYNA_INTRO_END'),
-(36723, -1594519, 'The master wants you dead, and I\'m here to fulfill this request!', 'SAY_AGGRO_GENERAL'), -- Frostworn General
-(36723, -1594520, 'Free... at long last...', 'SAY_DEATH_GENERAL'),
-(37554, -1594480, 'Hurry up, this prison will not distract him for long!', 'SAY_SYLVANA_AGGRO'), -- Sylvanas
-(37554, -1594488, 'I will take down this frozen barrier, protect me!', 'SAY_SYVL_WALL1'),
-(37554, -1594490, 'Another barrier... stop those minions from distracting me!', 'SAY_SYVL_WALL2'),
-(37554, -1594496, 'I hope this path will end up soon...', 'SAY_SYVL_WALL3'),
-(37554, -1594497, 'There is some way to icecrown behind this wall, hurry up!', 'SAY_SYLV_WALL4'),
-(37554, -1594500, 'Hurry up, the end of this path is near!', 'SAY_SYLV_ESCAPE_01'),
-(37554, -1594501, 'What\'s this up there... the Orgrim\'s Hammer?', 'SAY_SYLV_ESCAPE_02'),
-(37554, -1594503, 'Damn it, we are trapped here...', 'SAY_SYVL_TRAPPED'),
-(37554, -1594521, 'We are safe - for the moment...', 'SAY_SYLVANA_FINAL_2'), -- end Sylvanas' escape talks
-(36955, -1594479, 'Run... this prison will not stop him for long!', 'SAY_JAYNA_AGGRO'), -- Jayna
-(36955, -1594487, 'An icy wall! Protect me, I will take care of this!', 'SAY_JAYNA_WALL1'),
-(36955, -1594489, 'Another barrier - I will break it down, but stop these minions!', 'SAY_JAYNA_WALL2'),
-(36955, -1594494, 'Does this way have any end?', 'SAY_JAYNA_WALL3'),
-(36955, -1594495, 'I hope we are close to the end of this path...', 'SAY_JAYNA_WALL4'),
-(36955, -1594498, 'This tunnel ends...', 'SAY_JAYNA_ESCAPE_01'),
-(36955, -1594499, 'What\'s this up there? The Skybreaker?', 'SAY_JAYNA_ESCAPE_02'),
-(36955, -1594502, 'By the light, we are trapped here!', 'SAY_JAYNA_TRAPPED'),
-(36955, -1594524, 'Bartlett? I have never thought of you arriving here in time...', 'JAYNA_FINAL2'),
-(36955, -1594525, 'We are save - for the moment... But we will meet him again...', 'JAYNA_FINAL3'),	
-(36954, -1594486, 'Just a simple thing that stops for long...', 'SAY_LK_W1'),	-- Lich King - Hunting Sequence
-(36954, -1594491, 'Minions, your master calls for your service!', 'SAY_LK_W2'),
-(36954, -1594492, 'Do you really think you may escape me that easily?', 'SAY_LK_W3'),
-(36954, -1594493, 'Oh, you think you may evade using this path... what a pity...', 'SAY_LK_W4'),
-(36954, -1594481, 'May the coldness of this eternal winter consume your bodies...', 'SAY_LK_WINTER'),
-(36954, -1594482, 'Minions, hunt them!', 'SAY_LK_GNOUL'),
-(36954, -1594483, 'Monstrosities, hunt them!', 'SAY_LK_ABON'),
-(36954, -1594504, 'For the moment, you have escaped... but we will meet again...', 'SAY_LK_END_DUN'),
-(36954, -1594478, 'Sylvanas... you know that you cannot win this...', 'SAY_LK_AGGRO_H'),
-(36954, -1594477, 'Jayna... just another human that trusts in a part of me that has died long ago...', 'SAY_LK_AGGRO_A'),
-(36954, -1594485, 'As I have told you, running away does not prevent you from dying here!', 'SAY_LK_WIN'),
-(37883, -1594522, 'Arthas still following you... gunners, fire down these walls!', 'SAY_SYLV_FIRE'), -- Korm
-(37883, -1594523, 'That was quite close...', 'SAY_SYLV_FINAL_1'),
-(37182, -1594526, 'Gunners, fire down these walls, Lady Jayna is in danger!', 'FIRE_A'),	-- Bartlett	
-(37182, -1594527, 'That was... really... close, mylady.', 'END_A');
-
 -- Waypoints Sylvanas
 DELETE FROM `script_waypoint` WHERE `entry`=37554;
 INSERT INTO `script_waypoint` (`entry`,`pointid`,`location_x`,`location_y`,`location_z`,`waittime`) VALUES
@@ -311,7 +267,7 @@ INSERT INTO `gameobject_loot_template` (`entry`,`item`,`ChanceOrQuestChance`,`lo
 (27993,43102,85,1,0,1,1); -- Frozen Orb
 
 -- Queldelar (37158)
-REPLACE INTO `creature_template` (`entry`, `difficulty_entry_1`, `difficulty_entry_2`, `difficulty_entry_3`, `KillCredit1`, `KillCredit2`, `modelid1`, `modelid2`, `modelid3`, `modelid4`, `name`, `subname`, `IconName`, `gossip_menu_id`, `minlevel`, `maxlevel`, `exp`, `faction_A`, `faction_H`, `npcflag`, `speed_walk`, `speed_run`, `scale`, `rank`, `mindmg`, `maxdmg`, `dmgschool`, `attackpower`, `dmg_multiplier`, `baseattacktime`, `rangeattacktime`, `unit_class`, `unit_flags`, `dynamicflags`, `family`, `trainer_type`, `trainer_spell`, `trainer_class`, `trainer_race`, `minrangedmg`, `maxrangedmg`, `rangedattackpower`, `type`, `type_flags`, `lootid`, `pickpocketloot`, `skinloot`, `resistance1`, `resistance2`, `resistance3`, `resistance4`, `resistance5`, `resistance6`, `spell1`, `spell2`, `spell3`, `spell4`, `spell5`, `spell6`, `spell7`, `spell8`, `PetSpellDataId`, `VehicleId`, `mingold`, `maxgold`, `AIName`, `MovementType`, `InhabitType`, `Health_mod`, `Mana_mod`, `Armor_mod`, `RacialLeader`, `questItem1`, `questItem2`, `questItem3`, `questItem4`, `questItem5`, `questItem6`, `movementId`, `RegenHealth`, `equipment_id`, `mechanic_immune_mask`, `flags_extra`, `ScriptName`, `WDBVerified`) VALUES (37158, 0, 0, 0, 0, 0, 30547, 30547, 0, 0, 'Quel\'Delar', '', '', 0, 80, 80, 2, 14, 14, 0, 1, 1.14286, 1, 1, 422, 586, 0, 642, 7.5, 0, 0, 1, 0, 8, 0, 0, 0, 0, 0, 345, 509, 103, 10, 0, 37158, 0, 0, 0, 0, 0, 0, 0, 0, 67541, 29426, 16856, 67716, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 5, 17, 5, 1, 0, 50254, 0, 0, 0, 0, 0, 0, 1, 3002, 0, 0, 'npc_queldelar_schwert', 12340);
+REPLACE INTO `creature_template` (`entry`, `difficulty_entry_1`, `difficulty_entry_2`, `difficulty_entry_3`, `KillCredit1`, `KillCredit2`, `modelid1`, `modelid2`, `modelid3`, `modelid4`, `name`, `subname`, `IconName`, `gossip_menu_id`, `minlevel`, `maxlevel`, `exp`, `faction_A`, `faction_H`, `npcflag`, `speed_walk`, `speed_run`, `scale`, `rank`, `mindmg`, `maxdmg`, `dmgschool`, `attackpower`, `dmg_multiplier`, `baseattacktime`, `rangeattacktime`, `unit_class`, `unit_flags`, `dynamicflags`, `family`, `trainer_type`, `trainer_spell`, `trainer_class`, `trainer_race`, `minrangedmg`, `maxrangedmg`, `rangedattackpower`, `type`, `type_flags`, `lootid`, `pickpocketloot`, `skinloot`, `resistance1`, `resistance2`, `resistance3`, `resistance4`, `resistance5`, `resistance6`, `spell1`, `spell2`, `spell3`, `spell4`, `spell5`, `spell6`, `spell7`, `spell8`, `PetSpellDataId`, `VehicleId`, `mingold`, `maxgold`, `AIName`, `MovementType`, `InhabitType`, `Health_mod`, `Mana_mod`, `Armor_mod`, `RacialLeader`, `questItem1`, `questItem2`, `questItem3`, `questItem4`, `questItem5`, `questItem6`, `movementId`, `RegenHealth`, `equipment_id`, `mechanic_immune_mask`, `flags_extra`, `ScriptName`, `WDBVerified`) VALUES (37158, 0, 0, 0, 0, 0, 30547, 30547, 0, 0, 'Quel''Delar', '', '', 0, 80, 80, 2, 14, 14, 0, 1, 1.14286, 1, 1, 422, 586, 0, 642, 7.5, 0, 0, 1, 0, 8, 0, 0, 0, 0, 0, 345, 509, 103, 10, 0, 37158, 0, 0, 0, 0, 0, 0, 0, 0, 67541, 29426, 16856, 67716, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 5, 17, 5, 1, 0, 50254, 0, 0, 0, 0, 0, 0, 1, 3002, 0, 0, 'npc_queldelar_schwert', 12340);
 
 -- Loot
 DELETE FROM `creature_loot_template` WHERE (`entry`=37158);
@@ -323,7 +279,7 @@ DELETE FROM `creature_equip_template` WHERE (`entry`=3002);
 INSERT INTO `creature_equip_template` VALUES ('3002', '50048', '0', '0');
 
 -- Queldelar Trigger
-REPLACE INTO `creature_template` (`entry`, `difficulty_entry_1`, `difficulty_entry_2`, `difficulty_entry_3`, `KillCredit1`, `KillCredit2`, `modelid1`, `modelid2`, `modelid3`, `modelid4`, `name`, `subname`, `IconName`, `gossip_menu_id`, `minlevel`, `maxlevel`, `exp`, `faction_A`, `faction_H`, `npcflag`, `speed_walk`, `speed_run`, `scale`, `rank`, `mindmg`, `maxdmg`, `dmgschool`, `attackpower`, `dmg_multiplier`, `baseattacktime`, `rangeattacktime`, `unit_class`, `unit_flags`, `dynamicflags`, `family`, `trainer_type`, `trainer_spell`, `trainer_class`, `trainer_race`, `minrangedmg`, `maxrangedmg`, `rangedattackpower`, `type`, `type_flags`, `lootid`, `pickpocketloot`, `skinloot`, `resistance1`, `resistance2`, `resistance3`, `resistance4`, `resistance5`, `resistance6`, `spell1`, `spell2`, `spell3`, `spell4`, `spell5`, `spell6`, `spell7`, `spell8`, `PetSpellDataId`, `VehicleId`, `mingold`, `maxgold`, `AIName`, `MovementType`, `InhabitType`, `Health_mod`, `Mana_mod`, `Armor_mod`, `RacialLeader`, `questItem1`, `questItem2`, `questItem3`, `questItem4`, `questItem5`, `questItem6`, `movementId`, `RegenHealth`, `equipment_id`, `mechanic_immune_mask`, `flags_extra`, `ScriptName`, `WDBVerified`) VALUES (37704, 0, 0, 0, 0, 0, 20570, 17612, 0, 0, 'Frostmourne Altar Bunny (Quel\'Delar)', '', '', 0, 80, 80, 2, 114, 114, 0, 1, 1.14286, 1, 0, 2, 2, 0, 24, 1, 2000, 0, 1, 33555200, 8, 0, 0, 0, 0, 0, 1, 1, 0, 10, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 3, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 'npc_queldelar', 12340);
+REPLACE INTO `creature_template` (`entry`, `difficulty_entry_1`, `difficulty_entry_2`, `difficulty_entry_3`, `KillCredit1`, `KillCredit2`, `modelid1`, `modelid2`, `modelid3`, `modelid4`, `name`, `subname`, `IconName`, `gossip_menu_id`, `minlevel`, `maxlevel`, `exp`, `faction_A`, `faction_H`, `npcflag`, `speed_walk`, `speed_run`, `scale`, `rank`, `mindmg`, `maxdmg`, `dmgschool`, `attackpower`, `dmg_multiplier`, `baseattacktime`, `rangeattacktime`, `unit_class`, `unit_flags`, `dynamicflags`, `family`, `trainer_type`, `trainer_spell`, `trainer_class`, `trainer_race`, `minrangedmg`, `maxrangedmg`, `rangedattackpower`, `type`, `type_flags`, `lootid`, `pickpocketloot`, `skinloot`, `resistance1`, `resistance2`, `resistance3`, `resistance4`, `resistance5`, `resistance6`, `spell1`, `spell2`, `spell3`, `spell4`, `spell5`, `spell6`, `spell7`, `spell8`, `PetSpellDataId`, `VehicleId`, `mingold`, `maxgold`, `AIName`, `MovementType`, `InhabitType`, `Health_mod`, `Mana_mod`, `Armor_mod`, `RacialLeader`, `questItem1`, `questItem2`, `questItem3`, `questItem4`, `questItem5`, `questItem6`, `movementId`, `RegenHealth`, `equipment_id`, `mechanic_immune_mask`, `flags_extra`, `ScriptName`, `WDBVerified`) VALUES (37704, 0, 0, 0, 0, 0, 20570, 17612, 0, 0, 'Frostmourne Altar Bunny (Quel''Delar)', '', '', 0, 80, 80, 2, 114, 114, 0, 1, 1.14286, 1, 0, 2, 2, 0, 24, 1, 2000, 0, 1, 33555200, 8, 0, 0, 0, 0, 0, 1, 1, 0, 10, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 3, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 'npc_queldelar', 12340);
 
 DELETE FROM `creature` WHERE `id`=37704;
 INSERT INTO `creature` (`guid`,`id`,`map`,`spawnMask`,`phaseMask`,`modelid`,`equipment_id`,`position_x`,`position_y`,`position_z`,`orientation`,`spawntimesecs`,`spawndist`,`currentwaypoint`,`curhealth`,`curmana`,`MovementType`,`npcflag`,`unit_flags`,`dynamicflags`) VALUES
@@ -336,3 +292,47 @@ UPDATE `creature_template` SET `unit_flags`= 0 WHERE `entry` IN (
 38175,
 38172,
 37906);
+
+-- script_text
+DELETE FROM `script_texts` WHERE `entry` BETWEEN -1594540 AND -1594430;
+INSERT INTO `script_texts` (`entry`,`content_default`,`sound`,`type`,`language`,`emote`,`comment`) VALUES
+
+(-1594473,'Have reached your allies, Jaina, as promised. All will be powerful agents of the Scourge.',17229,1,0,0,'SAY_LK_JAINA_INTRO_END'),
+(-1594474,'Do not make the same mistake, Sylvanas. This time there will be no escape. I will serve in death!',17228,1,0,0,'SAY_LK_SYLVANAS_INTRO_END'),
+
+-- Frostworn General
+(-1594519,'You are not worthy to face the Lich King!',16921,1,0,0,'FrostWorn General - SAY_AGGRO'),
+(-1594520,'Master, I have failed...',16922,1,0,0,'FrostWorn General - SAY_DEATH'),
+
+-- INTRO - Pre Escape
+(-1594477,'Your allies have arrived, Jaina, just as you promised. You will all become powerful agents of the Scourge.',17212,1,0,0,'SAY_LICH_KING_AGGRO_A'),
+(-1594478,'I will not make the same mistake again, Sylvanas. This time there will be no escape. You will all serve me in death!',17213,1,0,0,'SAY_LICH_KING_AGGRO_H'),
+(-1594479,'He is too powerful, we must leave this place at once! My magic will hold him in place for only a short time! Come quickly, heroes!',16644,0,0,1,'SAY_JAINA_AGGRO'),
+(-1594480,'He''s too powerful! Heroes, quickly, come to me! We must leave this place immediately! I will do what I can do hold him in place while we flee.',17058,0,0,1,'SAY_SYLVANA_AGGRO'),
+
+-- ESCAPE
+(-1594487,'I will destroy this barrier. You must hold the undead back!',16607,1,0,0,'SAY_JAINA_WALL_01'),
+(-1594488,'No wall can hold the Banshee Queen! Keep the undead at bay, heroes! I will tear this barrier down!',17029,1,0,0,'SAY_SYLVANA_WALL_01'),
+(-1594489,'Another ice wall! Keep the undead from interrupting my incantation so that I may bring this wall down!',16608,1,0,0,'SAY_JAINA_WALL_02'),
+(-1594490,'Another barrier? Stand strong, champions! I will bring the wall down!',17030,1,0,0,'SAY_SYLVANA_WALL_02'),
+(-1594491,'Succumb to the chill of the grave.',17218,1,0,0,'SAY_LICH_KING_WALL_02'),
+(-1594492,'Another dead end.',17219,1,0,0,'SAY_LICH_KING_WALL_03'),
+(-1594493,'How long can you fight it?',17220,1,0,0,'SAY_LICH_KING_WALL_04'),
+(-1594494,'This playing with us. I''ll Show what happens to ice when meeting with fire!',16609,0,0,0,'SAY_JAINA_WALL_03'),
+(-1594495,'Your barriers can''t hold us back much longer, monster. I will shatter them all!',16610,1,0,0,'SAY_JAINA_WALL_04'),
+(-1594496,'I grow tired of these games, Arthas! Your walls can''t stop me!',17031,1,0,0,'SAY_SYLVANA_WALL_03'),
+(-1594497,'You won''t impede our escape, fiend. Keep the undead off me while I bring this barrier down!',17032,1,0,0,'SAY_SYLVANA_WALL_04'),
+(-1594498,'There''s an opening up ahead. GO NOW!',16645,1,0,0,'SAY_JAINA_ESCAPE_01'),
+(-1594499,'We''re almost there... Don''t give up!',16646,1,0,0,'SAY_JAINA_ESCAPE_02'),
+(-1594500,'There''s an opening up ahead. GO NOW!',17059,1,0,0, 'SAY_SYLVANA_ESCAPE_01'),
+(-1594501,'We''re almost there! Don''t give up!',17060,1,0,0,'SAY_SYLVANA_ESCAPE_02'),
+(-1594502,'It... It''s a dead end. We have no choice but to fight. Steel yourself heroes, for this is our last stand!',16647,1,0,0,'SAY_JAINA_TRAP'),
+(-1594503,'BLASTED DEAD END! So this is how it ends. Prepare yourselves, heroes, for today we make our final stand!',17061,1,0,0,'SAY_SYLVANA_TRAP'),
+
+-- LICH KING - Hunting Sequence
+(-1594486,'There is no escape!',17217,1,0,0,'SAY_LICH_KING_WALL_01'),
+(-1594482,'Rise minions, do not left them us!',17216,1,0,0,'SAY_LICH_KING_GHOUL'),
+(-1594483,'Minions sees them. Bring their corpses back to me!',17222,1,0,0,'SAY_LICH_KING_ABON'),
+(-1594481,'Death''s cold embrace awaits.',17221,1,0,0,'SAY_LICH_KING_WINTER'),
+(-1594504,'Nowhere to run! You''re mine now...',17223,1,0,0,'SAY_LICH_KING_END_DUN'),
+(-1594485,'All is lost!',17215,1,0,0,'SAY_LICH_KING_WIN');
