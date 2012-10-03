@@ -100,8 +100,8 @@ bool FleeingMovementGenerator<T>::_getPoint(T* owner, float &x, float &y, float 
     float curr_x, curr_y, curr_z;
     owner->GetPosition(curr_x, curr_y, curr_z);
 
-    x = curr_x + dist*cos(angle);
-    y = curr_y + dist*sin(angle);
+    x = curr_x + dist * std::cos(angle);
+    y = curr_y + dist * std::sin(angle);
     z = curr_z;
 
     owner->UpdateAllowedPositionZ(x, y, z);
@@ -209,4 +209,3 @@ bool TimedFleeingMovementGenerator::Update(Unit* owner, const uint32& time_diff)
     // This is done instead of casting Unit& to Creature& and call parent method, then we can use Unit directly
     return MovementGeneratorMedium< Creature, FleeingMovementGenerator<Creature> >::Update(owner, time_diff);
 }
-
