@@ -1066,7 +1066,7 @@ void AddSC_boss_hodir()
     new npc_flash_freeze();
     new spell_biting_cold();
     new spell_biting_cold_dot();
-    new achievement_staying_buffed_all_winter("achievement_staying_buffed_all_winter");
+    new achievement_staying_buffed_all_winter("achievement_staying_buffed_all_winter_10");
     new achievement_staying_buffed_all_winter("achievement_staying_buffed_all_winter_25");
 }
 
