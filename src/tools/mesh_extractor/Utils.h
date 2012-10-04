@@ -349,5 +349,10 @@ public:
     }
     static std::string Replace( std::string str, const std::string& oldStr, const std::string& newStr );
     static G3D::Matrix4 GetWmoDoodadTransformation( DoodadInstance inst, WorldModelDefinition root );
+    static void CreateDir( const std::string& Path );
+    static void SaveToDisk(FILE* stream, std::string path);
+    static Vector3 ToWoWCoords( Vector3 vec );
+    static std::string GetExtension( std::string path );
+    static char* GetPlainName(const char* FileName);
 };
 #endif

@@ -5,6 +5,13 @@
 #include "G3D/Matrix4.h"
 #include "G3D/Quat.h"
 
+#ifdef _WIN32
+    #include "direct.h"
+#else
+    #include <sys/stat.h>
+    #include <unistd.h>
+#endif
+
 const float Constants::TileSize = 533.0f + (1/3.0f);
 const float Constants::MaxXY = 32.0f * Constants::TileSize;
 const float Constants::ChunkSize = Constants::TileSize / 16.0f;
@@ -12,6 +19,17 @@ const float Constants::UnitSize = Constants::ChunkSize / 8.0f;
 const float Constants::Origin[] = { -Constants::MaxXY, 0.0f, -Constants::MaxXY };
 const float Constants::PI = 3.1415926f;
 const float Constants::MaxStandableHeight = 1.5f;
+const char* Constants::VMAPMagic =  "VMAP042";
+bool Constants::ToWoWCoords = false;
+
+void Utils::CreateDir( const std::string& Path )
+{
+#ifdef _WIN32
+    _mkdir( Path.c_str());
+#else
+    mkdir( Path.c_str(), 0777 );
+#endif
+}
 
 void Utils::Reverse(char word[])
 {
@@ -181,6 +199,43 @@ G3D::Matrix4 Utils::GetWmoDoodadTransformation( DoodadInstance inst, WorldModelD
     return scale * rotation * quatRotation ** translation * rootTransformation;
 }
 
+void Utils::SaveToDisk( FILE* stream, std::string path )
+{
+    FILE* disk = fopen(path.c_str(), "wb");
+    if (!disk)
+    {
+        printf("Could not save file %s to disk, please verify that you have write permissions on that directory\n", path.c_str());
+        return;
+    }
+
+    uint32 size = Utils::Size(stream);
+    uint8* data = new uint8[size];
+    // Read the data to an array
+    fread(data, 1, size, stream);
+    // And write it in the file
+    fwrite(data, 1, size, disk);
+
+    // Close the filestream
+    fclose(disk);
+    // Free the used memory
+    delete data;
+}
+
+Vector3 Utils::ToWoWCoords( Vector3 vec )
+{
+    return Vector3(vec.x, -vec.z, vec.y);
+}
+
+std::string Utils::GetExtension( std::string path )
+{
+    std::string::size_type idx = path.rfind('.');
+    std::string extension = "";
+
+    if(idx != std::string::npos)
+        extension = path.substr(idx+1);
+    return extension;
+}
+
 void MapChunkHeader::Read(FILE* stream)
 {
     fread(&Flags, sizeof(uint32), 1, stream);
@@ -270,16 +325,6 @@ void ModelHeader::Read(FILE* stream)
     fread(&OffsetTransLookup, sizeof(uint32), 1, stream);
     fread(&CountUvAnimLookup, sizeof(uint32), 1, stream);
     fread(&OffsetUvAnimLookup, sizeof(uint32), 1, stream);
-    fread(&CountColors, sizeof(uint32), 1, stream);
-    fread(&OffsetColors, sizeof(uint32), 1, stream);
-    fread(&CountTextures, sizeof(uint32), 1, stream);
-    fread(&OffsetTextures, sizeof(uint32), 1, stream);
-    fread(&CountTransparency, sizeof(uint32), 1, stream);
-    fread(&OffsetTransparency, sizeof(uint32), 1, stream);
-    fread(&CountUvAnimation, sizeof(uint32), 1, stream);
-    fread(&OffsetUvAnimation, sizeof(uint32), 1, stream);
-    fread(&CountTexReplace, sizeof(uint32), 1, stream);
-    fread(&OffsetTexReplace, sizeof(uint32), 1, stream);
     VertexBox[0] = Vector3::Read(stream);
     VertexBox[1] = Vector3::Read(stream);
     fread(&VertexRadius, sizeof(float), 1, stream);
@@ -429,4 +474,13 @@ H2OInformation H2OInformation::Read(FILE* stream)
     fread(&ret.OffsetMask2, sizeof(uint32), 1, stream);
     fread(&ret.OffsetHeightmap, sizeof(uint32), 1, stream);
     return ret;
+}
+
+char* Utils::GetPlainName(const char* FileName)
+{
+    char* temp;
+
+    if((temp = (char*)strrchr(FileName, '\\')) != NULL)
+        FileName = temp + 1;
+    return (char*)FileName;
 }
