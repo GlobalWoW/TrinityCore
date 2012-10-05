@@ -210,11 +210,7 @@ enum ScoreType
     SCORE_SECONDARY_OBJECTIVES  = 17,
     //SOTA
     SCORE_DESTROYED_DEMOLISHER  = 18,
-    SCORE_DESTROYED_WALL        = 19,
-	    /** World of Warcraft Armory **/
-    SCORE_DAMAGE_TAKEN          = 20,
-    SCORE_HEALING_TAKEN         = 21
-    /** World of Warcraft Armory **/
+    SCORE_DESTROYED_WALL        = 19
 };
 
 enum ArenaType
@@ -284,7 +280,7 @@ struct BattlegroundScore
         DamageDone(0), HealingDone(0)
     { }
 
-    virtual ~BattlegroundScore() { } //virtual destructor is used when deleting score from scores map
+    virtual ~BattlegroundScore() { }                        //virtual destructor is used when deleting score from scores map
 
     uint32 KillingBlows;
     uint32 Deaths;
@@ -292,10 +288,6 @@ struct BattlegroundScore
     uint32 BonusHonor;
     uint32 DamageDone;
     uint32 HealingDone;
-    /** World of Warcraft Armory **/
-    uint32 DamageTaken;
-    uint32 HealingTaken;
-    /** World of Warcraft Armory **/
 };
 
 enum BGHonorMode

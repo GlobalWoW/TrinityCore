@@ -75,7 +75,6 @@ void AddSC_tele_commandscript();
 void AddSC_ticket_commandscript();
 void AddSC_titles_commandscript();
 void AddSC_wp_commandscript();
-void AddSC_mmaps_commandscript();
 
 #ifdef SCRIPTS
 //world
@@ -343,7 +342,6 @@ void AddSC_darkshore();
 void AddSC_desolace();
 void AddSC_durotar();
 void AddSC_dustwallow_marsh();
-void AddSC_exodar();
 void AddSC_felwood();
 void AddSC_feralas();
 void AddSC_moonglade();
@@ -437,15 +435,11 @@ void AddSC_boss_xt002();
 void AddSC_boss_kologarn();
 void AddSC_boss_assembly_of_iron();
 void AddSC_boss_general_vezax();
+void AddSC_ulduar_teleporter();
 void AddSC_boss_mimiron();
 void AddSC_boss_hodir();
-void AddSC_boss_thorim();
 void AddSC_boss_freya();
-void AddSC_boss_yoggsaron();
 void AddSC_boss_algalon_the_observer();
-void AddSC_ulduar();
-void AddSC_ulduar_trash();
-void AddSC_ulduar_teleporter();
 void AddSC_instance_ulduar();
 void AddSC_boss_keleseth();              //Utgarde Keep
 void AddSC_boss_skarvald_dalronn();
@@ -489,10 +483,8 @@ void AddSC_instance_halls_of_reflection();   // Halls of Reflection
 void AddSC_halls_of_reflection();
 void AddSC_boss_falric();
 void AddSC_boss_marwyn();
-void AddSC_boss_lich_king_hr();
 void AddSC_boss_lord_marrowgar();       // Icecrown Citadel
 void AddSC_boss_lady_deathwhisper();
-void AddSC_boss_gunship_battle();
 void AddSC_boss_deathbringer_saurfang();
 void AddSC_boss_festergut();
 void AddSC_boss_rotface();
@@ -561,7 +553,6 @@ void AddSC_boss_warlord_kalithresh();
 void AddSC_instance_steam_vault();
 void AddSC_boss_hungarfen();                 //CR Underbog
 void AddSC_boss_the_black_stalker();
-void AddSC_boss_ahune();                     //CR Slave Pens
 void AddSC_boss_gruul();                     //Gruul's Lair
 void AddSC_boss_high_king_maulgar();
 void AddSC_instance_gruuls_lair();
@@ -702,7 +693,6 @@ void AddCommandScripts()
     AddSC_ticket_commandscript();
     AddSC_titles_commandscript();
     AddSC_wp_commandscript();
-    AddSC_mmaps_commandscript();
 }
 
 void AddWorldScripts()
@@ -981,7 +971,6 @@ void AddKalimdorScripts()
     AddSC_desolace();
     AddSC_durotar();
     AddSC_dustwallow_marsh();
-    AddSC_exodar();
     AddSC_felwood();
     AddSC_feralas();
     AddSC_moonglade();
@@ -1038,7 +1027,6 @@ void AddOutlandScripts()
     AddSC_instance_steam_vault();
     AddSC_boss_hungarfen();                 //CR Underbog
     AddSC_boss_the_black_stalker();
-    AddSC_boss_ahune();                     //CR Slave Pens
     AddSC_boss_gruul();                     //Gruul's Lair
     AddSC_boss_high_king_maulgar();
     AddSC_instance_gruuls_lair();
@@ -1167,15 +1155,11 @@ void AddNorthrendScripts()
     AddSC_boss_general_vezax();
     AddSC_boss_assembly_of_iron();
     AddSC_boss_kologarn();
+    AddSC_ulduar_teleporter();
     AddSC_boss_mimiron();
     AddSC_boss_hodir();
-    AddSC_boss_thorim();
     AddSC_boss_freya();
-    AddSC_boss_yoggsaron();
     AddSC_boss_algalon_the_observer();
-    AddSC_ulduar();
-    AddSC_ulduar_trash();
-    AddSC_ulduar_teleporter();
     AddSC_instance_ulduar();
     AddSC_boss_keleseth();              //Utgarde Keep
     AddSC_boss_skarvald_dalronn();
@@ -1219,10 +1203,8 @@ void AddNorthrendScripts()
     AddSC_halls_of_reflection();
     AddSC_boss_falric();
     AddSC_boss_marwyn();
-    AddSC_boss_lich_king_hr();
     AddSC_boss_lord_marrowgar();        // Icecrown Citadel
     AddSC_boss_lady_deathwhisper();
-    AddSC_boss_gunship_battle();
     AddSC_boss_deathbringer_saurfang();
     AddSC_boss_festergut();
     AddSC_boss_rotface();

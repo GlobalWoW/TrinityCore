@@ -23,17 +23,21 @@
 
 enum VezaxYells
 {
-    SAY_AGGRO                                    = 0,
-    SAY_SLAY                                     = 1,
-    SAY_SURGE_OF_DARKNESS                        = 2,
-    SAY_DEATH                                    = 3,
-    SAY_BERSERK                                  = 4,
-    SAY_HARDMODE                                 = 5,
+    SAY_AGGRO                                    = -1603290,
+    SAY_SLAY_1                                   = -1603291,
+    SAY_SLAY_2                                   = -1603292,
+    SAY_SURGE_OF_DARKNESS                        = -1603293,
+    SAY_DEATH                                    = -1603294,
+    SAY_BERSERK                                  = -1603295,
+    SAY_HARDMODE                                 = -1603296,
+};
 
-    EMOTE_VAPORS                                 = 6,
-    EMOTE_ANIMUS                                 = 7,
-    EMOTE_BARRIER                                = 8,
-    EMOTE_SURGE_OF_DARKNESS                      = 9
+enum VezaxEmotes
+{
+    EMOTE_VAPORS                                 = -1603289,
+    EMOTE_ANIMUS                                 = -1603297,
+    EMOTE_BARRIER                                = -1603298,
+    EMOTE_SURGE_OF_DARKNESS                      = -1603299,
 };
 
 enum VezaxSpells
@@ -57,14 +61,14 @@ enum VezaxSpells
     SPELL_PROFOUND_OF_DARKNESS                   = 63420,
 
     SPELL_CORRUPTED_RAGE                         = 68415,
-    SPELL_SHAMANTIC_RAGE                         = 30823
+    SPELL_SHAMANTIC_RAGE                         = 30823,
 };
 
 enum VezaxActions
 {
     ACTION_VAPORS_SPAWN,
     ACTION_VAPORS_DIE,
-    ACTION_ANIMUS_DIE
+    ACTION_ANIMUS_DIE,
 };
 
 enum VezaxEvents
@@ -81,7 +85,7 @@ enum VezaxEvents
     EVENT_PROFOUND_OF_DARKNESS                   = 7,
 
     // Saronite Vapor
-    EVENT_RANDOM_MOVE                            = 8
+    EVENT_RANDOM_MOVE                            = 8,
 };
 
 #define DATA_SMELL_SARONITE                      31813188
@@ -117,7 +121,7 @@ class boss_general_vezax : public CreatureScript
             {
                 _EnterCombat();
 
-                Talk(SAY_AGGRO);
+                DoScriptText(SAY_AGGRO, me);
                 DoCast(me, SPELL_AURA_OF_DESPAIR);
                 CheckShamanisticRage();
 
@@ -168,8 +172,8 @@ class boss_general_vezax : public CreatureScript
                             break;
                         }
                         case EVENT_SURGE_OF_DARKNESS:
-                            Talk(EMOTE_SURGE_OF_DARKNESS);
-                            Talk(SAY_SURGE_OF_DARKNESS);
+                            DoScriptText(EMOTE_SURGE_OF_DARKNESS, me);
+                            DoScriptText(SAY_SURGE_OF_DARKNESS, me);
                             DoCast(me, SPELL_SURGE_OF_DARKNESS);
                             events.ScheduleEvent(EVENT_SURGE_OF_DARKNESS, urand(50000, 70000));
                             break;
@@ -178,8 +182,8 @@ class boss_general_vezax : public CreatureScript
                             events.ScheduleEvent(EVENT_SARONITE_VAPORS, urand(30000, 35000));
                             if (++vaporCount == 6 && smellSaronite)
                             {
-                                Talk(SAY_HARDMODE);
-                                Talk(EMOTE_BARRIER);
+                                DoScriptText(SAY_HARDMODE, me);
+                                DoScriptText(EMOTE_BARRIER, me);
                                 summons.DespawnAll();
                                 DoCast(me, SPELL_SARONITE_BARRIER);
                                 DoCast(SPELL_SUMMON_SARONITE_ANIMUS);
@@ -189,7 +193,7 @@ class boss_general_vezax : public CreatureScript
                             }
                             break;
                         case EVENT_BERSERK:
-                            Talk(SAY_BERSERK);
+                            DoScriptText(SAY_BERSERK, me);
                             DoCast(me, SPELL_BERSERK);
                             break;
                     }
@@ -206,13 +210,13 @@ class boss_general_vezax : public CreatureScript
 
             void KilledUnit(Unit* /*who*/)
             {
-                Talk(SAY_SLAY);
+                DoScriptText(RAND(SAY_SLAY_1, SAY_SLAY_2), me);
             }
 
             void JustDied(Unit* /*killer*/)
             {
                 _JustDied();
-                Talk(SAY_DEATH);
+                DoScriptText(SAY_DEATH, me);
                 instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_AURA_OF_DESPAIR);
             }
 
@@ -311,7 +315,7 @@ class boss_saronite_animus : public CreatureScript
             boss_saronite_animusAI(Creature* creature) : ScriptedAI(creature)
             {
                 instance = me->GetInstanceScript();
-                Talk(EMOTE_BARRIER);
+                DoScriptText(EMOTE_BARRIER, me);
             }
 
             void Reset()
@@ -373,7 +377,7 @@ class npc_saronite_vapors : public CreatureScript
         {
             npc_saronite_vaporsAI(Creature* creature) : ScriptedAI(creature)
             {
-                Talk(EMOTE_VAPORS);
+                DoScriptText(EMOTE_VAPORS, me);
                 instance = me->GetInstanceScript();
                 me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
                 me->ApplySpellImmune(0, IMMUNITY_ID, 49560, true); // Death Grip jump effect

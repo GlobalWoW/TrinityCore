@@ -874,5 +874,3 @@ uint32 GetLiquidFlags(uint32 liquidType)
     return 0;
 }
 
-// script support functions
-DBCStorage <AchievementEntry>   const* GetAchievementStore()    { return &sAchievementStore;    }

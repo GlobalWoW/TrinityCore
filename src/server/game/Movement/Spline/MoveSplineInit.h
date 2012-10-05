@@ -20,7 +20,6 @@
 #define TRINITYSERVER_MOVESPLINEINIT_H
 
 #include "MoveSplineInitArgs.h"
-#include "PathGenerator.h"
 
 class Unit;
 
@@ -38,12 +37,12 @@ namespace Movement
     class TransportPathTransform
     {
     public:
-        TransportPathTransform(Unit* owner, bool transformForTransport)
+        TransportPathTransform(Unit& owner, bool transformForTransport)
             : _owner(owner), _transformForTransport(transformForTransport) { }
         Vector3 operator()(Vector3 input);
 
     private:
-        Unit* _owner;
+        Unit& _owner;
         bool _transformForTransport;
     };
 
@@ -53,11 +52,11 @@ namespace Movement
     {
     public:
 
-        explicit MoveSplineInit(Unit* m);
+        explicit MoveSplineInit(Unit& m);
 
         /*  Final pass of initialization that launches spline movement.
          */
-        int32 Launch();
+        void Launch();
 
         /* Adds movement by parabolic trajectory
          * @param amplitude  - the maximum height of parabola, value could be negative and positive
@@ -76,7 +75,7 @@ namespace Movement
          */
         void SetFacing(float angle);
         void SetFacing(Vector3 const& point);
-        void SetFacing(const Unit* target);
+        void SetFacing(const Unit * target);
 
         /* Initializes movement by path
          * @param path - array of points, shouldn't be empty
@@ -84,10 +83,10 @@ namespace Movement
          */
         void MovebyPath(const PointsArray& path, int32 pointId = 0);
 
-        /* Initializes simple A to B motion, A is current unit's position, B is destination
+        /* Initializes simple A to B mition, A is current unit's position, B is destination
          */
-        void MoveTo(const Vector3& destination, bool generatePath = true, bool forceDestination = false);
-        void MoveTo(float x, float y, float z, bool generatePath = true, bool forceDestination = false);
+        void MoveTo(const Vector3& destination);
+        void MoveTo(float x, float y, float z);
 
         /* Sets Id of fisrt point of the path. When N-th path point will be done ILisener will notify that pointId + N done
          * Needed for waypoint movement where path splitten into parts
@@ -138,7 +137,7 @@ namespace Movement
     protected:
 
         MoveSplineInitArgs args;
-        Unit*  unit;
+        Unit&  unit;
     };
 
     inline void MoveSplineInit::SetFly() { args.flags.EnableFlying(); }
@@ -159,10 +158,10 @@ namespace Movement
         std::transform(controls.begin(), controls.end(), args.path.begin(), TransportPathTransform(unit, args.TransformForTransport));
     }
 
-    inline void MoveSplineInit::MoveTo(float x, float y, float z, bool generatePath, bool forceDestination)
+    inline void MoveSplineInit::MoveTo(float x, float y, float z)
     {
         Vector3 v(x, y, z);
-        MoveTo(v, generatePath, forceDestination);
+        MoveTo(v);
     }
 
     inline void MoveSplineInit::SetParabolic(float amplitude, float time_shift)

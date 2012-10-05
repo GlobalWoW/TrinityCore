@@ -133,7 +133,7 @@ enum eHiraSnowdawn
     SPELL_COLD_WEATHER_FLYING                   = 54197
 };
 
-#define GOSSIP_TEXT_TRAIN_HIRA "Je cherche une formation de monte."
+#define GOSSIP_TEXT_TRAIN_HIRA "I seek training to ride a steed."
 
 class npc_hira_snowdawn : public CreatureScript
 {
