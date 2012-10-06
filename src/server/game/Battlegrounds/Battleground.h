@@ -210,7 +210,10 @@ enum ScoreType
     SCORE_SECONDARY_OBJECTIVES  = 17,
     //SOTA
     SCORE_DESTROYED_DEMOLISHER  = 18,
-    SCORE_DESTROYED_WALL        = 19
+    SCORE_DESTROYED_WALL        = 19,
+    //WOW ArmoryPatch
+    SCORE_DAMAGE_TAKEN          = 20,
+    SCORE_HEALING_TAKEN         = 21
 };
 
 enum ArenaType
@@ -288,6 +291,9 @@ struct BattlegroundScore
     uint32 BonusHonor;
     uint32 DamageDone;
     uint32 HealingDone;
+    // WOW ArmoryPatch
+    uint32 DamageTaken;
+    uint32 HealingTaken;
 };
 
 enum BGHonorMode

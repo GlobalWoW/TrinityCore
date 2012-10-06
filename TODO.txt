@@ -1,0 +1,25 @@
+NEED TO BE FIXED AND NOTES
+
+//RAIDS:
+
+- Ulduar:
+    * Ulduar Gauntlet Event:
+        Convert script_text & emote script to creature_text in DB
+        need translate spannish to english or french
+    * Thorim:
+        fix error startup console related to spell in the script for runic colossus
+
+- ICC:
+    * Gunship Battle:
+        Need to fix transition & error startup console
+
+
+//INSTANCES:
+
+- Hall of Reflection:
+    * Convert script_text to creature_text
+    * Need Outro complete
+    * fix invocation of wave mob in escape event
+
+- Halls of Stone:
+    * Tribunal of age event need more search for game_object

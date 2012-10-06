@@ -3599,12 +3599,43 @@ void SpellMgr::LoadDbcDataCorrections()
                 spellInfo->manaCost = 0;
                 spellInfo->manaPerSecond = 0;
                 break;
+            // ENDOF ICECROWN CITADEL SPELLS
+            //
             // OCULUS SPELLS
+            //
             // The spells below are here, because their effect 1 is giving warning, because the triggered spell is not found in dbc and is missing from encounter sniff.
             case 49462: // Call Ruby Drake
             case 49461: // Call Amber Drake
             case 49345: // Call Emerald Drake
                 spellInfo->Effect[1] = 0;
+                break;
+            // ENDOF OCULUS SPELLS
+            //
+            // OTHERS SPELLS
+            //
+            case 65076: // Leviathan auras
+            case 65075: // Leviathan auras
+            case 64482: // Leviathan auras
+                spellInfo->EffectRadiusIndex[EFFECT_1] = EFFECT_RADIUS_50_YARDS;
+                spellInfo->EffectRadiusIndex[EFFECT_2] = EFFECT_RADIUS_50_YARDS;
+                break;
+            case 45524: // Chains of Ice
+                spellInfo->EffectImplicitTargetA[2] = TARGET_UNIT_TARGET_ENEMY;
+                break;
+            case 22741: // High Tinker Mekkatorque - Goblin Dragon Gun
+                spellInfo->EffectBasePoints[EFFECT_0] = 4200;
+                break;
+            case 20688: // Tyrande Whisperwind - Searing Arrow
+                spellInfo->EffectBasePoints[EFFECT_0] = 18000;
+                break;
+            case 59713: // Lady Sylvanas Windrunner - Multi-Shot
+                spellInfo->EffectBasePoints[EFFECT_0] = 13000;
+                break;
+            case 59710: // Lady Sylvanas Windrunner - Shoot
+                spellInfo->EffectBasePoints[EFFECT_0] = 18000;
+                break;
+            case 33385: // Lorthemar'Theron - Mana Burn
+                spellInfo->EffectValueMultiplier[EFFECT_0] = 7.0f;
                 break;
             default:
                 break;

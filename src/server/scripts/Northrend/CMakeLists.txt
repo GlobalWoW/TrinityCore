@@ -32,6 +32,8 @@ set(scripts_STAT_SRCS
   Northrend/Ulduar/Ulduar/boss_flame_leviathan.cpp
   Northrend/Ulduar/Ulduar/boss_xt002.cpp
   Northrend/Ulduar/Ulduar/boss_mimiron.cpp
+  Northrend/Ulduar/Ulduar/ulduar_trash.cpp
+  Northrend/Ulduar/Ulduar/ulduar.cpp
   Northrend/Ulduar/Ulduar/ulduar.h
   Northrend/Ulduar/Ulduar/boss_freya.cpp
   Northrend/Ulduar/Ulduar/boss_razorscale.cpp
@@ -56,6 +58,7 @@ set(scripts_STAT_SRCS
   Northrend/FrozenHalls/HallsOfReflection/instance_halls_of_reflection.cpp
   Northrend/FrozenHalls/HallsOfReflection/halls_of_reflection.cpp
   Northrend/FrozenHalls/HallsOfReflection/boss_marwyn.cpp
+  Northrend/FrozenHalls/HallsOfReflection/boss_the_lich_king_hor.cpp
   Northrend/FrozenHalls/PitOfSaron/boss_forgemaster_garfrost.cpp
   Northrend/FrozenHalls/PitOfSaron/boss_krickandick.cpp
   Northrend/FrozenHalls/PitOfSaron/pit_of_saron.cpp
@@ -166,6 +169,7 @@ set(scripts_STAT_SRCS
   Northrend/IcecrownCitadel/icecrown_citadel_teleport.cpp
   Northrend/IcecrownCitadel/boss_lord_marrowgar.cpp
   Northrend/IcecrownCitadel/boss_lady_deathwhisper.cpp
+  Northrend/IcecrownCitadel/boss_gunship_battle.cpp
   Northrend/IcecrownCitadel/boss_deathbringer_saurfang.cpp
   Northrend/IcecrownCitadel/boss_festergut.cpp
   Northrend/IcecrownCitadel/boss_rotface.cpp

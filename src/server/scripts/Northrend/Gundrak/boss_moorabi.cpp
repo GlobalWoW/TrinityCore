@@ -32,16 +32,15 @@ enum eSpells
     SPELL_TRANSFORMATION                          = 55098, //Periodic, The caster transforms into a powerful mammoth, increasing Physical damage done by 25% and granting immunity to Stun effects.
 };
 
-enum eSays
+enum Texts
 {
-    SAY_AGGRO                                     = -1604010,
-    //SAY_SLAY_1                                  = -1604011, // not in db
-    SAY_SLAY_2                                    = -1604012,
-    SAY_SLAY_3                                    = -1604013,
-    SAY_DEATH                                     = -1604014,
-    SAY_TRANSFORM                                 = -1604015,
-    SAY_QUAKE                                     = -1604016,
-    EMOTE_TRANSFORM                               = -1604017
+    SAY_AGGRO                                     = 0,
+    SAY_KILL                                      = 1,
+    SAY_DEATH                                     = 2,
+    SAY_TRANSFORM                                 = 3,
+    EMOTE_TRANSFORM                               = 4,
+    SAY_QUAKE                                     = 5,
+
 };
 
 #define DATA_LESS_RABI                            1
@@ -86,7 +85,7 @@ public:
 
         void EnterCombat(Unit* /*who*/)
         {
-            DoScriptText(SAY_AGGRO, me);
+            Talk(SAY_AGGRO);
             DoCast(me, SPELL_MOJO_FRENZY, true);
 
             if (instance)
@@ -107,7 +106,7 @@ public:
 
             if (uiGroundTremorTimer <= uiDiff)
             {
-                DoScriptText(SAY_QUAKE, me);
+                Talk(SAY_QUAKE);
                 if (bPhase)
                     DoCast(me->getVictim(), SPELL_QUAKE, true);
                 else
@@ -135,8 +134,8 @@ public:
 
             if (!bPhase && uiTransformationTImer <= uiDiff)
             {
-                DoScriptText(EMOTE_TRANSFORM, me);
-                DoScriptText(SAY_TRANSFORM, me);
+                Talk(EMOTE_TRANSFORM);
+                Talk(SAY_TRANSFORM);
                 DoCast(me, SPELL_TRANSFORMATION, false);
                 uiTransformationTImer = 10*IN_MILLISECONDS;
             } else uiTransformationTImer -= uiDiff;
@@ -154,7 +153,7 @@ public:
 
          void JustDied(Unit* /*killer*/)
          {
-            DoScriptText(SAY_DEATH, me);
+            Talk(SAY_DEATH);
 
             if (instance)
                 instance->SetData(DATA_MOORABI_EVENT, DONE);
@@ -165,7 +164,7 @@ public:
             if (victim == me)
                 return;
 
-            DoScriptText(RAND(SAY_SLAY_2, SAY_SLAY_3), me);
+            Talk(SAY_KILL);
         }
     };
 

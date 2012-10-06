@@ -58,6 +58,7 @@ set(scripts_STAT_SRCS
   Kalimdor/BlackfathomDeeps/blackfathom_deeps.cpp
   Kalimdor/BlackfathomDeeps/boss_aku_mai.cpp
   Kalimdor/BlackfathomDeeps/blackfathom_deeps.h
+  Kalimdor/exodar.cpp
   Kalimdor/azuremyst_isle.cpp
   Kalimdor/orgrimmar.cpp
   Kalimdor/desolace.cpp

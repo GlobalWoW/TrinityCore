@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2012 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2011 TrinityCore <http://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -15,8 +15,7 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "ScriptMgr.h"
-#include "ScriptedCreature.h"
+#include "ScriptPCH.h"
 #include "halls_of_reflection.h"
 
 enum Yells
@@ -26,7 +25,7 @@ enum Yells
     SAY_SLAY_2                                    = -1668062,
     SAY_DEATH                                     = -1668063,
     SAY_CORRUPTED_FLESH_1                         = -1668064,
-    SAY_CORRUPTED_FLESH_2                         = -1668065,
+    SAY_WELL_OF_CORRUPTION                        = -1668065,
 };
 
 enum Spells
@@ -67,6 +66,11 @@ public:
             if (instance)
                 instance->SetData(DATA_MARWYN_EVENT, NOT_STARTED);
         }
+        
+        void JustReachedHome()
+        {
+            instance->SetData(DATA_WAVE_STATE, FAIL);
+        }
 
         void EnterCombat(Unit* /*who*/)
         {
@@ -85,7 +89,10 @@ public:
             DoScriptText(SAY_DEATH, me);
 
             if (instance)
+            {
                 instance->SetData(DATA_MARWYN_EVENT, DONE);
+                instance->SetData(DATA_WAVE_STATE, DONE);
+            }
         }
 
         void KilledUnit(Unit* /*victim*/)
@@ -111,11 +118,12 @@ public:
                     events.ScheduleEvent(EVENT_OBLITERATE, 30000);
                     break;
                 case EVENT_WELL_OF_CORRUPTION:
+                    DoScriptText(SAY_WELL_OF_CORRUPTION, me);
                     DoCast(SPELL_WELL_OF_CORRUPTION);
                     events.ScheduleEvent(EVENT_WELL_OF_CORRUPTION, 13000);
                     break;
                 case EVENT_CORRUPTED_FLESH:
-                    DoScriptText(RAND(SAY_CORRUPTED_FLESH_1, SAY_CORRUPTED_FLESH_2), me);
+                    DoScriptText(SAY_CORRUPTED_FLESH_1, me);
                     DoCast(SPELL_CORRUPTED_FLESH);
                     events.ScheduleEvent(EVENT_CORRUPTED_FLESH, 20000);
                     break;
