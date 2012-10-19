@@ -18,11 +18,8 @@
 #ifndef DEF_ULDUAR_H
 #define DEF_ULDUAR_H
 
-#include "Creature.h"
-#include "GameObject.h"
+#include "ObjectMgr.h"
 #define UlduarScriptName "instance_ulduar"
-
-extern Position const AlgalonLandPos;
 
 enum UlduarBosses
 {
@@ -61,7 +58,7 @@ enum UlduarBosses
     DATA_HODIR_RARE_CACHE,
 
     // Collosus (Leviathan)
-    DATA_COLOSSUS,
+    DATA_COLOSSUS,               
 
     // Assembly of Iorn
     DATA_STEELBREAKER,
@@ -89,8 +86,8 @@ enum UlduarBosses
     DATA_STONE_DOOR,
     DATA_HODIR_RARE_CHEST,
 
-    // Mimiron
     DATA_CALL_TRAM,
+    // Mimiron
     DATA_LEVIATHAN_MK_II,
     DATA_VX_001,
     DATA_AERIAL_UNIT,
@@ -117,12 +114,6 @@ enum UlduarBosses
     DATA_BRANN_BRONZEBEARD_ALG,
 };
 
-enum UlduarWorldStates
-{
-    WORLD_STATE_ALGALON_DESPAWN_TIMER   = 4131,
-    WORLD_STATE_ALGALON_TIMER_ENABLED   = 4132,
-};
- 
 enum UlduarBossDeadFlags
 {
     DEAD_NONE             =        0,   // Death is registered, but irrelevant
@@ -142,7 +133,7 @@ enum UlduarBossDeadFlags
     DEAD_ALGALON          = (1 << 13)
 };
 
-enum UlduarNPCs // TODO: Check if we also need the heroic-entries for the boss-NPCs
+enum UlduarNPCs
 {
     NPC_LEVIATHAN               = 33113,
     NPC_SALVAGED_DEMOLISHER     = 33109,
@@ -185,13 +176,18 @@ enum UlduarNPCs // TODO: Check if we also need the heroic-entries for the boss-N
     NPC_VX_001                   = 33651,
     NPC_AERIAL_COMMAND_UNIT      = 33670,
 
+    NPC_MIMIRON_IMAGE            = 33412,
+
     // Freya's Keepers
     NPC_IRONBRANCH               = 32913,
     NPC_BRIGHTLEAF               = 32915,
     NPC_STONEBARK                = 32914,
 
+    NPC_FREYA_IMAGE              = 33410,
+
     // Thorim
     NPC_THORIM_CTRL              = 32879,
+    NPC_THORIM_IMAGE             = 33413,
     // Thorim_PrePhaseAddEntries
     NPC_JORMUNGAR_BEHEMOTH       = 32882,
     NPC_MERCENARY_CAPTAIN_A      = 32908,
@@ -218,6 +214,8 @@ enum UlduarNPCs // TODO: Check if we also need the heroic-entries for the boss-N
     NPC_FIELD_MEDIC_PENNY        = 32897,
     NPC_FIELD_MEDIC_JESSI        = 33326,
 
+    NPC_HODIR_IMAGE              = 33411,
+
     // Freya's trash NPCs
     NPC_CORRUPTED_SERVITOR       = 33354,
     NPC_MISGUIDED_NYMPH          = 33355,
@@ -230,6 +228,7 @@ enum UlduarNPCs // TODO: Check if we also need the heroic-entries for the boss-N
 
     // Algalon the Observer
     NPC_BRANN_BRONZBEARD_ALG                = 34064,
+    NPC_PROSPECTOR_DOREN                    = 33956,
     NPC_AZEROTH                             = 34246,
     NPC_LIVING_CONSTELLATION                = 33052,
     NPC_ALGALON_STALKER                     = 33086,
@@ -240,30 +239,10 @@ enum UlduarNPCs // TODO: Check if we also need the heroic-entries for the boss-N
     NPC_ALGALON_STALKER_ASTEROID_TARGET_01  = 33104,
     NPC_ALGALON_STALKER_ASTEROID_TARGET_02  = 33105,
     NPC_UNLEASHED_DARK_MATTER               = 34097,
-
-    //Ulduar Gauntlet
-    NPC_ULDUAR_WARMAGE                      = 33662,
-    NPC_RHYDIAN                             = 33696,
-    NPC_KEEPER_UNIT                         = 33721,
-    NPC_NORGANNON                           = 33686,
-    NPC_BRONZEBEARD_RADIO                   = 34054,    
-    NPC_LOREKEEPER                          = 33686, // Hard mode starter
-    NPC_BRANN_BRONZBEARD                    = 33579,
-    NPC_BRANZ_BRONZBEARD                    = 33579,
-    NPC_DELORAH                             = 33701,
-    NPC_ULDUAR_GAUNTLET_GENERATOR           = 33571, // Trigger tied to towers
 };
 
 enum UlduarGameObjects
 {
-    GO_TOWER_OF_STORMS          = 194377,
-    GO_TOWER_OF_FLAMES          = 194371,
-    GO_TOWER_OF_FROST           = 194370,
-    GO_TOWER_OF_LIFE            = 194375,
-    GO_REPAIR_STATION           = 194261,
-    GO_TELEPORTER               = 194569,
-    GO_CUPOLE                   = 194484,
-
     GO_IRON_COUNCIL_ENTRANCE    = 194554,
     GO_ARCHIVUM_DOOR            = 194556,
 
@@ -293,7 +272,6 @@ enum UlduarGameObjects
     GO_FREYA_CHEST_HERO_HARD    = 194331,
 
     GO_LEVIATHAN_DOOR           = 194905,
-    GO_LEVIATHAN_DOOR2          = 194416,
     GO_LEVIATHAN_GATE           = 194630,
 
     GO_XT_002_DOOR              = 194631,
@@ -319,24 +297,22 @@ enum UlduarGameObjects
     GO_RAZOR_HARPOON_4          = 194519,
     GO_RAZOR_BROKEN_HARPOON     = 194565,
 
-    GO_CELESTIAL_PLANETARIUM_ACCESS_10      = 194628,
-    GO_CELESTIAL_PLANETARIUM_ACCESS_25      = 194752,
-    GO_DOODAD_UL_SIGILDOOR_01               = 194767,
-    GO_DOODAD_UL_SIGILDOOR_02               = 194911,
-    GO_DOODAD_UL_SIGILDOOR_03               = 194910,
-    GO_DOODAD_UL_UNIVERSEFLOOR_01           = 194715,
-    GO_DOODAD_UL_UNIVERSEFLOOR_02           = 194716,
-    GO_DOODAD_UL_UNIVERSEGLOBE01            = 194148,
-    GO_DOODAD_UL_ULDUAR_TRAPDOOR_03         = 194253,
-    GO_GIFT_OF_THE_OBSERVER_10              = 194821,
-    GO_GIFT_OF_THE_OBSERVER_25              = 194822,
-
+    GO_ALGALON_ACCESS           = 194628,
+    GO_ALGALON_DOOR_1           = 194911,
+    GO_ALGALON_DOOR_2           = 194767,
+    GO_ALGALON_PLATFORM         = 194715,
+    GO_ALGALON_GLOBE            = 194148,
+    GO_ALGALON_BRIDGE           = 194253,
+    GO_ALGALON_B_VISUAL         = 194716,
+    GO_ALGALON_B_DOOR           = 194910,
+    GO_GIFT_OF_THE_OBSERVER_10  = 194821,
+    GO_GIFT_OF_THE_OBSERVER_25  = 194822,
     // Dummies - not yet in db
     GO_LEVIATHAN_CHEST_10       = 555555,
     GO_LEVIATHAN_CHEST_25       = 444444
 };
 
-enum UlduarTowerEvents // Separated from other data, since that's the relevant point which decides for hardmode
+enum UlduarTowerEvents // Separated from other data, since that's the relevant point which decides for hardmode 
 {
     EVENT_TOWER_OF_STORM_DESTROYED      = 21031,
     EVENT_TOWER_OF_FROST_DESTROYED      = 21032,
@@ -344,14 +320,13 @@ enum UlduarTowerEvents // Separated from other data, since that's the relevant p
     EVENT_TOWER_OF_LIFE_DESTROYED       = 21030,
 };
 
-enum LeviathanData
+enum LeviathanData  
 {
     ACTION_TOWER_OF_STORM_DESTROYED     = 1,
     ACTION_TOWER_OF_FROST_DESTROYED     = 2,
     ACTION_TOWER_OF_FLAMES_DESTROYED    = 3,
     ACTION_TOWER_OF_LIFE_DESTROYED      = 4,
     ACTION_MOVE_TO_CENTER_POSITION      = 10,
-    ACTION_ACTIVATE_HARD_MODE           = 12,
 };
 
 // TODO: Review those
@@ -444,10 +419,28 @@ enum UlduarEvents
     ACTION_INIT_ALGALON         = 6,
 };
 
+enum UlduarWorldstates
+{
+    WORLD_STATE_ALGALON_DESPAWN_TIMER = 4131,
+    WORLD_STATE_ALGALON_TIMER_ENABLED = 4132
+};
+
 enum UlduarArea
 {
     MAP_ULDUAR              = 603,
     AREA_FORMATION_GROUNDS  = 4652
+};
+
+enum UlduarFactions
+{
+    FACTION_HOSTILE = 14,
+    FACTION_FRIENDLY = 35
+};
+
+// leviathans spawn position after wipe
+Position const Center =
+{
+    354.8771f, -12.90240f, 409.803650f, 3.05873f
 };
 
 template<class AI>
@@ -475,13 +468,26 @@ GameObjectAI* GetUlduarAI(GameObject* go)
 class PlayerOrPetCheck
 {
     public:
-        bool operator() (WorldObject* target)
+        bool operator() (WorldObject* unit)
         {
-            if (target->GetTypeId() != TYPEID_PLAYER)
-                if (!target->ToCreature()->isPet())
+            if (unit->GetTypeId() != TYPEID_PLAYER)
+                if (!unit->ToCreature()->isPet())
                     return true;
 
             return false;
+        }
+};
+
+class NoPlayerOrPetCheck
+{
+    public:
+        bool operator() (WorldObject* unit)
+        {
+            if (unit->GetTypeId() != TYPEID_PLAYER)
+                if (!unit->ToCreature()->isPet())
+                    return false;
+
+            return true;
         }
 };
 

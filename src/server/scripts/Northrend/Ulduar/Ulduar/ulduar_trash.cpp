@@ -20,7 +20,6 @@
 #include "ScriptedGossip.h"
 #include "ulduar.h"
 #include "InstanceScript.h"
-
 #include <limits>
 
 /************************************************************************/
@@ -122,7 +121,7 @@ class npc_steelforged_defender : public CreatureScript
             {
                 if (InstanceScript* instance = me->GetInstanceScript())
                     if (instance->GetBossState(BOSS_LEVIATHAN) == DONE)
-                        me->SetRespawnTime(604800); // Once the levi died, we will not spawn again
+                        me->SetRespawnTime(WEEK); // Once the levi died, we will not spawn again
             }
 
             void UpdateAI(uint32 const diff)
@@ -194,7 +193,7 @@ class npc_ironwork_cannon : public CreatureScript
             void Reset()
             {
                 events.Reset();
-                events.ScheduleEvent(EVENT_FLAME_CANNON, 1200);
+                events.ScheduleEvent(EVENT_FLAME_CANNON, 1.2*IN_MILLISECONDS);
             }
 
             void UpdateAI(uint32 const diff)
@@ -209,9 +208,9 @@ class npc_ironwork_cannon : public CreatureScript
                     switch (event)
                     {
                         case EVENT_FLAME_CANNON:
-                            if ( Unit* dest = SelectTarget(SELECT_TARGET_RANDOM, 0, RangeCheck(me, 30.0f, 200.0f)) )
+                            if (Unit* dest = SelectTarget(SELECT_TARGET_RANDOM, 0, RangeCheck(me, 30.0f, 200.0f)))
                                 DoCast(dest, SPELL_FLAME_CANNON);
-                            events.ScheduleEvent(EVENT_FLAME_CANNON, 1500);
+                            events.ScheduleEvent(EVENT_FLAME_CANNON, 1.5*IN_MILLISECONDS);
                             break;
                     }
                 }
@@ -3325,6 +3324,86 @@ class npc_twilight_shadowblade : public CreatureScript
         }
 };
 
+class npc_boomer_xp : public CreatureScript
+{
+    enum MySpells
+    {
+        SPELL_BOOM_BOT               = 63767,
+        SPELL_BOOM_BOT_PERIODIC      = 63801
+    };
+
+    public:
+        npc_boomer_xp() : CreatureScript("npc_boomer_xp") {}
+
+        struct npc_boomer_xpAI : public ScriptedAI
+        {
+            npc_boomer_xpAI(Creature* creature) : ScriptedAI(creature) {}
+
+            void InitializeAI()
+            {
+                me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_TAUNT, true);
+                me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_ATTACK_ME, true);
+                Reset();
+            }
+
+            Unit* SelectPlayerTargetInRange(float range)
+            {
+                Player* target = 0;
+                Trinity::AnyPlayerInObjectRangeCheck u_check(me, range, true);
+                Trinity::PlayerSearcher<Trinity::AnyPlayerInObjectRangeCheck> searcher(me, target, u_check);
+                me->VisitNearbyObject(range, searcher);
+                return target;
+            }
+
+            void Reset()
+            {
+                despawn = false;
+            }
+
+            void EnterCombat(Unit* /*who*/)
+            {
+                if (Unit* target = SelectPlayerTargetInRange(100.0f))
+                {
+                    me->AddThreat(target, std::numeric_limits<float>::max());
+                    me->GetMotionMaster()->MoveFollow(target, 100.0f, 0.0f);
+                }
+            }
+
+            void SpellHit(Unit* /*caster*/, SpellInfo const* spell)
+            {
+                if (spell->Id == SPELL_BOOM_BOT_PERIODIC)
+                    me->DespawnOrUnsummon(1*IN_MILLISECONDS);
+            }
+
+            void JustDied(Unit* /*killer*/)
+            {
+                DoCast(me, SPELL_BOOM_BOT, true);
+            }
+
+            void UpdateAI(const uint32 /*diff*/)
+            {
+                if (!UpdateVictim())
+                    return;
+
+                if (!despawn && me->IsWithinMeleeRange(me->getVictim()))
+                {
+                    despawn = true;
+                    me->CastSpell(me, SPELL_BOOM_BOT, true);
+                }
+                // suicide has procflag PROC_FLAG_DONE_MELEE_AUTO_ATTACK, they have to melee, even tho the spell is delayed if the npc misses
+                DoMeleeAttackIfReady();
+            }
+
+            private:
+                bool despawn;
+        };
+
+        CreatureAI* GetAI(Creature* creature) const
+        {
+            return new npc_boomer_xpAI(creature);
+        }
+};
+
 /************************************************************************/
 /*                          Spells                                      */
 /************************************************************************/
@@ -3434,6 +3513,7 @@ void AddSC_ulduar_trash()
     new npc_clockwork_mechanic();
     new npc_ice_turret();
     new npc_clockwork_sapper();
+    new npc_boomer_xp();
 
     new spell_pollinate();
 }

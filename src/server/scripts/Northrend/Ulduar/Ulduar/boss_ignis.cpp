@@ -36,10 +36,8 @@ enum Yells
 
 enum Spells
 {
-    SPELL_FLAME_JETS_10         = 62680,
-    SPELL_FLAME_JETS_25         = 63472,
-    SPELL_SCORCH_10             = 62546,
-    SPELL_SCORCH_25             = 63474,
+    SPELL_FLAME_JETS            = 62680,
+    SPELL_SCORCH                = 62546,
     SPELL_SLAG_POT              = 62717,
     SPELL_SLAG_POT_DAMAGE       = 65722,
     SPELL_SLAG_IMBUED           = 62836,
@@ -59,8 +57,6 @@ enum Spells
     SPELL_FREEZE_ANIM           = 63354
 };
 
-#define SPELL_FLAME_JETS RAID_MODE(SPELL_FLAME_JETS_10, SPELL_FLAME_JETS_25)
-#define SPELL_SCORCH RAID_MODE(SPELL_SCORCH_10, SPELL_SCORCH_25)
 #define SPELL_BRITTLE RAID_MODE(SPELL_BRITTLE_10, SPELL_BRITTLE_25)
 
 enum Events
@@ -122,7 +118,6 @@ Position const ConstructSpawnPosition[CONSTRUCT_SPAWN_POINTS] =
 /* 
     TODO: 
     - Shatter Achievement (2925/2926)
-    - Check if Grab Pot works
 */
 
 class AchievShatterHelper
@@ -211,12 +206,12 @@ class boss_ignis : public CreatureScript
             {
                 _EnterCombat();
                 Talk(SAY_AGGRO);
-                events.ScheduleEvent(EVENT_JET, 30000);
-                events.ScheduleEvent(EVENT_SCORCH, 25000);
-                events.ScheduleEvent(EVENT_SLAG_POT, 35000);
-                events.ScheduleEvent(EVENT_CONSTRUCT, 15000);
-                events.ScheduleEvent(EVENT_END_POT, 40000);
-                events.ScheduleEvent(EVENT_BERSERK, 480000);
+                events.ScheduleEvent(EVENT_JET, 30*IN_MILLISECONDS);
+                events.ScheduleEvent(EVENT_SCORCH, 25*IN_MILLISECONDS);
+                events.ScheduleEvent(EVENT_SLAG_POT, 35*IN_MILLISECONDS);
+                events.ScheduleEvent(EVENT_CONSTRUCT, 15*IN_MILLISECONDS);
+                events.ScheduleEvent(EVENT_END_POT, 40*IN_MILLISECONDS);
+                events.ScheduleEvent(EVENT_BERSERK, 8*MINUTE*IN_MILLISECONDS);
                 slagPotGUID = 0;
                 instance->DoStartTimedAchievement(ACHIEVEMENT_TIMED_TYPE_EVENT, ACHIEVEMENT_IGNIS_START_EVENT);
             }
@@ -289,25 +284,25 @@ class boss_ignis : public CreatureScript
                         case EVENT_JET:
                             Talk(EMOTE_JETS);
                             DoCast(me, SPELL_FLAME_JETS);
-                            events.DelayEvents(5000);   // Cast time
-                            events.ScheduleEvent(EVENT_JET, urand(35000, 40000));
+                            events.DelayEvents(5*IN_MILLISECONDS);   // Cast time
+                            events.ScheduleEvent(EVENT_JET, urand(35*IN_MILLISECONDS, 40*IN_MILLISECONDS));
                             return;
                         case EVENT_SLAG_POT:
-                            if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 1))
+                            if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 1, 0.0f, true))
                             {
                                 Talk(SAY_SLAG_POT);
                                 slagPotGUID = target->GetGUID();
                                 DoCast(target, SPELL_GRAB);
-                                events.DelayEvents(3000);
-                                events.ScheduleEvent(EVENT_GRAB_POT, 500);
+                                events.DelayEvents(3*IN_MILLISECONDS);
+                                events.ScheduleEvent(EVENT_GRAB_POT, 0.5*IN_MILLISECONDS);
                             }
-                            events.ScheduleEvent(EVENT_SLAG_POT, RAID_MODE(30000, 15000));
+                            events.ScheduleEvent(EVENT_SLAG_POT, RAID_MODE(30*IN_MILLISECONDS, 15*IN_MILLISECONDS));
                             return;
                         case EVENT_GRAB_POT:
                             if (Unit* slagPotTarget = ObjectAccessor::GetUnit(*me, slagPotGUID))
                             {
                                 slagPotTarget->EnterVehicle(me, 1);
-                                events.ScheduleEvent(EVENT_CHANGE_POT, 1000);
+                                events.ScheduleEvent(EVENT_CHANGE_POT, 1*IN_MILLISECONDS);
                             }
                             return;
                         case EVENT_CHANGE_POT:
@@ -316,7 +311,7 @@ class boss_ignis : public CreatureScript
                                 slagPotTarget->EnterVehicle(me, 1);
                                 slagPotTarget->ClearUnitState(UNIT_STATE_ONVEHICLE);
                                 DoCast(slagPotTarget, SPELL_SLAG_POT);
-                                events.ScheduleEvent(EVENT_END_POT, 10000);
+                                events.ScheduleEvent(EVENT_END_POT, 10*IN_MILLISECONDS);
                             }
                             return;
                         case EVENT_END_POT:
@@ -329,16 +324,16 @@ class boss_ignis : public CreatureScript
                         case EVENT_SCORCH:
                             Talk(SAY_SCORCH);
                             if (Unit* target = me->getVictim())
-                                me->SummonCreature(NPC_GROUND_SCORCH, target->GetPositionX(), target->GetPositionY(), target->GetPositionZ(), 0, TEMPSUMMON_TIMED_DESPAWN, 45000);
+                                me->SummonCreature(NPC_GROUND_SCORCH, target->GetPositionX(), target->GetPositionY(), target->GetPositionZ(), 0, TEMPSUMMON_TIMED_DESPAWN, 45*IN_MILLISECONDS);
                             DoCast(SPELL_SCORCH);
-                            events.ScheduleEvent(EVENT_SCORCH, 25000);
+                            events.ScheduleEvent(EVENT_SCORCH, 25*IN_MILLISECONDS);
                             return;
                         case EVENT_CONSTRUCT:
                             if (!summons.empty())
                             {
                                 Talk(SAY_SUMMON);
                                 DoCast(me, SPELL_ACTIVATE_CONSTRUCT);
-                                events.ScheduleEvent(EVENT_CONSTRUCT, RAID_MODE(40000, 30000));
+                                events.ScheduleEvent(EVENT_CONSTRUCT, RAID_MODE(40*IN_MILLISECONDS, 30*IN_MILLISECONDS));
                             }
                             return;
                         case EVENT_BERSERK:
@@ -395,14 +390,14 @@ class npc_iron_construct : public CreatureScript
 
             void DamageTaken(Unit* /*attacker*/, uint32& damage)
             {
-                if (me->HasAura(SPELL_BRITTLE) && damage >= 5000)
+                if (me->HasAura(SPELL_BRITTLE) && damage >= 5*IN_MILLISECONDS)
                 {
                     DoCast(SPELL_SHATTER);
                     if (Creature* ignis = ObjectAccessor::GetCreature(*me, instance->GetData64(BOSS_IGNIS)))
                         if (ignis->AI())
                             ignis->AI()->DoAction(ACTION_REMOVE_BUFF);
 
-                    me->DespawnOrUnsummon(1000);
+                    me->DespawnOrUnsummon(1*IN_MILLISECONDS);
                 }
             }
 
@@ -426,6 +421,7 @@ class npc_iron_construct : public CreatureScript
             {
                 if (!UpdateVictim())
                     return;
+
                 if (Aura* aur = me->GetAura(SPELL_HEAT))
                 {
                     if (aur->GetStackAmount() >= 10)
@@ -504,7 +500,7 @@ class npc_scorch_ground : public CreatureScript
                         if (construct && !construct->HasAura(SPELL_MOLTEN))
                         {
                             me->AddAura(SPELL_HEAT, construct);
-                            heatTimer = 1000;
+                            heatTimer = 1*IN_MILLISECONDS;
                         }
                     }
                     else
@@ -655,6 +651,4 @@ void AddSC_boss_ignis()
     new spell_ignis_activate_construct();
 }
 
-#undef SPELL_FLAME_JETS
-#undef SPELL_SCORCH
 #undef SPELL_BRITTLE 
