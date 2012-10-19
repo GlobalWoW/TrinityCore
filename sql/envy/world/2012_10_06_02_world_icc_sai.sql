@@ -123,13 +123,20 @@ INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_
 /* NEED TEST */
 /*
 -- Here are some modifications to the actual spiders and the backup
-UPDATE creature SET position_z='4' WHERE ID='36725';
+UPDATE creature
+SET position_z='4'
+WHERE ID='36725'
+-- UPDATE creature SET position_z='80' WHERE ID='36725'
+ 
+ 
 -- Here are the trigger implementations in creature and creature_template table
+-- Replace XXXXX with what value you want in your creature_template
+ 
 SET @ENTRY := 314365;
 SET @SOURCETYPE := 0;
-DELETE FROM creature WHERE `id`=@ENTRY;
-INSERT INTO creature (guid, id, map, spawnMask, phaseMask, modelid, equipment_id, position_x, position_y, position_z, orientation, spawntimesecs, spawndist, currentwaypoint, curhealth, curmana, MovementType, npcflag, unit_flags, dynamicflags) VALUES
-(@ENTRY*100+1, @ENTRY, 631, 3, 1, 0, 0, -220.382, 2177.07, 37.9852, 0.855211, 86400, 0, 0, 99999999, 9999999, 0, 0, 0, 0),
+ 
+INSERT INTO creature (guid, id, map, spawnMask, phaseMask, modelid, equipment_id, position_x, position_y, position_z, orientation, spawntimesecs, spawndist, currentwaypoint, curhealth, curmana, MovementType, npcflag, unit_flags, dynamicflags)
+VALUES(@ENTRY*100+1, @ENTRY, 631, 3, 1, 0, 0, -220.382, 2177.07, 37.9852, 0.855211, 86400, 0, 0, 99999999, 9999999, 0, 0, 0, 0),
 (@ENTRY*100+2, @ENTRY, 631, 3, 1, 0, 0, -220.382, 2245.79, 37.9852, 0.855211, 86400, 0, 0, 99999999, 9999999, 0, 0, 0, 0),
 (@ENTRY*100+3, @ENTRY, 631, 3, 1, 0, 0, -250.402 , 2202.06 , 42.5644, 0.855211, 86400, 0, 0, 99999999, 9999999, 0, 0, 0, 0),
 (@ENTRY*100+4, @ENTRY, 631, 3, 1, 0, 0, -250.402 , 2219.13, 42.5644, 0.855211, 86400, 0, 0, 99999999, 9999999, 0, 0, 0, 0),
@@ -137,16 +144,20 @@ INSERT INTO creature (guid, id, map, spawnMask, phaseMask, modelid, equipment_id
 (@ENTRY*100+6, @ENTRY, 631, 3, 1, 0, 0, -211.498 , 2202.06, 35.2236, 0.855211, 86400, 0, 0, 99999999, 9999999, 0, 0, 0, 0),
 (@ENTRY*100+7, @ENTRY, 631, 3, 1, 0, 0, -310.327, 2202.06, 42.0143, 0.855211, 86400, 0, 0, 99999999, 9999999, 0, 0, 0, 0),
 (@ENTRY*100+8, @ENTRY, 631, 3, 1, 0, 0, -310.327, 2219.13, 42.0143, 0.855211, 86400, 0, 0, 99999999, 9999999, 0, 0, 0, 0);
--- Creature_template for trigger
--- NEED FIX QUERY
-DELETE FROM creature_template WHERE `entry`=@ENTRY;
-INSERT INTO creature_template VALUES
-(@ENTRY, 0, 0, 0, 0, 0, 11686, 0, 0, 0, 'NerubAr Trigger', '', '', 0, 1, 1, 0, 14, 14, 0, 1, 1.14286, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 33554432, 32, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 'SmartAI', 0, 1, 1000, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 2147483647, 0, '', 0);
+-- DELETE FROM creature WHERE `id`=@ENTRY
+ 
+INSERT INTO Creature_template
+VALUES (@ENTRY, 0, 0, 0, 0, 0, 11686, 0, 0, 0, 'NerubAr Trigger', '', '', 0, 1, 1, 0, 14, 14, 0, 1, 1.14286, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 33554432, 32, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 'SmartAI', 0, 1, 1000, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 2147483647, 0, '', 0);
+-- DELETE FROM creature_template WHERE `entry`=@ENTRY
+ 
 -- Here is the SAI for the trigger, after finishing it's purpose it will kill itself and it will respawn just like other mobs, after 1 hour
+ 
 -- NerubAr Trigger
-UPDATE creature_template SET AIName="SmartAI" WHERE entry=@ENTRY LIMIT 1;
+ 
 DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY AND `source_type`=@SOURCETYPE;
+UPDATE creature_template SET AIName="SmartAI" WHERE entry=@ENTRY LIMIT 1;
 INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES
 (@ENTRY,@SOURCETYPE,0,0,4,0,100,0,0,0,0,0,12,36725,7,300000,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"nerub aggro"),
 (@ENTRY,@SOURCETYPE,1,0,0,0,100,0,2000,3000,0,0,37,0,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"trigger die");
+-- DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY AND `source_type`=@SOURCETYPE;
 */

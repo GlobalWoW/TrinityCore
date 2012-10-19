@@ -87,88 +87,6 @@ struct DeathStateCheck : public std::unary_function<Unit*, bool>
 /*                       The Grand Approach                             */
 /************************************************************************/
 
-class npc_steelforged_defender : public CreatureScript
-{
-    private:
-        enum MyEvents
-        {
-            EVENT_HAMSTRING         = 1,
-            EVENT_LIGHTNING_BOLT,
-            EVENT_SUNDER_ARMOR,
-        };
-        enum Spells
-        {
-            SPELL_HAMSTRING         = 62845,
-            SPELL_LIGHTNING_BOLT    = 57780,
-            SPELL_SUNDER_ARMOR      = 50370,
-        };
-    public:
-        npc_steelforged_defender () : CreatureScript("npc_steelforged_defender") {}
-
-        struct npc_steelforged_defenderAI: public ScriptedAI
-        {
-            npc_steelforged_defenderAI(Creature* creature) : ScriptedAI(creature) {}
-
-            void Reset()
-            {
-                events.Reset();
-                events.ScheduleEvent(EVENT_HAMSTRING, 10*IN_MILLISECONDS);
-                events.ScheduleEvent(EVENT_LIGHTNING_BOLT, urand(9*IN_MILLISECONDS, 12*IN_MILLISECONDS));
-                events.ScheduleEvent(EVENT_SUNDER_ARMOR, 2*IN_MILLISECONDS);
-            }
-
-            void JustDied(Unit* /*killer*/)
-            {
-                if (InstanceScript* instance = me->GetInstanceScript())
-                    if (instance->GetBossState(BOSS_LEVIATHAN) == DONE)
-                        me->SetRespawnTime(WEEK); // Once the levi died, we will not spawn again
-            }
-
-            void UpdateAI(uint32 const diff)
-            {
-                if (!UpdateVictim())
-                    return;
-
-                events.Update(diff);
-
-                while (uint32 event = events.ExecuteEvent())
-                {
-                    switch (event)
-                    {
-                        case EVENT_HAMSTRING:
-                            DoCast(SelectTarget(SELECT_TARGET_RANDOM, 0, 5.0f), SPELL_HAMSTRING);
-                            events.ScheduleEvent(EVENT_HAMSTRING, 10*IN_MILLISECONDS);
-                            break;
-                        case EVENT_LIGHTNING_BOLT:
-                            DoCast(SelectTarget(SELECT_TARGET_RANDOM, 0, 40.0f), SPELL_LIGHTNING_BOLT);
-                            events.ScheduleEvent(EVENT_LIGHTNING_BOLT, 9*IN_MILLISECONDS);
-                            break;
-                        case EVENT_SUNDER_ARMOR:
-                            DoCastVictim( SPELL_SUNDER_ARMOR);
-                            if (Unit* vic = me->getVictim())
-                                if (Aura* sunder = vic->GetAura(SPELL_SUNDER_ARMOR))
-                                    if (sunder->GetStackAmount() == 5)  // If stacks are maximized, we will take a longer delay.
-                                    {
-                                        events.ScheduleEvent(EVENT_SUNDER_ARMOR, 15*IN_MILLISECONDS);
-                                        break;
-                                    }
-                            events.ScheduleEvent(EVENT_SUNDER_ARMOR, 2*IN_MILLISECONDS);
-                            break;
-                    }
-                }
-                DoMeleeAttackIfReady();
-            }
-
-            private:
-                EventMap events;
-        };
-
-        CreatureAI* GetAI(Creature* creature) const
-        {
-            return new npc_steelforged_defenderAI(creature);
-        }
-};
-
 class npc_ironwork_cannon : public CreatureScript
 {
     private:
@@ -3455,7 +3373,6 @@ class spell_pollinate : public SpellScriptLoader
 void AddSC_ulduar_trash()
 {
     // GA
-    new npc_steelforged_defender();
     new npc_ironwork_cannon();
     new npc_molten_colossus();
     new npc_forge_construct();
