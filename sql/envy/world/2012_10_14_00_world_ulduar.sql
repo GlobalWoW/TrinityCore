@@ -523,6 +523,9 @@ UPDATE `creature_template` SET `mechanic_immune_mask`=1|2|4|8|16|32|64|256|512|2
 33890, 33954  -- Brain of Yogg-Saron
 );
 
+-- General Vezax shouldnt be immune to interrupt
+UPDATE `creature_template` SET `mechanic_immune_mask` = `mechanic_immune_mask` & ~33554432 WHERE `entry` IN (33271, 33449);
+
 -- Stormcaller Brundir (stun and interrupt immunities are handled in scripts)
 UPDATE `creature_template` SET `mechanic_immune_mask`=1|2|4|8|16|32|64|256|512|4096|8192|65536|131072|524288|4194304|8388608|67108864|536870912, `flags_extra`=1 WHERE `entry` IN (32857, 33694);
 
@@ -1024,3 +1027,18 @@ INSERT INTO `creature_loot_template` (`entry`, `item`, `ChanceOrQuestChance`, `l
 (33955, 7, 100, 8, 0, -34349, 1),
 (33955, 45533, 0, 8, 1, 1, 1),
 (33955, 45693, 100, 16, 0, 1, 1);
+
+-- Algalon's Sack of Ulduar Spoils (10m)
+DELETE FROM `creature_loot_template` WHERE `entry`=45875;
+INSERT INTO `creature_loot_template` (`entry`, `item`, `ChanceOrQuestChance`, `lootmode`, `groupid`, `mincountOrRef`, `maxcount`) VALUES
+(45875, 45087, 100, 1, 0, 1, 1),
+(45875, 47241, 100, 1, 0, 5, 5);
+
+-- fix error related to creature addon
+DELETE FROM `creature_addon` WHERE `guid` IN
+(
+136274,136385,136386,136387,136388,136389,136390,136391,136392,136393,136394,136395,136396,136397,136398,136399,136400,136401,136402,136403,136404,136407,
+136408,136409,136410,136411,136412,136413,136414,136415,136416,136417,136418,136419,136420,136433,136434,136435,136436,136446,136447,136448,136449,136450,
+136451,136452,136455,136456,136457,136458,136459,136460,136461,136462,136463,136464,136465,136466,136467,136468,136469,136470,136471,136472,136473,136474,
+136475,136476,136477,136478,136479,136480,136481,136482,136483,136484,136485,136486,136487,136488,136489,136490,136555,137619
+);
