@@ -31,17 +31,20 @@
 #include "GroupMgr.h"
 #include "GameEventMgr.h"
 
-LFGMgr::LFGMgr(): m_QueueTimer(0), m_lfgProposalId(1),
-    m_options(sWorld->getBoolConfig(CONFIG_DUNGEON_FINDER_ENABLE)),
-    m_lfgPlayerScript(new LFGPlayerScript()), m_lfgGroupScript(new LFGGroupScript())
-{ }
+LFGMgr::LFGMgr(): m_QueueTimer(0), m_lfgProposalId(1)
+{
+    m_options = sWorld->getBoolConfig(CONFIG_DUNGEON_FINDER_ENABLE);
+    if (m_options)
+    {
+        new LFGPlayerScript();
+        new LFGGroupScript();
+    }
+}
 
 LFGMgr::~LFGMgr()
 {
     for (LfgRewardMap::iterator itr = m_RewardMap.begin(); itr != m_RewardMap.end(); ++itr)
         delete itr->second;
-    delete m_lfgPlayerScript;
-    delete m_lfgGroupScript;
 }
 
 void LFGMgr::_LoadFromDB(Field* fields, uint64 guid)
@@ -315,6 +318,9 @@ void LFGMgr::LoadLFGDungeons(bool reload /* = false */)
     for (LFGDungeonMap::iterator itr = m_LfgDungeonMap.begin(); itr != m_LfgDungeonMap.end(); ++itr)
     {
         LFGDungeonData& dungeon = itr->second;
+        if (dungeon.type == LFG_TYPE_RANDOM)
+            continue;
+
         // No teleport coords in database, load from areatriggers
         if (dungeon.x == 0.0f && dungeon.y == 0.0f && dungeon.z == 0.0f)
         {
