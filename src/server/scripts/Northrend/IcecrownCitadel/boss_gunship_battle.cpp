@@ -77,8 +77,8 @@ enum Spells
     SPELL_REGROWTH                    = 69882,
     SPELL_REJUVENATION                = 69898,
 
-    SPELL_SUMMON_BATTLE_STANDART_A    = 69810,
-    SPELL_SUMMON_BATTLE_STANDART_H    = 69811,
+    SPELL_SUMMON_BATTLE_STANDART_A    = 69808, //old: 69810
+    SPELL_SUMMON_BATTLE_STANDART_H    = 69809, //old: 69811
 
     // Kor'kron Defender
     SPELL_DEVASTATE                   = 69902,
@@ -2515,7 +2515,7 @@ class npc_korkron_primalist: public CreatureScript
                             {
                                 tempUnit->AI()->Talk(SAY_FIRST_SQUAD_RESCUED_HORDE_1);
                                 tempUnit->AI()->Talk(SAY_SUMMON_BATTLE_STANDARD);
-                                //tempUnit->CastSpell(tempUnit, SPELL_SUMMON_BATTLE_STANDART_H, true);
+                                tempUnit->CastSpell(tempUnit, SPELL_SUMMON_BATTLE_STANDART_H, true);
                             }
                             instance->SetData(DATA_FIRST_SQUAD_STATE, DONE);
                             break;
@@ -2747,7 +2747,7 @@ class npc_skybreaker_vindicator: public CreatureScript
                             {
                                 tempUnit->AI()->Talk(SAY_FIRST_SQUAD_RESCUED_ALLIANCE_1);
                                 tempUnit->AI()->Talk(SAY_SUMMON_BATTLE_STANDARD);
-                                //tempUnit->CastSpell(tempUnit, SPELL_SUMMON_BATTLE_STANDART_A, true);
+                                tempUnit->CastSpell(tempUnit, SPELL_SUMMON_BATTLE_STANDART_A, true);
                             }
                             instance->SetData(DATA_FIRST_SQUAD_STATE, DONE);
                             break;
