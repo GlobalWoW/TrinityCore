@@ -127,12 +127,11 @@ enum HodirActions
 };
 
 #define ACHIEVEMENT_CHEESE_THE_FREEZE            RAID_MODE<uint8>(2961, 2962)
-#define ACHIEVEMENT_GETTING_COLD_IN_HERE         RAID_MODE<uint8>(2967, 2968)
+#define ACHIEVEMENT_GETTING_COLD_IN_HERE         RAID_MODE<uint32>(2967, 2968)
 #define ACHIEVEMENT_THIS_CACHE_WAS_RARE          RAID_MODE<uint8>(3182, 3184)
 #define ACHIEVEMENT_COOLEST_FRIENDS              RAID_MODE<uint8>(2963, 2965)
 #define ACHIEVEMENT_STAYING_BUFFED_ALL_WINTER    RAID_MODE<uint8>(2969, 2970) // 10223, 10240, 10241 - 10229, 10238, 10239
 #define FRIENDS_COUNT                            RAID_MODE<uint8>(4, 8)
-#define DATA_GETTING_COLD_IN_HERE                29672968 // 2967, 2968 are achievement IDs
 
 Position const SummonPositions[8] =
 {
@@ -369,6 +368,9 @@ class boss_hodir : public CreatureScript
                     if (iCouldSayThatThisCacheWasRare)
                         instance->SetData(DATA_HODIR_RARE_CACHE, 1);
 
+                    if (gettingColdInHere)
+                        instance->DoCompleteAchievement(ACHIEVEMENT_GETTING_COLD_IN_HERE);
+
                     me->RemoveAllAuras();
                     me->RemoveAllAttackers();
                     me->AttackStop();
@@ -396,6 +398,22 @@ class boss_hodir : public CreatureScript
                     return;
 
                 events.Update(diff);
+
+                if (gettingColdInHere)
+                {
+                    if (gettingColdInHereTimer <= diff)
+                    {
+                        std::list<HostileReference*> ThreatList = me->getThreatManager().getThreatList();
+                        for (std::list<HostileReference*>::const_iterator itr = ThreatList.begin(); itr != ThreatList.end(); ++itr)
+                            if (Unit* target = ObjectAccessor::GetUnit(*me, (*itr)->getUnitGuid()))
+                                if (Aura* BitingColdAura = target->GetAura(SPELL_BITING_COLD_TRIGGERED))
+                                    if ((target->GetTypeId() == TYPEID_PLAYER) && (BitingColdAura->GetStackAmount() > 2))
+                                        gettingColdInHere = false;
+                        gettingColdInHereTimer = 2*IN_MILLISECONDS;
+                    }
+                    else
+                        gettingColdInHereTimer -= diff;
+                }
 
                 if (me->HasUnitState(UNIT_STATE_CASTING))
                     return;
@@ -454,19 +472,6 @@ class boss_hodir : public CreatureScript
                             return;
                     }
                 }
-
-                if (gettingColdInHereTimer <= diff && gettingColdInHere)
-                {
-                    std::list<HostileReference*> ThreatList = me->getThreatManager().getThreatList();
-                    for (std::list<HostileReference*>::const_iterator itr = ThreatList.begin(); itr != ThreatList.end(); ++itr)
-                        if (Unit* target = ObjectAccessor::GetUnit(*me, (*itr)->getUnitGuid()))
-                            if (Aura* BitingColdAura = target->GetAura(SPELL_BITING_COLD_TRIGGERED))
-                                if ((target->GetTypeId() == TYPEID_PLAYER) && (BitingColdAura->GetStackAmount() > 2))
-                                    me->AI()->SetData(DATA_GETTING_COLD_IN_HERE, 0);
-                    gettingColdInHereTimer = 2*IN_MILLISECONDS;
-                }
-                else
-                    gettingColdInHereTimer -= diff;
 
                 DoMeleeAttackIfReady();
             }
@@ -687,6 +692,12 @@ class npc_hodir_priest : public CreatureScript
             {
                 if (Creature* Hodir = ObjectAccessor::GetCreature(*me, instance ? instance->GetData64(BOSS_HODIR) : 0))
                     Hodir->AI()->DoAction(ACTION_I_HAVE_THE_COOLEST_FRIENDS);
+            }
+
+            void UpdateAI(uint32 const /*diff*/)
+            {
+                if (instance && instance->GetBossState(BOSS_HODIR) == DONE)
+                    me->DespawnOrUnsummon();
             }
 
             private:
