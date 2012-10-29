@@ -1049,12 +1049,3 @@ DELETE FROM `creature_ai_scripts` WHERE `creature_id`=34192;
 DELETE FROM `smart_scripts` WHERE `entryorguid`=34192;
 INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES
 (34192,0,0,0,9,0,100,0,0,3,0,0,11,55714,0,0,0,0,0,1,0,0,0,0,0,0,0, 'Boomer XP-500 - Explode');
-
--- fix error related to creature addon
-DELETE FROM `creature_addon` WHERE `guid` IN
-(
-136274,136385,136386,136387,136388,136389,136390,136391,136392,136393,136394,136395,136396,136397,136398,136399,136400,136401,136402,136403,136404,136407,
-136408,136409,136410,136411,136412,136413,136414,136415,136416,136417,136418,136419,136420,136433,136434,136435,136436,136446,136447,136448,136449,136450,
-136451,136452,136455,136456,136457,136458,136459,136460,136461,136462,136463,136464,136465,136466,136467,136468,136469,136470,136471,136472,136473,136474,
-136475,136476,136477,136478,136479,136480,136481,136482,136483,136484,136485,136486,136487,136488,136489,136490,136555,137619
-);

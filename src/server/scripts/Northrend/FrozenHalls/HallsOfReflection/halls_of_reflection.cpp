@@ -2208,33 +2208,6 @@ class at_hor_waves_restarter : public AreaTriggerScript
         }
 };
 
-class npc_queldelar : public CreatureScript
-{
-public:
-    npc_queldelar() : CreatureScript("npc_queldelar") { }
-
-    CreatureAI* GetAI(Creature* creature) const
-    {
-        return new npc_queldelarAI(creature);
-    }
-    struct npc_queldelarAI  : public ScriptedAI
-    {
-        npc_queldelarAI(Creature *c) : ScriptedAI(c)
-        {
-        }
-        void MoveInLineOfSight(Unit* who)
-        {
-            if (!who)
-                return;
-            if (me->IsWithinDistInMap(who, 20) && who->HasAura(SPELL_QUELDELAR_AURA))
-            {
-                me->SummonCreature(NPC_QUELDELAR, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), me->GetOrientation(), TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 60000);
-                me->DisappearAndDie();
-            }
-        }
-    };
-};
-
 void AddSC_halls_of_reflection()
 {
     new npc_jaina_or_sylvanas_hor(true, "npc_sylvanas_hor_part1");
@@ -2249,5 +2222,4 @@ void AddSC_halls_of_reflection()
     new at_hor_waves_restarter();
     new npc_frostworn_general();
     new npc_spiritual_reflection();
-    new npc_queldelar();
 }

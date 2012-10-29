@@ -1597,57 +1597,6 @@ class npc_freya_ward_of_life : public CreatureScript
         }
 };
 
-
-// TODO: Add script to database - not sure where exactly, seems to be a dummy that is used as a seat handler
-class npc_leviathan_player_vehicle : public CreatureScript
-{
-    public:
-        npc_leviathan_player_vehicle() : CreatureScript("npc_leviathan_player_vehicle") {}
-
-        struct npc_leviathan_player_vehicleAI : public NullCreatureAI
-        {
-            npc_leviathan_player_vehicleAI(Creature* creature) : NullCreatureAI(creature)
-            {
-                // TODO: Check where this id comes from.
-                if (VehicleSeatEntry* vehSeat = const_cast<VehicleSeatEntry*>(sVehicleSeatStore.LookupEntry(3013)))
-                    vehSeat->m_flags &= ~VEHICLE_SEAT_FLAG_ALLOW_TURNING;
-            }
-
-            void PassengerBoarded(Unit* unit, int8 seat, bool apply)
-            {
-                if (!unit->ToPlayer() || seat != 0)
-                    return;
-
-                if (apply)
-                    unit->CastSpell(me, SPELL_GEAR_SCALING, true);
-                else
-                    me->RemoveAurasDueToSpell(SPELL_GEAR_SCALING);
-
-                if (InstanceScript* instance = me->GetInstanceScript())
-                {
-                    if (Creature* leviathan = ObjectAccessor::GetCreature(*me, instance->GetData64(BOSS_LEVIATHAN)))
-                    {
-                        if (leviathan->isInCombat())
-                        {
-                            me->SetInCombatWith(leviathan);
-                            me->AddThreat(leviathan, 1.0f);
-                            leviathan->SetInCombatWith(me);
-                            leviathan->AddThreat(me, 1.0f);
-
-                            if (apply)
-                                me->SetHealth(uint32(me->GetHealth() / 2));
-                        }
-                    }
-                }
-            }
-        };
-
-        CreatureAI* GetAI(Creature* creature) const
-        {
-            return new npc_leviathan_player_vehicleAI(creature);
-        }
-};
-
 // npc lore keeper
 #define GOSSIP_ITEM_1  "Activate secondary defensive systems"
 #define GOSSIP_ITEM_2  "Confirmed"
@@ -2685,7 +2634,6 @@ void AddSC_boss_flame_leviathan()
     new npc_hodirs_fury();                          // 33212
     new npc_freyas_ward();                          // 33367
     new npc_freya_ward_of_life();                   // 34275
-    new npc_leviathan_player_vehicle();            
     new npc_lorekeeper();                           // 33686
     // new npc_brann_bronzebeard(); 
     new at_RX_214_repair_o_matic_station();         // Area-Trigger 5369/5423
