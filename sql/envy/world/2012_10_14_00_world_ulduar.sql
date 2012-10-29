@@ -371,7 +371,6 @@ UPDATE `creature_template` SET `difficulty_entry_1`=34361, `ScriptName`='npc_fro
 UPDATE `creature_template` SET `speed_walk`=0.15, `speed_run`=0.15, `ScriptName`='npc_mimiron_flame_trigger' WHERE `entry` =34363;
 UPDATE `creature_template` SET `ScriptName`='npc_mimiron_flame_spread' WHERE `entry`=34121;
 UPDATE `creature_template` SET `ScriptName`='npc_mimiron_bomb_bot' WHERE `entry`=33836;
-UPDATE `creature_template` SET `ScriptName`='npc_boomer_xp' WHERE `entry`=34192;
 
 -- Cleaning up Leviathan Mk II
 DELETE FROM `creature` WHERE `id`=34071;
@@ -490,14 +489,19 @@ INSERT INTO `spell_script_names` (`spell_id`,`ScriptName`) VALUES
 (62702,'spell_keeper_support_aura_targeting'),
 (62650,'spell_keeper_support_aura_targeting');
 
-DELETE FROM `conditions` WHERE `SourceEntry` IN (64184, 63882, 63886, 64172, 64465, 65719, 62714);
-INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `ConditionTypeOrReference`, `ConditionValue1`, `ConditionValue2`, `Comment`) VALUES 
-(13, 0, 64184, 31, 3, 33288, 'Effect on YoggSaron'), -- Create Val'anyr on Yogg-Saron
-(13, 0, 63882, 31, 3, 33882, 'Effect on Death Orb'), -- Deathray Effect on Death Orb
-(13, 0, 63886, 31, 3, 33882, 'Effect on Death Orb'),
-(13, 0, 64172, 31, 3, 33988, 'Effect only for Immortal Guardians'), -- Condition because NPCs need this else no hit
-(13, 0, 64465, 31, 3, 33988, 'Effect only for Immortal Guardians'),
-(13, 1, 65719, 31, 3, 33134, 'Spell should hit only Sara'),		-- Shadow Nova
+DELETE FROM `conditions` WHERE SourceEntry IN (64184, 63882, 63886, 64172, 64465, 65209);
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES
+(13, 1, 64184, 0, 0, 18, 0, 1, 33288, 0, 0, 0, '', 'Effect on YoggSaron'), -- Create Val'anyr on Yogg-Saron
+(13, 1, 63882, 0, 0, 18, 0, 1, 33882, 0, 0, 0, '', 'Effect on Death Orb'), -- Deathray Effekt on Death Orb
+(13, 1, 63886, 0, 0, 18, 0, 1, 33882, 0, 0, 0, '', 'Effect on Death Orb'),
+(13, 1, 64172, 0, 0, 18, 0, 1, 33988, 0, 0, 0, '', 'Effect only for Immortal Guardians'), -- Condition because NPCs need this else no hit
+(13, 1, 64465, 0, 0, 18, 0, 1, 33988, 0, 0, 0, '', 'Effect only for Immortal Guardians'),
+(13, 1, 65209, 0, 0, 18, 0, 1, 33136, 0, 0, 0, '', 'Effect only for Guardian of YoggSaron'), -- Second Damage Effekt of ShadowNova only on other Guardians or Sara
+(13, 1, 65209, 0, 0, 18, 0, 1, 33134, 0, 0, 0, '', 'Effect only for Sara');
+
+DELETE FROM `conditions` WHERE `SourceEntry` IN (65719, 62714);
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `ConditionTypeOrReference`, `ConditionValue1`, `ConditionValue2`, `Comment`) VALUES
+(13, 1, 65719, 31, 3, 33134, 'Spell should hit only Sara'),	-- Shadow Nova
 (13, 1, 62714, 31, 3, 33136, 'Effect should hit only Guardians'),
 (13, 2, 62714, 31, 4, 0, 'Effect should hit only Players');
 
@@ -582,7 +586,6 @@ UPDATE `creature_template` SET `AIName`='', `ScriptName`='npc_XR949_salvagebot' 
 UPDATE `creature_template` SET `AIName`='', `ScriptName`='npc_salvagebot_sawblade' WHERE `entry`=34288;
 UPDATE `creature_template` SET `AIName`='', `ScriptName`='npc_XD175_compactobot' WHERE `entry`=34271;
 UPDATE `creature_template` SET `AIName`='', `ScriptName`='npc_XB488_disposalbot' WHERE `entry`=34273;
-UPDATE `creature_template` SET `AIName`='', `ScriptName`='npc_boomer_xp' WHERE `entry`=34192;
 
 DELETE FROM `spell_script_names` WHERE `spell_id`=63059;
 INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES (63059, 'spell_pollinate');
@@ -592,23 +595,6 @@ INSERT INTO `spell_linked_spell` (`spell_trigger`, `spell_effect`, `type`, `comm
 
 -- Clockwork mechanic
 UPDATE `creature_template` SET `unit_flags`=`unit_flags`&~(262144|33554432) WHERE `entry`=34184;
-
--- TrinityCore: Edit the required spell credit markers for Dwarfageddon (10/25 player) achievements
-UPDATE `spell_dbc` SET `attributes`=0x00800100,`DmgMultiplier1`=0, `DmgMultiplier2`=0, `DmgMultiplier3`=0,`RangeIndex`=12 WHERE `ID`=65387; -- (SPELL_ATTR0_HIDE_IN_COMBAT_LOG, SPELL_ATTR0_CASTABLE_WHILE_DEAD)
--- Edit SAI support for Dwarfageddon (10 and 25 player) achievement /required changes since attribute castable_while_dead is not working/
-SET @Defender := 33236;
-DELETE FROM `smart_scripts` WHERE `entryorguid`=@Defender AND `source_type`=0;
-INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES
-(@Defender,0,0,0,25,0,100,0,0,0,0,0,42,0,1,0,0,0,0,1,0,0,0,0,0,0,0,'Steelforged Defender - On reset - Set Invincibility for 1%'),
-(@Defender,0,1,2,2,0,100,0,1,1,0,0,11,65387,0,0,0,0,0,1,0,0,0,0,0,0,0,'Steelforged Defender - Health Percentage (1%) - Cast spell for achievement credit'),
-(@Defender,0,2,0,61,0,100,0,0,0,0,0,37,0,0,0,0,0,0,1,0,0,0,0,0,0,0,'Steelforged Defender - Linked with previous event - Die'),
-(@Defender,0,3,0,0,0,100,0,0,2500,9000,12000,11,62845,0,0,0,0,0,2,0,0,0,0,0,0,0,'Steelforged Defender - IC - Hamstring'),
-(@Defender,0,4,0,0,0,100,0,0,2600,13000,14000,11,50370,0,0,0,0,0,2,0,0,0,0,0,0,0,'Steelforged Defender - IC - Cast Sunder armor'),
-(@Defender,0,5,0,0,0,100,0,500,4000,4500,9000,11,57780,0,0,0,0,0,2,0,0,0,0,0,0,0,'Steelforged Defender - IC - Cast Lightening Bolt');
--- Add conditions to prevent lag and for the sake of logic
-DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId`=13 AND `SourceEntry` IN (65387);
-INSERT INTO `conditions` (`SourceTypeOrReferenceId`,`SourceGroup`,`SourceEntry`,`SourceId`,`ElseGroup`,`ConditionTypeOrReference`,`ConditionTarget`,`ConditionValue1`,`ConditionValue2`,`ConditionValue3`,`NegativeCondition`,`ErrorTextId`,`ScriptName`,`Comment`) VALUES
-(13,1,65387,0,1,31,0,4,0,0,0,0,'','Steelforged Defender kill credit for achievement can hit only players');
 
 -- Auriaya
 DELETE FROM `spell_group` WHERE `id`=64381;
@@ -848,8 +834,8 @@ INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language
 (32845, 8, 0, 'Hodir gains Frozen Blows!', 41, 0, 100, 0, 0, 0, 'Hodir - EMOTE_BLOW');
 
 -- Mimiron
-DELETE FROM `script_texts` WHERE `npc_entry`=33350;
-DELETE FROM `creature_text` WHERE `entry`=33350;
+DELETE FROM `script_texts` WHERE `npc_entry` IN (33350, 33432);
+DELETE FROM `creature_text` WHERE `entry` IN (33350, 33432);
 INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language`, `probability`, `emote`, `duration`, `sound`, `comment`) VALUES
 (33350, 0, 0, 'Oh, my! I wasn''t expecting company! The workshop is such a mess! How embarrassing!', 14, 0, 100, 0, 0, 15611, 'Mimiron SAY_AGGRO'),
 (33350, 1, 0, 'Now why would you go and do something like that? Didn''t you see the sign that said ''DO NOT PUSH THIS BUTTON!''? How will we finish testing with the self-destruct mechanism active?', 14, 0, 100, 0, 0, 15629, 'Mimiron SAY_HARDMODE_ON'),
@@ -869,7 +855,8 @@ INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language
 (33350, 12, 0, 'Prognosis: Negative!', 14, 0, 100, 0, 0, 15625, 'Mimiron SAY_V07TRON_SLAY_1'),
 (33350, 12, 1, 'You''re not going to get up from that one, friend.', 14, 0, 100, 0, 0, 15626, 'Mimiron SAY_V07TRON_SLAY_2'),
 (33350, 13, 0, 'It would appear that I''ve made a slight miscalculation. I allowed my mind to be corrupted by the fiend in the prison, overriding my primary directive. All systems seem to be functional now. Clear.', 14, 0, 100, 0, 0, 15627, 'Mimiron SAY_V07TRON_DEATH'),
-(33350, 14, 0, 'Oh, my! It would seem that we are out of time, my friends!', 14, 0, 100, 0, 0, 15628, 'Mimiron SAY_BERSERK');
+(33350, 14, 0, 'Oh, my! It would seem that we are out of time, my friends!', 14, 0, 100, 0, 0, 15628, 'Mimiron SAY_BERSERK'),
+(33432, 0, 0, 'Leviathan MK II begins to cast Plasma Blast!', 41, 0, 100, 0, 0, 0, 'Leviathan MK II EMOTE_PLASMA_BLAST');
 
 -- Thorim
 DELETE FROM `script_texts` WHERE `npc_entry` IN (33413, 32865, 32872);
@@ -1037,6 +1024,31 @@ DELETE FROM `item_loot_template` WHERE `entry`=45875;
 INSERT INTO `item_loot_template` (`entry`, `item`, `ChanceOrQuestChance`, `lootmode`, `groupid`, `mincountOrRef`, `maxcount`) VALUES
 (45875, 45087, 100, 1, 0, 1, 1),
 (45875, 47241, 100, 1, 0, 5, 5);
+
+-- TrinityCore: Edit the required spell credit markers for Dwarfageddon (10/25 player) achievements
+UPDATE `spell_dbc` SET `attributes`=0x00800100,`DmgMultiplier1`=0, `DmgMultiplier2`=0, `DmgMultiplier3`=0,`RangeIndex`=12 WHERE `ID`=65387; -- (SPELL_ATTR0_HIDE_IN_COMBAT_LOG, SPELL_ATTR0_CASTABLE_WHILE_DEAD)
+-- SAI support for Dwarfageddon (10 and 25 player) achievement /required changes since attribute castable_while_dead is not working/
+SET @Defender := 33236;
+DELETE FROM `smart_scripts` WHERE `entryorguid`=@Defender AND `source_type`=0;
+INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES
+(@Defender,0,0,0,25,0,100,0,0,0,0,0,42,0,1,0,0,0,0,1,0,0,0,0,0,0,0,'Steelforged Defender - On reset - Set Invincibility for 1%'),
+(@Defender,0,1,2,2,0,100,0,1,1,0,0,11,65387,0,0,0,0,0,1,0,0,0,0,0,0,0,'Steelforged Defender - Health Percentage (1%) - Cast spell for achievement credit'),
+(@Defender,0,2,0,61,0,100,0,0,0,0,0,37,0,0,0,0,0,0,1,0,0,0,0,0,0,0,'Steelforged Defender - Linked with previous event - Die'),
+(@Defender,0,3,0,0,0,100,0,0,2500,9000,12000,11,62845,0,0,0,0,0,2,0,0,0,0,0,0,0,'Steelforged Defender - IC - Hamstring'),
+(@Defender,0,4,0,0,0,100,0,0,2600,13000,14000,11,50370,0,0,0,0,0,2,0,0,0,0,0,0,0,'Steelforged Defender - IC - Cast Sunder armor'),
+(@Defender,0,5,0,0,0,100,0,500,4000,4500,9000,11,57780,0,0,0,0,0,2,0,0,0,0,0,0,0,'Steelforged Defender - IC - Cast Lightening Bolt');
+-- Add conditions to prevent lag and for the sake of logic
+DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId`=13 AND `SourceEntry` IN (65387);
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`,`SourceGroup`,`SourceEntry`,`SourceId`,`ElseGroup`,`ConditionTypeOrReference`,`ConditionTarget`,`ConditionValue1`,`ConditionValue2`,`ConditionValue3`,`NegativeCondition`,`ErrorTextId`,`ScriptName`,`Comment`) VALUES
+(13,1,65387,0,1,31,0,4,0,0,0,0,'','Steelforged Defender kill credit for achievement can hit only players');
+
+-- SAI to Boomer XP-500
+UPDATE `creature_template` SET `faction_A`=16,`faction_H`=16,`dmg_multiplier`=10,`AIName`='SmartAI' WHERE `entry`=34192;
+UPDATE `creature_template` SET `faction_A`=16,`faction_H`=16,`dmg_multiplier`=18 WHERE `entry`=34216;
+DELETE FROM `creature_ai_scripts` WHERE `creature_id`=34192;
+DELETE FROM `smart_scripts` WHERE `entryorguid`=34192;
+INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES
+(34192,0,0,0,9,0,100,0,0,3,0,0,11,55714,0,0,0,0,0,1,0,0,0,0,0,0,0, 'Boomer XP-500 - Explode');
 
 -- fix error related to creature addon
 DELETE FROM `creature_addon` WHERE `guid` IN
