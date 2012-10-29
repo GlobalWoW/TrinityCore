@@ -198,8 +198,8 @@ public:
         {
             // make the fight more attractive and less grinding when more players are around
             uint32 enemyCount = 0;
-            std::list<HostileReference*>& threatList = me->getThreatManager().getThreatList();
-            std::list<HostileReference*>::iterator itr;
+            ThreatContainer::StorageType const &threatList = me->getThreatManager().getThreatList();
+            ThreatContainer::StorageType::const_iterator itr;
             for (itr = threatList.begin(); itr != threatList.end(); ++itr)
             {
                 Unit* unit = (*itr)->getTarget();
@@ -389,8 +389,8 @@ public:
         {
             // make the fight more attractive and less grinding when more players are around
             uint32 enemyCount = 0;
-            std::list<HostileReference*>& threatList = me->getThreatManager().getThreatList();
-            std::list<HostileReference*>::iterator itr;
+            ThreatContainer::StorageType const &threatList = me->getThreatManager().getThreatList();
+            ThreatContainer::StorageType::const_iterator itr;
             for (itr = threatList.begin(); itr != threatList.end(); ++itr)
             {
                 Unit* unit = (*itr)->getTarget();
