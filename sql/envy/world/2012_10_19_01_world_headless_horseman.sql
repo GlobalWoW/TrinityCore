@@ -1,4 +1,7 @@
--- AUTHORS: garyfisher
+#######################
+-- HEADLESS HORSEMAN ##
+#######################
+-- author garyfisher
 
 DELETE FROM `gameobject` WHERE `id`=186267;
 DELETE FROM `game_event_gameobject` WHERE `guid`=54947;
