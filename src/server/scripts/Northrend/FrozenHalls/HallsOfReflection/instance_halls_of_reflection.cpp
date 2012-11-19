@@ -17,6 +17,7 @@
 
 #include "ScriptPCH.h"
 #include "halls_of_reflection.h"
+#include "Player.h"
 
 /* Halls of Reflection encounters:
 0- Falric
