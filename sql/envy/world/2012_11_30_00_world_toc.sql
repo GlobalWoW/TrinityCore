@@ -175,7 +175,7 @@ INSERT INTO `creature_template_addon` (`entry`, `path_id`, `mount`, `bytes1`, `b
 DELETE FROM `script_texts` WHERE `entry` <= -1999926 and `entry` >= -1999999;
 INSERT INTO `script_texts` (`npc_entry`,`entry`,`content_default`,`sound`,`type`,`language`,`emote`,`comment`) VALUES
 (0,-1999926, 'Coming out of the gate are the Grand Champions from the other faction! ' ,0,0,0,1, 'SAY_START' ),
-(0,-1999927, 'Good work! You can get your reward from the Crusader\'s Coliseum chest!. ' ,0,1,0,1, 'Win' ),
+(0,-1999927, 'Good work! You can get your reward from the Crusader''s Coliseum chest!. ' ,0,1,0,1, 'Win' ),
 (0,-1999928, 'You spoiled my grand entrance, Rat.' ,16256,1,0,5, 'SAY_AGGRO' ),
 (0,-1999929, 'Did you honestly think that an agent of the Lich King would be bested on the field of your pathetic little tournament?' ,16257,1,0,5, 'SAY_AGGRO_1' ),
 (0,-1999930, 'I have come to finish my task ' ,16258,1,0,5, 'SAY_AGGRO_2' ),
@@ -184,10 +184,10 @@ INSERT INTO `script_texts` (`npc_entry`,`entry`,`content_default`,`sound`,`type`
 (0,-1999933, 'My roting flash was just getting in the way!' ,16262,1,0,5, 'SAY_DEATH_1' ),
 (0,-1999934, 'I have no need for bones to best you!' ,16263,1,0,5, 'SAY_DEATH_2' ),
 (0,-1999935, 'No! I must not fail...again...' ,16264,1,0,5, 'SAY_DEATH_3' ),
-(0,-1999936, 'What\'s that. up near the rafters?' ,0,1,0,5, 'detected' ),
+(0,-1999936, 'What''s that. up near the rafters?' ,0,1,0,5, 'detected' ),
 (0,-1999937, 'Please change your weapon. The next battle will be starting shortly.' ,0,3,0,5, 'nx' ),
 (0,-1999939, 'Excellent work!' ,0,1,0,1, 'work' ),
-(0,-1999940, 'Coming out of the gate is the Crusader\'s Coliseum Champion.' ,0,0,0,1, 'SAY_START3' ),
+(0,-1999940, 'Coming out of the gate is the Crusader''s Coliseum Champion.' ,0,0,0,1, 'SAY_START3' ),
 (0,-1999941, 'Excellent work! You have triumphed over the Argent Champion!' ,0,3,0,0, 'win' ),
 (0,-1999942, 'The Sunreavers are proud to present their representatives in this trial by combat.',0,1,0,2, 'an1' ),
 (0,-1999943, 'Welcome, champions. Today, before the eyes of your leaders and peers, you will prove youselves worthy combatants.' ,0,1,0,5, 'an2' ),
@@ -195,12 +195,12 @@ INSERT INTO `script_texts` (`npc_entry`,`entry`,`content_default`,`sound`,`type`
 (0,-1999945, 'Finally, a fight worth watching.' ,0,1,0,5, 'Garrosh' ),
 (0,-1999946, 'I did not come here to watch animals tear at each other senselessly, Tirion' ,0,1,0,5, 'King' ),
 (0,-1999947, 'You will first be facing three of the Grand Champions of the Tournament! These fierce contenders have beaten out all others to reach the pinnacle of skill in the joust.' ,0,1,0,5, 'Hightlord' ),
-(0,-1999948, 'Well fought! You next challenge comes from the Crusade\'s own ranks. You will be tested against their considerable prowess.' ,0,1,0,5, 'Hightlord2' ),
+(0,-1999948, 'Well fought! You next challenge comes from the Crusade''s own ranks. You will be tested against their considerable prowess.' ,0,1,0,5, 'Hightlord2' ),
 (0,-1999949, 'You may begin!' ,0,0,0,5, 'text' ),
 (0,-1999950, 'Well, then. Let us begin.', 0,1,0,5, '' ),
 (0,-1999951, 'Take this time to consider your past deeds.' ,16248,1,0,5, 'palsum' ),
 (0,-1999952, 'What is the meaning of this?' ,0,1,0,5, 'dk_hightlord' ),
-(0,-1999953, 'No...I\'m still too young!' ,0,1,0,5, 'die' ),
+(0,-1999953, 'No...I''m still too young!' ,0,1,0,5, 'die' ),
 (0,-1999954, 'Excellent work! You have triumphed over the Argent Champion!' ,0,3,0,0, 'win' ),
 (0,-1999955, 'Are you up to the challenge? I will not hold back.',16134, 1, 0, 0, 'start'),
 (0,-1999956, 'Well then, let us begin.', 16247, 1, 0, 0, 'text'),
@@ -245,7 +245,7 @@ INSERT INTO `script_texts` (`npc_entry`,`entry`,`content_default`,`sound`,`type`
 (0,-1999995, 'Admirably? Hah!  I will enjoy watching your weak little champions fail, human.',0, 1, 0, 1, NULL),
 (0,-1999996, 'Garrosh, enough.',0, 1, 0, 5, NULL),
 (0,-1999997, 'The Silver Covenant is pleased to present their contenders for this event, Highlord.',0,1,0,2, 'an1' ),
-(0,-1999998, 'Don\'t just stand there; kill him!',0, 1, 0, 5, NULL),
+(0,-1999998, 'Don''t just stand there; kill him!',0, 1, 0, 5, NULL),
 (0,-1999999, 'Tear him apart!',0, 1, 0, 5, NULL);
 
 -- Equipment

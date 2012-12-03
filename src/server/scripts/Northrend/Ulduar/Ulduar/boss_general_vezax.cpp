@@ -596,10 +596,10 @@ class spell_saronite_vapors : public SpellScriptLoader // 63278
         }
 };
 
-class achievement__shadowDodger : public AchievementCriteriaScript
+class achievement_shadowDodger : public AchievementCriteriaScript
 {
     public:
-        achievement__shadowDodger(const char* name) : AchievementCriteriaScript(name) {}
+        achievement_shadowDodger(const char* name) : AchievementCriteriaScript(name) {}
 
         bool OnCheck(Player* /*player*/, Unit* target)
         {
@@ -639,8 +639,8 @@ void AddSC_boss_general_vezax()
     new spell_mark_of_the_faceless();
     new spell_saronite_vapors();
 
-    new achievement__shadowDodger("achievement__shadowDodger");       // 10m 10173 (2996)
-    new achievement__shadowDodger("achievement__shadowDodger_25");    // 25m 10306 (2997)
+    new achievement_shadowDodger("achievement_shadowDodger");       // 10m 10173 (2996)
+    new achievement_shadowDodger("achievement_shadowDodger_25");    // 25m 10306 (2997)
     new achievement_i_love_the_smell_of_saronite_in_the_morning("achievement_i_love_the_smell_of_saronite_in_the_morning");     // 10m 10451 (3181)
     new achievement_i_love_the_smell_of_saronite_in_the_morning("achievement_i_love_the_smell_of_saronite_in_the_morning_25");  // 25m 10462 (3188)
 }

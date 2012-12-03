@@ -433,9 +433,9 @@ INSERT INTO `achievement_criteria_data` (`criteria_id`, `type`, `value1`, `value
 (10451, 12, 0, 0, ''), 
 (10462, 11, 0, 0, 'achievement_i_love_the_smell_of_saronite_in_the_morning_25'), 
 (10462, 12, 1, 0, ''),
-(10173, 11, 0, 0, 'achievement_shadowdodger'), 
+(10173, 11, 0, 0, 'achievement_shadowDodger'), 
 (10173, 12, 0, 0, ''), 
-(10306, 11, 0, 0, 'achievement_shadowdodger_25'), 
+(10306, 11, 0, 0, 'achievement_shadowDodger_25'), 
 (10306, 12, 1, 0, '');
 
 -- YoggSaron

@@ -766,127 +766,44 @@ class boss_runemaster_molgeim : public CreatureScript
         }
 };
 
-class mob_rune_of_power : public CreatureScript
+class spell_assembly_rune_of_summoning : public SpellScriptLoader
 {
     public:
-        mob_rune_of_power() : CreatureScript("mob_rune_of_power") {}
+        spell_assembly_rune_of_summoning() : SpellScriptLoader("spell_assembly_rune_of_summoning") { }
 
-        struct mob_rune_of_powerAI : public Scripted_NoMovementAI
+        class spell_assembly_rune_of_summoning_AuraScript : public AuraScript
         {
-            mob_rune_of_powerAI(Creature* creature) : Scripted_NoMovementAI(creature)
-            {
-                me->SetInCombatWithZone();
-                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_NON_ATTACKABLE);
-                me->setFaction(16); // Same faction as bosses
-                DoCast(SPELL_RUNE_OF_POWER);
+            PrepareAuraScript(spell_assembly_rune_of_summoning_AuraScript);
 
-                me->DespawnOrUnsummon(60*IN_MILLISECONDS);
+            bool Validate(SpellInfo const* /*spell*/)
+            {
+                if (!sSpellMgr->GetSpellInfo(SPELL_RUNE_OF_SUMMONING_SUMMON))
+                    return false;
+                return true;
+            }
+
+            void HandlePeriodic(AuraEffect const* aurEff)
+            {
+                PreventDefaultAction();
+                GetTarget()->CastSpell(GetTarget(), SPELL_RUNE_OF_SUMMONING_SUMMON, true, NULL, aurEff, GetTarget()->isSummon() ? GetTarget()->ToTempSummon()->GetSummonerGUID() : 0);
+            }
+
+            void OnRemove(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+            {
+                if (TempSummon* summ = GetTarget()->ToTempSummon())
+                    summ->DespawnOrUnsummon(1);
+            }
+
+            void Register()
+            {
+                OnEffectPeriodic += AuraEffectPeriodicFn(spell_assembly_rune_of_summoning_AuraScript::HandlePeriodic, EFFECT_0, SPELL_AURA_PERIODIC_DUMMY);
+                OnEffectRemove += AuraEffectRemoveFn(spell_assembly_rune_of_summoning_AuraScript::OnRemove, EFFECT_0, SPELL_AURA_PERIODIC_DUMMY, AURA_EFFECT_HANDLE_REAL);
             }
         };
 
-        CreatureAI* GetAI(Creature* creature) const
+        AuraScript* GetAuraScript() const
         {
-            return new mob_rune_of_powerAI(creature);
-        }
-};
-
-class mob_lightning_elemental : public CreatureScript
-{
-    public:
-        mob_lightning_elemental() : CreatureScript("mob_lightning_elemental") {}
-
-        struct mob_lightning_elementalAI : public ScriptedAI
-        {
-            mob_lightning_elementalAI(Creature* creature) : ScriptedAI(creature)
-            {
-                _instance = creature->GetInstanceScript();
-                me->SetInCombatWithZone();
-            }
-
-            void EnterCombat(Unit* /* target */)
-            {
-                DoCast(me, SPELL_LIGHTNING_ELEMENTAL_PASSIVE);      // TODO: Check if both this spell and the other one below are required
-                if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0.0f, true))
-                {
-                    me->AddThreat(target, std::numeric_limits<float>::max());
-                    AttackStart(target);
-                }
-            }
-
-            void UpdateAI(uint32 const /*diff*/)
-            {
-                if (!UpdateVictim())
-                    return;
-
-                if (me->IsWithinMeleeRange(me->getVictim()) && !_castDone)
-                {
-                    me->CastSpell(me, SPELL_LIGHTNING_BLAST, true);
-                    me->DespawnOrUnsummon(0.5*IN_MILLISECONDS);
-                    _castDone = true;
-                }
-
-                if (_instance && _instance->GetBossState(BOSS_ASSEMBLY_OF_IRON) != IN_PROGRESS)
-                    me->DespawnOrUnsummon();
-            }
-
-        private:
-            InstanceScript* _instance;
-            bool _castDone;
-        };
-
-        CreatureAI* GetAI(Creature* creature) const
-        {
-            return new mob_lightning_elementalAI(creature);
-        }
-};
-
-class mob_rune_of_summoning : public CreatureScript
-{
-    public:
-        mob_rune_of_summoning() : CreatureScript("mob_rune_of_summoning") {}
-
-        struct mob_rune_of_summoningAI : public ScriptedAI
-        {
-            mob_rune_of_summoningAI(Creature* creature) : ScriptedAI(creature)
-            {
-                me->AddAura(SPELL_RUNE_OF_SUMMONING_VIS, me);
-                _summonCount = 0;
-                _summonTimer = 2*IN_MILLISECONDS;
-                _instance = creature->GetInstanceScript();
-            }
-
-            void JustSummoned(Creature* summon)
-            {
-                if (Creature* Molgeim = ObjectAccessor::GetCreature(*me, _instance ? _instance->GetData64(DATA_MOLGEIM) : 0))
-                    Molgeim->AI()->JustSummoned(summon);    // Move ownership, take care that the spawned summon does not know about this
-            }
-
-            void UpdateAI(uint32 const diff)
-            {
-                if (_summonTimer <= diff)
-                    SummonLightningElemental();
-                else
-                    _summonTimer -= diff;
-            }
-
-            void SummonLightningElemental()
-            {
-                me->CastSpell(me, SPELL_RUNE_OF_SUMMONING_SUMMON, false);   // Spell summons 32958
-                if (++_summonCount == 10)                        // TODO: Find out if this amount is right
-                    me->DespawnOrUnsummon();
-                else
-                    _summonTimer = 2*IN_MILLISECONDS;                         // TODO: Find out of timer is right
-            }
-
-            private:
-                InstanceScript* _instance;
-                uint32 _summonCount;
-                uint32 _summonTimer;
-        };
-
-        CreatureAI* GetAI(Creature* creature) const
-        {
-            return new mob_rune_of_summoningAI(creature);
+            return new spell_assembly_rune_of_summoning_AuraScript();
         }
 };
 
@@ -1362,10 +1279,8 @@ void AddSC_boss_assembly_of_iron()
     new boss_steelbreaker();
     new boss_runemaster_molgeim();
     new boss_stormcaller_brundir();
-    new mob_lightning_elemental();
-    new mob_rune_of_summoning();
-    new mob_rune_of_power();
 
+    new spell_assembly_rune_of_summoning();
     new spell_steelbreaker_static_disruption();
     new spell_steelbreaker_electrical_charge();
     new spell_shield_of_runes();
