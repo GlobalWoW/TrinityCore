@@ -37,11 +37,11 @@ enum Spells
 enum Texts
 {
     SAY_AGGRO                                     = 0,
-    SAY_KILL                                      = 1,
+    SAY_SLAY                                      = 1,
     SAY_DEATH                                     = 2,
     SAY_SUMMON_RHINO                              = 3,
-    SAY_TRANSFORM_TROLL                           = 4,
-    SAY_TRANSFORM_RHINO                           = 5,
+    SAY_TRANSFORM_1                               = 4,
+    SAY_TRANSFORM_2                               = 5
 };
 
 enum Displays
@@ -140,7 +140,7 @@ public:
                             me->SetDisplayId(DISPLAY_RHINO);
                             Phase = RHINO;
                             uiPhaseCounter = 0;
-                            Talk(SAY_TRANSFORM_RHINO);
+                            Talk(SAY_TRANSFORM_1);
                             uiTransformationTimer = 5*IN_MILLISECONDS;
                             bStartOfTransformation = true;
                             me->ClearUnitState(UNIT_STATE_STUNNED|UNIT_STATE_ROOT);
@@ -183,7 +183,7 @@ public:
                             me->SetDisplayId(DISPLAY_TROLL);
                             Phase = TROLL;
                             uiPhaseCounter = 0;
-                            Talk(SAY_TRANSFORM_TROLL);
+                            Talk(SAY_TRANSFORM_2);
                             uiTransformationTimer = 9*IN_MILLISECONDS;
                             bStartOfTransformation = true;
                             me->ClearUnitState(UNIT_STATE_STUNNED|UNIT_STATE_ROOT);
@@ -273,7 +273,7 @@ public:
             if (victim == me)
                 return;
 
-            Talk(SAY_KILL);
+            Talk(SAY_SLAY);
         }
     };
 

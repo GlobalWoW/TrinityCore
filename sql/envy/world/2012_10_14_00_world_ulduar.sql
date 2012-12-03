@@ -371,6 +371,7 @@ UPDATE `creature_template` SET `difficulty_entry_1`=34361, `ScriptName`='npc_fro
 UPDATE `creature_template` SET `speed_walk`=0.15, `speed_run`=0.15, `ScriptName`='npc_mimiron_flame_trigger' WHERE `entry` =34363;
 UPDATE `creature_template` SET `ScriptName`='npc_mimiron_flame_spread' WHERE `entry`=34121;
 UPDATE `creature_template` SET `ScriptName`='npc_mimiron_bomb_bot' WHERE `entry`=33836;
+UPDATE `creature_template` SET `ScriptName`='npc_boomer_xp' WHERE `entry`=34192;
 
 -- Cleaning up Leviathan Mk II
 DELETE FROM `creature` WHERE `id`=34071;
@@ -489,19 +490,14 @@ INSERT INTO `spell_script_names` (`spell_id`,`ScriptName`) VALUES
 (62702,'spell_keeper_support_aura_targeting'),
 (62650,'spell_keeper_support_aura_targeting');
 
-DELETE FROM `conditions` WHERE SourceEntry IN (64184, 63882, 63886, 64172, 64465, 65209);
-INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES
-(13, 1, 64184, 0, 0, 18, 0, 1, 33288, 0, 0, 0, '', 'Effect on YoggSaron'), -- Create Val'anyr on Yogg-Saron
-(13, 1, 63882, 0, 0, 18, 0, 1, 33882, 0, 0, 0, '', 'Effect on Death Orb'), -- Deathray Effekt on Death Orb
-(13, 1, 63886, 0, 0, 18, 0, 1, 33882, 0, 0, 0, '', 'Effect on Death Orb'),
-(13, 1, 64172, 0, 0, 18, 0, 1, 33988, 0, 0, 0, '', 'Effect only for Immortal Guardians'), -- Condition because NPCs need this else no hit
-(13, 1, 64465, 0, 0, 18, 0, 1, 33988, 0, 0, 0, '', 'Effect only for Immortal Guardians'),
-(13, 1, 65209, 0, 0, 18, 0, 1, 33136, 0, 0, 0, '', 'Effect only for Guardian of YoggSaron'), -- Second Damage Effekt of ShadowNova only on other Guardians or Sara
-(13, 1, 65209, 0, 0, 18, 0, 1, 33134, 0, 0, 0, '', 'Effect only for Sara');
-
-DELETE FROM `conditions` WHERE `SourceEntry` IN (65719, 62714);
-INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `ConditionTypeOrReference`, `ConditionValue1`, `ConditionValue2`, `Comment`) VALUES
-(13, 1, 65719, 31, 3, 33134, 'Spell should hit only Sara'),	-- Shadow Nova
+DELETE FROM `conditions` WHERE `SourceEntry` IN (64184, 63882, 63886, 64172, 64465, 65719, 62714);
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `ConditionTypeOrReference`, `ConditionValue1`, `ConditionValue2`, `Comment`) VALUES 
+(13, 0, 64184, 31, 3, 33288, 'Effect on YoggSaron'), -- Create Val'anyr on Yogg-Saron
+(13, 0, 63882, 31, 3, 33882, 'Effect on Death Orb'), -- Deathray Effect on Death Orb
+(13, 0, 63886, 31, 3, 33882, 'Effect on Death Orb'),
+(13, 0, 64172, 31, 3, 33988, 'Effect only for Immortal Guardians'), -- Condition because NPCs need this else no hit
+(13, 0, 64465, 31, 3, 33988, 'Effect only for Immortal Guardians'),
+(13, 1, 65719, 31, 3, 33134, 'Spell should hit only Sara'),		-- Shadow Nova
 (13, 1, 62714, 31, 3, 33136, 'Effect should hit only Guardians'),
 (13, 2, 62714, 31, 4, 0, 'Effect should hit only Players');
 
@@ -588,10 +584,12 @@ UPDATE `creature_template` SET `AIName`='', `ScriptName`='npc_XD175_compactobot'
 UPDATE `creature_template` SET `AIName`='', `ScriptName`='npc_XB488_disposalbot' WHERE `entry`=34273;
 
 DELETE FROM `spell_script_names` WHERE `spell_id`=63059;
-INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES (63059, 'spell_pollinate');
+INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES
+(63059, 'spell_pollinate');
 
 DELETE FROM `spell_linked_spell` WHERE `spell_trigger`=62317 AND `spell_effect`=57807 AND `type`=1;
-INSERT INTO `spell_linked_spell` (`spell_trigger`, `spell_effect`, `type`, `comment`) VALUES (62317, 57807, 1, 'Twilight Guardian - Link Devastate to Sunder Armor');
+INSERT INTO `spell_linked_spell` (`spell_trigger`, `spell_effect`, `type`, `comment`) VALUES
+(62317, 57807, 1, 'Twilight Guardian - Link Devastate to Sunder Armor');
 
 -- Clockwork mechanic
 UPDATE `creature_template` SET `unit_flags`=`unit_flags`&~(262144|33554432) WHERE `entry`=34184;

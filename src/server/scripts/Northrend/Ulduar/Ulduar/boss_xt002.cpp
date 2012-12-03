@@ -275,7 +275,7 @@ class boss_xt002 : public CreatureScript
                     ExposeHeart();
             }
 
-            uint32 GetData(uint32 type) const
+            uint32 GetData(uint32 type)
             {
                 switch (type)
                 {

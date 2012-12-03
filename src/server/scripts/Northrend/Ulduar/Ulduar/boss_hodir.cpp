@@ -67,7 +67,8 @@ enum HodirSpells
     SPELL_BERSERK                                = 47008,
     SPELL_ICE_SHARD                              = 62457,
     SPELL_ICE_SHARD_HIT                          = 65370,
-    SPELL_ACHIEVEMENT_CHECK                      = 64899,
+
+    SPELL_KILL_CREDIT                            = 64899,
 
     // Druids
     SPELL_WRATH                                  = 62793,
@@ -405,10 +406,10 @@ class boss_hodir : public CreatureScript
                     me->SetControlled(true, UNIT_STATE_STUNNED);
                     me->CombatStop(true);
 
-                    DoCast(me, SPELL_ACHIEVEMENT_CHECK, true); // For hodir credit, due to wowhead
-
                     me->setFaction(FACTION_FRIENDLY);
                     me->DespawnOrUnsummon(10*IN_MILLISECONDS);
+
+                    DoCastAOE(SPELL_KILL_CREDIT);
 
                     _JustDied();
                 }

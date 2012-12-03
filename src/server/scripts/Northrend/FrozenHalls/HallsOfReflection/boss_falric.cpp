@@ -15,27 +15,28 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "ScriptMgr.h"
+#include "ScriptedCreature.h"
 #include "ScriptPCH.h"
 #include "halls_of_reflection.h"
 
 enum Yells
 {
-    SAY_AGGRO                                     = -1668050,
-    SAY_SLAY_1                                    = -1668051,
-    SAY_SLAY_2                                    = -1668052,
-    SAY_DEATH                                     = -1668053,
-    SAY_IMPENDING_DESPAIR                 = -1668054,
-    SAY_DEFILING_HORROR                    = -1668055,
+    SAY_AGGRO                                     = 0,
+    SAY_SLAY                                      = 1,
+    SAY_DEATH                                     = 2,
+    SAY_IMPENDING_DESPAIR                         = 3,
+    SAY_DEFILING_HORROR                           = 4
 };
 
 enum Spells
 {
     SPELL_QUIVERING_STRIKE                        = 72422,
-    SPELL_IMPENDING_DESPAIR                      = 72426,
+    SPELL_IMPENDING_DESPAIR                       = 72426,
     SPELL_DEFILING_HORROR                         = 72435,
-    H_SPELL_DEFILING_HORROR                     = 72452,
-    SPELL_HOPELESSNESS                             = 72395,
-    H_SPELL_HOPELESSNESS                         = 72390, // TODO: not in dbc. Add in DB.
+    H_SPELL_DEFILING_HORROR                       = 72452,
+    SPELL_HOPELESSNESS                            = 72395,
+    H_SPELL_HOPELESSNESS                          = 72390 // TODO: not in dbc. Add in DB.
 };
 
 enum Events
@@ -94,7 +95,7 @@ public:
         }
         void EnterCombat(Unit* /*who*/)
         {
-            DoScriptText(SAY_AGGRO, me);
+            Talk(SAY_AGGRO);
             if (instance)
                 instance->SetData(DATA_FALRIC_EVENT, IN_PROGRESS);
 
@@ -105,7 +106,7 @@ public:
 
         void JustDied(Unit* /*killer*/)
         {
-            DoScriptText(SAY_DEATH, me);
+            Talk(SAY_DEATH);
 
             if (instance)
                 instance->SetData(DATA_FALRIC_EVENT, DONE);
@@ -113,7 +114,7 @@ public:
 
         void KilledUnit(Unit* /*victim*/)
         {
-            DoScriptText(RAND(SAY_SLAY_1, SAY_SLAY_2), me);
+            Talk(SAY_SLAY);
         }
 
         void UpdateAI(const uint32 diff)
@@ -136,14 +137,14 @@ public:
                 case EVENT_IMPENDING_DESPAIR:
                     if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM))
                     {
-                        DoScriptText(SAY_IMPENDING_DESPAIR, me);
+                        Talk(SAY_IMPENDING_DESPAIR);
                         DoCast(target, SPELL_IMPENDING_DESPAIR);
                     }
                     events.ScheduleEvent(EVENT_IMPENDING_DESPAIR, 13000);
                     break;
                 case EVENT_DEFILING_HORROR:
                     DoDefilingHorror();
-                    DoScriptText(SAY_DEFILING_HORROR, me);
+                    Talk(SAY_DEFILING_HORROR);
                     events.ScheduleEvent(EVENT_DEFILING_HORROR, urand(20000, 35000)); // TODO adjust timer.
                     break;
             }

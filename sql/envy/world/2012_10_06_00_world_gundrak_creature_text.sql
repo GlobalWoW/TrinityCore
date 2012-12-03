@@ -1,8 +1,5 @@
--- Move text used in Gundrak from script_texts to creature_text
-DELETE FROM `script_texts` WHERE `entry` BETWEEN -1604099 AND -1604000;
-DELETE FROM `creature_text` WHERE `entry` IN (29304,29305,29306);
-
 -- BOSS: SLAD'RAN
+DELETE FROM `creature_text` WHERE `entry`=29304;
 INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`sound`,`emote`,`comment`) VALUES
 (29304,0,0,'Drakkari gonna kill anybody who trespass on these lands!',14,14443,0,'SladRan - SAY_AGGRO'),
 (29304,1,0,'Ye not breathin''! Good.',14,14446,0,'SladRan - SAY_KILL_01'),
@@ -13,6 +10,7 @@ INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`sound`,`emote
 (29304,4,0,'Our thousand fangs gonna rend your flesh!',14,14445,0,'SladRan - SAY_SUMMON_CONSTRICTORS');
 
 -- BOSS: MOORABI
+DELETE FROM `creature_text` WHERE `entry`=29305;
 INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`sound`,`emote`,`comment`) VALUES
 (29305,0,0,'We fought back da Scourge. What chance joo be thinkin'' JOO got?',14,14721,0,'Moorabi - SAY_AGGRO'),
 (29305,1,0,'I crush you, cockroaches!',14,14725,0,'Moorabi - SAY_KILL_01'),
@@ -24,6 +22,7 @@ INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`sound`,`emote
 (29305,5,0,'Da ground gonna swallow you up!',14,14723,0,'Moorabi - SAY_QUAKE');
 
 -- BOSS: GAL'DARAH
+DELETE FROM `creature_text` WHERE `entry`=29306;
 INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`sound`,`emote`,`comment`) VALUES
 (29306,0,0,'I''m gonna spill your guts, mon!',14,14430,0,'GalDarah - SAY_AGGRO'),
 (29306,1,0,'What a rush!',14,14436,0,'GalDarah - SAY_KILL_01'),
@@ -31,7 +30,7 @@ INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`sound`,`emote
 (29306,1,2,'I told ya so!',14,14438,0,'GalDarah - SAY_KILL_03'),
 (29306,2,0,'Even the mighty... can fall.',14,14439,0,'GalDarah - SAY_DEATH'),
 (29306,3,0,'Gut them! Impale them!',14,14433,0,'GalDarah - SAY_SUMMON_RHINO_1'),
-(29306,3,1,'Kill them all!',14,14434,0,'GalDarah - SAY_SUMMON_RHINO_2'),
+(29306,3,1,'KILL THEM ALL!',14,14434,0,'GalDarah - SAY_SUMMON_RHINO_2'),
 (29306,3,2,'Say hello to my BIG friend!',14,14435,0,'GalDarah - SAY_SUMMON_RHINO_3'),
-(29306,4,0,'You wanna see power? I''m gonna show you power!',14,14432,0,'GalDarah - SAY_TRANSFORM_TROLL'),
-(29306,5,0,'Ain''t gonna be nottin'' left after this!',14,14431,0,'GalDarah - SAY_TRANSFORM_RHINO');
+(29306,4,0,'Ain''t gonna be nottin'' left after this!',14,14431,0,'GalDarah - SAY_TRANSFORM_RHINO'),
+(29306,5,0,'You wanna see power? I''m gonna show you power!',14,14432,0,'GalDarah - SAY_TRANSFORM_TROLL');

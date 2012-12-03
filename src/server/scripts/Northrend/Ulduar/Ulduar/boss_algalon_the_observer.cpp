@@ -376,6 +376,8 @@ class boss_algalon_the_observer : public CreatureScript
                         _firstPull = false;
                         me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC);
                         break;
+                    default:
+                        break;
                 }
             }
 
