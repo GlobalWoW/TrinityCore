@@ -36,10 +36,11 @@ enum Spells
 enum Texts
 {
     SAY_AGGRO                                     = 0,
-    SAY_KILL                                      = 1,
+    SAY_SLAY                                      = 1,
     SAY_DEATH                                     = 2,
     SAY_SUMMON_SNAKES                             = 3,
     SAY_SUMMON_CONSTRICTORS                       = 4,
+    EMOTE_NOVA                                    = 5
 };
 
 //Creatures
@@ -130,6 +131,7 @@ public:
             if (uiPoisonNovaTimer <= diff)
             {
                 DoCast(me->getVictim(), SPELL_POISON_NOVA);
+                Talk(EMOTE_NOVA);
                 uiPoisonNovaTimer = 15*IN_MILLISECONDS;
             } else uiPoisonNovaTimer -= diff;
 
@@ -185,7 +187,7 @@ public:
 
         void KilledUnit(Unit* /*victim*/)
         {
-            Talk(SAY_KILL);
+            Talk(SAY_SLAY);
         }
 
         void JustSummoned(Creature* summoned)

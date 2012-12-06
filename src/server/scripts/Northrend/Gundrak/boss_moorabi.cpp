@@ -35,12 +35,11 @@ enum eSpells
 enum Texts
 {
     SAY_AGGRO                                     = 0,
-    SAY_KILL                                      = 1,
+    SAY_SLAY                                      = 1,
     SAY_DEATH                                     = 2,
     SAY_TRANSFORM                                 = 3,
     EMOTE_TRANSFORM                               = 4,
-    SAY_QUAKE                                     = 5,
-
+    SAY_QUAKE                                     = 5
 };
 
 #define DATA_LESS_RABI                            1
@@ -164,7 +163,7 @@ public:
             if (victim == me)
                 return;
 
-            Talk(SAY_KILL);
+            Talk(SAY_SLAY);
         }
     };
 
