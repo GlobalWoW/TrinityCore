@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2011 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2012 TrinityCore <http://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -17,7 +17,6 @@
 
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
-#include "ScriptPCH.h"
 #include "halls_of_reflection.h"
 
 enum Yells
@@ -25,8 +24,7 @@ enum Yells
     SAY_AGGRO                                     = 0,
     SAY_SLAY                                      = 1,
     SAY_DEATH                                     = 2,
-    SAY_CORRUPTED_FLESH                           = 3,
-    //SAY_WELL_OF_CORRUPTION                      = 4 //not in db
+    SAY_CORRUPTED_FLESH                           = 3
 };
 
 enum Spells
@@ -34,7 +32,7 @@ enum Spells
     SPELL_OBLITERATE                              = 72360,
     SPELL_WELL_OF_CORRUPTION                      = 72362,
     SPELL_CORRUPTED_FLESH                         = 72363,
-    SPELL_SHARED_SUFFERING                        = 72368
+    SPELL_SHARED_SUFFERING                        = 72368,
 };
 
 enum Events
@@ -67,11 +65,6 @@ public:
             if (instance)
                 instance->SetData(DATA_MARWYN_EVENT, NOT_STARTED);
         }
-        
-        void JustReachedHome()
-        {
-            instance->SetData(DATA_WAVE_STATE, FAIL);
-        }
 
         void EnterCombat(Unit* /*who*/)
         {
@@ -90,10 +83,7 @@ public:
             Talk(SAY_DEATH);
 
             if (instance)
-            {
                 instance->SetData(DATA_MARWYN_EVENT, DONE);
-                instance->SetData(DATA_WAVE_STATE, DONE);
-            }
         }
 
         void KilledUnit(Unit* /*victim*/)
@@ -119,7 +109,6 @@ public:
                     events.ScheduleEvent(EVENT_OBLITERATE, 30000);
                     break;
                 case EVENT_WELL_OF_CORRUPTION:
-                    //Talk(SAY_WELL_OF_CORRUPTION); //not in db
                     DoCast(SPELL_WELL_OF_CORRUPTION);
                     events.ScheduleEvent(EVENT_WELL_OF_CORRUPTION, 13000);
                     break;
