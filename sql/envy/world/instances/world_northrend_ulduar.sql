@@ -1,12 +1,3 @@
-###########
--- ULDUAR #
-###########
-
--- Saronite Vapors scriptname
-DELETE FROM `spell_script_names` WHERE `spell_id`=63322;
-INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES
-(63322, 'spell_saronite_vapors');
-
 -- Leviathan tower buffs
 DELETE FROM `spell_script_names` WHERE `spell_id` IN (64482, 65075, 65076, 65077);
 INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES
@@ -412,8 +403,9 @@ INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES
 
 -- General Vezax
 -- Register spell-scripts
-DELETE FROM `spell_script_names` WHERE `spell_id` IN (62692, 63276, 63278);
-INSERT INTO `spell_script_names` VALUES 
+DELETE FROM `spell_script_names` WHERE `spell_id` IN (63322, 62692, 63276, 63278);
+INSERT INTO `spell_script_names` VALUES
+(63322, 'spell_saronite_vapors'),
 (62692,'spell_aura_of_despair_aura'),
 (63276,'spell_mark_of_the_faceless'),
 (63278,'spell_mark_of_the_faceless_drain');
