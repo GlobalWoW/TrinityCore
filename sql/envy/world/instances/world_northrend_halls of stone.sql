@@ -52,9 +52,11 @@ UPDATE `creature_template` SET `ScriptName`= 'mob_iron_golem_gustodian' WHERE `e
 DELETE FROM `gameobject` WHERE `id` IN (190586, 193996);
 UPDATE `gameobject_template` SET `flags`=0 WHERE `entry` IN (190586, 193996);
 
+/* NEED FIX
 DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId`=13 AND `SourceEntry` IN (51001,51136);
 INSERT INTO `conditions` VALUES ('13', '1', '51136', '0', '0', '32', '0', '144', '0', '0', '0', '0', '', null);
 INSERT INTO `conditions` VALUES ('13', '1', '51001', '0', '0', '32', '0', '144', '0', '0', '0', '0', '', null);
+*/
 
 -- fix Factions for Sjonnir adds
 UPDATE `creature_template` SET `faction_A`= 1965, `faction_H`= 1965 WHERE `entry` IN (27979, 27981, 27982, 28165, 31390, 31388, 31394, 31389);

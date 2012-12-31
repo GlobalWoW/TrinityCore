@@ -2,6 +2,7 @@
 DELETE FROM `creature_text` WHERE `entry`=29304;
 DELETE FROM `creature_text` WHERE `entry`=29305;
 DELETE FROM `creature_text` WHERE `entry`=29306;
+
 INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`sound`,`emote`,`comment`) VALUES
 (29304,0,0,'Drakkari gonna kill anybody who trespass on these lands!',14,14443,0,'Slad''ran - SAY_AGGRO'),
 (29304,1,0,'Ye not breathin''! Good.',14,14446,0,'Slad''ran - SAY_SLAY_01'),
@@ -10,7 +11,7 @@ INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`sound`,`emote
 (29304,2,0,'I sssee now... Ssscourge wasss not... our greatessst enemy...',14,14449,0,'Slad''ran - SAY_DEATH'),
 (29304,3,0,'Minions of the scale, heed my call!',14,14444,0,'Slad''ran - SAY_SUMMON_SNAKES'),
 (29304,4,0,'Our thousand fangs gonna rend your flesh!',14,14445,0,'Slad''ran - SAY_SUMMON_CONSTRICTORS'),
-(29304,5,0,'%s begins to cast Poison Nova!',41,0,100,0,0,0,'Slad''ran - EMOTE_NOVA'),
+(29304,5,0,'%s begins to cast Poison Nova!',41,0,0,'Slad''ran - EMOTE_NOVA'),
 
 (29305,0,0,'We fought back da Scourge. What chance joo be thinkin'' JOO got?',14,14721,0,'Moorabi - SAY_AGGRO'),
 (29305,1,0,'I crush you, cockroaches!',14,14725,0,'Moorabi - SAY_SLAY_01'),
