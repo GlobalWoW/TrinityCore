@@ -3646,9 +3646,6 @@ void SpellMgr::LoadDbcDataCorrections()
                 spellInfo->EffectRadiusIndex[EFFECT_1] = EFFECT_RADIUS_50_YARDS;
                 spellInfo->EffectRadiusIndex[EFFECT_2] = EFFECT_RADIUS_50_YARDS;
                 break;
-            case 45524: // Chains of Ice
-                spellInfo->EffectImplicitTargetA[2] = TARGET_UNIT_TARGET_ENEMY;
-                break;
             case 22741: // High Tinker Mekkatorque - Goblin Dragon Gun
                 spellInfo->EffectBasePoints[EFFECT_0] = 4200;
                 break;
