@@ -23,18 +23,18 @@
 
 enum HighGuid
 {
-    HIGHGUID_ITEM           = 0x400,                       // blizz 4000
-    HIGHGUID_CONTAINER      = 0x400,                       // blizz 4000
-    HIGHGUID_PLAYER         = 0x000,                       // blizz 0000
-    HIGHGUID_GAMEOBJECT     = 0xF11,                       // blizz F110
-    HIGHGUID_TRANSPORT      = 0xF12,                       // blizz F120 (for GAMEOBJECT_TYPE_TRANSPORT)
-    HIGHGUID_UNIT           = 0xF13,                       // blizz F130
-    HIGHGUID_PET            = 0xF14,                       // blizz F140
-    HIGHGUID_VEHICLE        = 0xF15,                       // blizz F550
-    HIGHGUID_DYNAMICOBJECT  = 0xF10,                       // blizz F100
+    HIGHGUID_ITEM           = 0x4000,                      // blizz 4000
+    HIGHGUID_CONTAINER      = 0x4000,                      // blizz 4000
+    HIGHGUID_PLAYER         = 0x0000,                      // blizz 0000
+    HIGHGUID_GAMEOBJECT     = 0xF110,                      // blizz F110
+    HIGHGUID_TRANSPORT      = 0xF120,                      // blizz F120 (for GAMEOBJECT_TYPE_TRANSPORT)
+    HIGHGUID_UNIT           = 0xF130,                      // blizz F130
+    HIGHGUID_PET            = 0xF140,                      // blizz F140
+    HIGHGUID_VEHICLE        = 0xF150,                      // blizz F550
+    HIGHGUID_DYNAMICOBJECT  = 0xF100,                      // blizz F100
     HIGHGUID_CORPSE         = 0xF101,                      // blizz F100
-    HIGHGUID_MO_TRANSPORT   = 0x1FC,                       // blizz 1FC0 (for GAMEOBJECT_TYPE_MO_TRANSPORT)
-    HIGHGUID_GROUP          = 0x1F5
+    HIGHGUID_MO_TRANSPORT   = 0x1FC0,                      // blizz 1FC0 (for GAMEOBJECT_TYPE_MO_TRANSPORT)
+    HIGHGUID_GROUP          = 0x1F50
 };
 
 // used for creating values for respawn for example
@@ -198,15 +198,15 @@ uint32 GUID_HIPART(uint64 guid)
 uint32 GUID_ENPART(uint64 x)
 {
     return IsGuidHaveEnPart(x)
-            ? ((uint32)((x >> 32) & UI64LIT(0x00000000000FFFFF)))
+            ? (uint32)((x >> 24) & UI64LIT(0x0000000000FFFFFF))
             : 0;
 }
 
 uint32 GUID_LOPART(uint64 x)
 {
     return IsGuidHaveEnPart(x)
-            ? ((uint32)(x & UI64LIT(0x00000000FFFFFFFF)))
-            : ((uint32)(x & UI64LIT(0x0000000000FFFFFF)));
+            ? (uint32)(x & UI64LIT(0x0000000000FFFFFF))
+            : (uint32)(x & UI64LIT(0x00000000FFFFFFFF));
 }
 
 bool IsGuidHaveEnPart(uint64 guid)
