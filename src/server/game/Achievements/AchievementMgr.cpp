@@ -2032,9 +2032,6 @@ void AchievementMgr::RemoveTimedAchievement(AchievementCriteriaTimedTypes type, 
 
 void AchievementMgr::CompletedAchievement(AchievementEntry const* achievement)
 {
-    sLog->outInfo(LOG_FILTER_ACHIEVEMENTSYS, "AchievementMgr::CompletedAchievement(%u). Player: %s (%u)",
-        achievement->ID, m_player->GetName().c_str(), m_player->GetGUIDLow());
-
     // disable for gamemasters with GM-mode enabled
     if (m_player->isGameMaster())
         return;
@@ -2046,6 +2043,9 @@ void AchievementMgr::CompletedAchievement(AchievementEntry const* achievement)
     if (sWorld->getBoolConfig(CONFIG_ARMORY_ENABLE))
         GetPlayer()->CreateWowarmoryFeed(1, achievement->ID, 0, 0);
     // World of Warcraft ArmoryPatch END
+
+    sLog->outInfo(LOG_FILTER_ACHIEVEMENTSYS, "AchievementMgr::CompletedAchievement(%u). Player: %s (%u)",
+        achievement->ID, m_player->GetName().c_str(), m_player->GetGUIDLow());
 
     SendAchievementEarned(achievement);
     CompletedAchievementData& ca = m_completedAchievements[achievement->ID];
