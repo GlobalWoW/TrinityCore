@@ -3661,6 +3661,8 @@ void SpellMgr::LoadDbcDataCorrections()
             case 33385: // Lorthemar'Theron - Mana Burn
                 spellInfo->EffectValueMultiplier[EFFECT_0] = 7.0f;
                 break;
+            case 24314: // Threatening Gaze
+                spellInfo->AuraInterruptFlags |= AURA_INTERRUPT_FLAG_CAST | AURA_INTERRUPT_FLAG_MOVE | AURA_INTERRUPT_FLAG_JUMP;
             default:
                 break;
         }
