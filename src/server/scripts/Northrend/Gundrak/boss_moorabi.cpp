@@ -32,14 +32,14 @@ enum eSpells
     SPELL_TRANSFORMATION                          = 55098, //Periodic, The caster transforms into a powerful mammoth, increasing Physical damage done by 25% and granting immunity to Stun effects.
 };
 
-enum Texts
+enum eSays
 {
     SAY_AGGRO                                     = 0,
     SAY_SLAY                                      = 1,
     SAY_DEATH                                     = 2,
     SAY_TRANSFORM                                 = 3,
-    EMOTE_TRANSFORM                               = 4,
-    SAY_QUAKE                                     = 5
+    SAY_QUAKE                                     = 4,
+    EMOTE_TRANSFORM                               = 5
 };
 
 #define DATA_LESS_RABI                            1

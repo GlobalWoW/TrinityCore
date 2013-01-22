@@ -1120,7 +1120,7 @@ bool Player::Create(uint32 guidlow, CharacterCreateInfo* createInfo)
         addActionButton(action_itr->button, action_itr->action, action_itr->type);
 
     // original items
-    if (CharStartOutfitEntry const* oEntry = sCharStartOutfitStore.LookupEntry(RaceClassGender))
+    if (CharStartOutfitEntry const* oEntry = GetCharStartOutfitEntry(createInfo->Race, createInfo->Class, createInfo->Gender))
     {
         for (int j = 0; j < MAX_OUTFIT_ITEMS; ++j)
         {
@@ -3432,6 +3432,19 @@ void Player::AddNewMailDeliverTime(time_t deliver_time)
     }
 }
 
+void DeleteSpellFromAllPlayers(uint32 spellId)
+{
+    CharacterDatabaseStatements stmts[2] = {CHAR_DEL_INVALID_SPELL_SPELLS, CHAR_DEL_INVALID_SPELL_TALENTS};
+    for (uint8 i = 0; i < 2; i++)
+    {
+        PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(stmts[i]);
+
+        stmt->setUInt32(0, spellId);
+
+        CharacterDatabase.Execute(stmt);
+    }
+}
+
 bool Player::AddTalent(uint32 spellId, uint8 spec, bool learning)
 {
     SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(spellId);
@@ -3442,11 +3455,7 @@ bool Player::AddTalent(uint32 spellId, uint8 spec, bool learning)
         {
             sLog->outError(LOG_FILTER_SPELLS_AURAS, "Player::addSpell: Non-existed in SpellStore spell #%u request, deleting for all characters in `character_spell`.", spellId);
 
-            PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_INVALID_SPELL);
-
-            stmt->setUInt32(0, spellId);
-
-            CharacterDatabase.Execute(stmt);
+            DeleteSpellFromAllPlayers(spellId);
         }
         else
             sLog->outError(LOG_FILTER_SPELLS_AURAS, "Player::addSpell: Non-existed in SpellStore spell #%u request.", spellId);
@@ -3461,11 +3470,7 @@ bool Player::AddTalent(uint32 spellId, uint8 spec, bool learning)
         {
             sLog->outError(LOG_FILTER_SPELLS_AURAS, "Player::addTalent: Broken spell #%u learning not allowed, deleting for all characters in `character_talent`.", spellId);
 
-            PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_INVALID_SPELL);
-
-            stmt->setUInt32(0, spellId);
-
-            CharacterDatabase.Execute(stmt);
+            DeleteSpellFromAllPlayers(spellId);
         }
         else
             sLog->outError(LOG_FILTER_SPELLS_AURAS, "Player::addTalent: Broken spell #%u learning not allowed.", spellId);
@@ -3515,11 +3520,7 @@ bool Player::addSpell(uint32 spellId, bool active, bool learning, bool dependent
         {
             sLog->outError(LOG_FILTER_SPELLS_AURAS, "Player::addSpell: Non-existed in SpellStore spell #%u request, deleting for all characters in `character_spell`.", spellId);
 
-            PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_INVALID_SPELL);
-
-            stmt->setUInt32(0, spellId);
-
-            CharacterDatabase.Execute(stmt);
+            DeleteSpellFromAllPlayers(spellId);
         }
         else
             sLog->outError(LOG_FILTER_SPELLS_AURAS, "Player::addSpell: Non-existed in SpellStore spell #%u request.", spellId);
@@ -3534,11 +3535,7 @@ bool Player::addSpell(uint32 spellId, bool active, bool learning, bool dependent
         {
             sLog->outError(LOG_FILTER_SPELLS_AURAS, "Player::addSpell: Broken spell #%u learning not allowed, deleting for all characters in `character_spell`.", spellId);
 
-            PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_INVALID_SPELL);
-
-            stmt->setUInt32(0, spellId);
-
-            CharacterDatabase.Execute(stmt);
+            DeleteSpellFromAllPlayers(spellId);
         }
         else
             sLog->outError(LOG_FILTER_SPELLS_AURAS, "Player::addSpell: Broken spell #%u learning not allowed.", spellId);
@@ -4954,11 +4951,6 @@ void Player::DeleteFromDB(uint64 playerguid, uint32 accountId, bool updateRealmC
             stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_CHAR_SKILLS);
             stmt->setUInt32(0, guid);
             trans->Append(stmt);
-
-            // World of Warcraft ArmoryPatch START
-            trans->PAppend("DELETE FROM armory_character_stats WHERE guid = '%u'",guid);
-            trans->PAppend("DELETE FROM character_feed_log WHERE guid = '%u'",guid);
-            // World of Warcraft ArmoryPatch END
 
             CharacterDatabase.CommitTransaction(trans);
             break;
@@ -16777,9 +16769,6 @@ bool Player::LoadFromDB(uint32 guid, SQLQueryHolder *holder)
         return false;
     }
 
-    // Cleanup old WowArmory feeds
-    InitWowarmoryFeeds();
-
     // overwrite possible wrong/corrupted guid
     SetUInt64Value(OBJECT_FIELD_GUID, MAKE_NEW_GUID(guid, 0, HIGHGUID_PLAYER));
 
@@ -18959,33 +18948,6 @@ void Player::SaveToDB(bool create /*=false*/)
         _SaveStats(trans);
 
     CharacterDatabase.CommitTransaction(trans);
-
-    // World of Warcraft ArmoryPatch START
-    // Place this code AFTER CharacterDatabase.CommitTransaction(); to avoid some character saving errors.
-    // Wowarmory feeds
-    if (sWorld->getBoolConfig(CONFIG_ARMORY_ENABLE))
-    {
-        std::ostringstream sWowarmory;
-        for (WowarmoryFeeds::iterator iter = m_wowarmory_feeds.begin(); iter < m_wowarmory_feeds.end(); ++iter) {
-            sWowarmory << "INSERT IGNORE INTO character_feed_log (guid,type,data,date,counter,difficulty,item_guid,item_quality) VALUES ";
-            //                      guid                    type                        data                    date                            counter                   difficulty                        item_guid                      item_quality
-            sWowarmory << "(" << (*iter).guid << ", " << (*iter).type << ", " << (*iter).data << ", " << uint64((*iter).date) << ", " << (*iter).counter << ", " << uint32((*iter).difficulty) << ", " << (*iter).item_guid << ", " << (*iter).item_quality <<  ");";
-            CharacterDatabase.PExecute(sWowarmory.str().c_str());
-            sWowarmory.str("");
-        }
-        // Clear old saved feeds from storage - they are not required for server core.
-        InitWowarmoryFeeds();
-        // Character stats
-        std::ostringstream ps;
-        time_t t = time(NULL);
-        CharacterDatabase.PExecute("DELETE FROM armory_character_stats WHERE guid = %u", GetGUIDLow());
-        ps << "INSERT INTO armory_character_stats (guid, data, save_date) VALUES (" << GetGUIDLow() << ", '";
-        for (uint16 i = 0; i < m_valuesCount; ++i)
-            ps << GetUInt32Value(i) << " ";
-        ps << "', " << uint64(t) << ");";
-        CharacterDatabase.PExecute(ps.str().c_str());
-    }
-    // World of Warcraft ArmoryPatch END
 
     // save pet (hunter pet level and experience and all type pets health/mana).
     if (Pet* pet = GetPet())
@@ -25704,47 +25666,6 @@ void Player::_SaveInstanceTimeRestrictions(SQLTransaction& trans)
         trans->Append(stmt);
     }
 }
-
-// World of Warcraft ArmoryPatch START
-void Player::InitWowarmoryFeeds() {
-    // Clear feeds
-    m_wowarmory_feeds.clear();
-}
-
-void Player::CreateWowarmoryFeed(uint32 type, uint32 data, uint32 item_guid, uint32 item_quality) {
-    /*
-        1 - TYPE_ACHIEVEMENT_FEED
-        2 - TYPE_ITEM_FEED
-        3 - TYPE_BOSS_FEED
-    */
-    if (GetGUIDLow() == 0)
-    {
-        sLog->outError(LOG_FILTER_SQL, "[Wowarmory]: player is not initialized, unable to create log entry!");
-        return;
-    }
-    if (type <= 0 || type > 3)
-    {
-        sLog->outError(LOG_FILTER_SQL, "[Wowarmory]: unknown feed type: %d, ignore.", type);
-        return;
-    }
-    if (data == 0)
-    {
-        sLog->outError(LOG_FILTER_SQL, "[Wowarmory]: empty data (GUID: %u), ignore.", GetGUIDLow());
-        return;
-    }
-    WowarmoryFeedEntry feed;
-    feed.guid = GetGUIDLow();
-    feed.type = type;
-    feed.data = data;
-    feed.difficulty = type == 3 ? GetMap()->GetDifficulty() : 0;
-    feed.item_guid  = item_guid;
-    feed.item_quality = item_quality;
-    feed.counter = 0;
-    feed.date = time(NULL);
-    sLog->outDebug(LOG_FILTER_UNITS, "[Wowarmory]: create wowarmory feed (GUID: %u, type: %d, data: %u).", feed.guid, feed.type, feed.data);
-    m_wowarmory_feeds.push_back(feed);
-}
-// World of Warcraft ArmoryPatch END
 
 bool Player::IsInWhisperWhiteList(uint64 guid)
 {

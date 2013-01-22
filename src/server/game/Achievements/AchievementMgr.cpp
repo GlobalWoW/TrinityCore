@@ -2039,11 +2039,6 @@ void AchievementMgr::CompletedAchievement(AchievementEntry const* achievement)
     if (achievement->flags & ACHIEVEMENT_FLAG_COUNTER || HasAchieved(achievement->ID))
         return;
 
-    // World of Warcraft Armorypatch START
-    if (sWorld->getBoolConfig(CONFIG_ARMORY_ENABLE))
-        GetPlayer()->CreateWowarmoryFeed(1, achievement->ID, 0, 0);
-    // World of Warcraft ArmoryPatch END
-
     sLog->outInfo(LOG_FILTER_ACHIEVEMENTSYS, "AchievementMgr::CompletedAchievement(%u). Player: %s (%u)",
         achievement->ID, m_player->GetName().c_str(), m_player->GetGUIDLow());
 

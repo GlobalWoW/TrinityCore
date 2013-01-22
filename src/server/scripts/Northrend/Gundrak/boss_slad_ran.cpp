@@ -32,8 +32,8 @@ enum Spells
     H_SPELL_VENOM_BOLT                            = 59839
 };
 
-//Texts
-enum Texts
+//Yell
+enum Yells
 {
     SAY_AGGRO                                     = 0,
     SAY_SLAY                                      = 1,
