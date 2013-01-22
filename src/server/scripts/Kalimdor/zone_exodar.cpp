@@ -1,6 +1,5 @@
 /*
  * Copyright (C) 2008-2013 TrinityCore <http://www.trinitycore.org/>
- * Copyright (C) 2006-2009 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -15,82 +14,47 @@
  * You should have received a copy of the GNU General Public License along
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-
-/* ScriptData
-SDName: Thunder_Bluff
-SD%Complete: 100
-SDComment: Quest support: 925
-SDCategory: Thunder Bluff
-EndScriptData */
-
+ 
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
+#include "ScriptedEscortAI.h"
 #include "ScriptedGossip.h"
-#include "Player.h"
+#include "Cell.h"
+#include "CellImpl.h"
+#include "GridNotifiers.h"
 
 /*#####
-# npc_cairne_bloodhoof
+# npc_prohet_velen
 ######*/
 
-enum CairneBloodhoof
+enum ProphetVelen
 {
-    SPELL_BERSERKER_CHARGE  = 16636,
-    SPELL_CLEAVE            = 16044,
-    SPELL_MORTAL_STRIKE     = 16856,
-    SPELL_THUNDERCLAP       = 23931,
-    SPELL_UPPERCUT          = 22916,
+    SPELL_HOLY_BLAST        = 59700,
+    SPELL_HOLY_NOVA         = 59701,
+    SPELL_HOLY_SMITE        = 59703,
+    SPELL_PRAYER_OF_HEALING = 59698, // on friendly targets in range
+    SPELL_STAFF_STRIKE      = 33542,
 
-    QUEST_DEFENDING_HORDE       = 60001,
+    QUEST_DEFENDING_ALLIANCE = 60000,
 
-    NOTIFY_COOLDOWN             = 600000,
+    NOTIFY_COOLDOWN    = 600000,
 
-    SCALING_5                   = 73816,
-    SCALING_10                  = 73818,
-    SCALING_15                  = 73819,
-    SCALING_20                  = 73820,
-    SCALING_25                  = 73821,
-    SCALING_30                  = 73822,
+    SCALING_5          = 73762,
+    SCALING_10         = 73824,
+    SCALING_15         = 73825,
+    SCALING_20         = 73826,
+    SCALING_25         = 73827,
+    SCALING_30         = 73828,
 };
 
-#define GOSSIP_HCB "I know this is rather silly but a young ward who is a bit shy would like your hoofprint."
-//TODO: verify abilities/timers
-class npc_cairne_bloodhoof : public CreatureScript
+class npc_prophet_velen : public CreatureScript
 {
 public:
-    npc_cairne_bloodhoof() : CreatureScript("npc_cairne_bloodhoof") { }
+    npc_prophet_velen() : CreatureScript("npc_prophet_velen") { }
 
-    bool OnGossipSelect(Player* player, Creature* creature, uint32 /*sender*/, uint32 action)
+    struct npc_prophet_velenAI : public ScriptedAI
     {
-        player->PlayerTalkClass->ClearMenus();
-        if (action == GOSSIP_SENDER_INFO)
-        {
-            player->CastSpell(player, 23123, false);
-            player->SEND_GOSSIP_MENU(7014, creature->GetGUID());
-        }
-        return true;
-    }
-
-    bool OnGossipHello(Player* player, Creature* creature)
-    {
-        if (creature->isQuestGiver())
-            player->PrepareQuestMenu(creature->GetGUID());
-
-        if (player->GetQuestStatus(925) == QUEST_STATUS_INCOMPLETE)
-            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_HCB, GOSSIP_SENDER_MAIN, GOSSIP_SENDER_INFO);
-
-        player->SEND_GOSSIP_MENU(7013, creature->GetGUID());
-
-        return true;
-    }
-
-    CreatureAI* GetAI(Creature* creature) const
-    {
-        return new npc_cairne_bloodhoofAI (creature);
-    }
-
-    struct npc_cairne_bloodhoofAI : public ScriptedAI
-    {
-        npc_cairne_bloodhoofAI(Creature* creature) : ScriptedAI(creature) {}
+        npc_prophet_velenAI(Creature* creature) : ScriptedAI(creature) { }
 
         EventMap events;
 
@@ -106,16 +70,14 @@ public:
             rescaleTimer = 5000;
             notifyCooldown = 0;
 
-            me->m_CombatDistance = 100.0f;
-
             me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_ATTACK_POWER, true);
 
-            events.ScheduleEvent(SPELL_BERSERKER_CHARGE, 30000);
-            events.ScheduleEvent(SPELL_CLEAVE, 5000);
-            events.ScheduleEvent(SPELL_MORTAL_STRIKE, 10000);
-            events.ScheduleEvent(SPELL_THUNDERCLAP, 15000);
-            events.ScheduleEvent(SPELL_UPPERCUT, 10000);
-
+            events.Reset();
+            events.ScheduleEvent(SPELL_HOLY_BLAST, 7000);
+            events.ScheduleEvent(SPELL_HOLY_NOVA, 12000);
+            events.ScheduleEvent(SPELL_HOLY_SMITE, 9000);
+            events.ScheduleEvent(SPELL_PRAYER_OF_HEALING, 10000);
+            events.ScheduleEvent(SPELL_STAFF_STRIKE, 5000);
         }
 
         void EnterEvadeMode()
@@ -130,7 +92,7 @@ public:
                 for (std::list<Player*>::const_iterator itr = playerList.begin(); itr != playerList.end(); ++itr)
                 {
                     Player* player = (*itr);
-                    if (player->GetTeamId() != TEAM_HORDE)
+                    if (player->GetTeamId() != TEAM_ALLIANCE)
                         continue; // only same faction
 
                     if (!player->IsPvP())
@@ -139,12 +101,12 @@ public:
                         continue; // Do not reward players who are not flagged for pvp ("no pain, no gain")
                     }
 
-                    if (player->GetQuestStatus(QUEST_DEFENDING_HORDE) == QUEST_STATUS_INCOMPLETE)
+                    if (player->GetQuestStatus(QUEST_DEFENDING_ALLIANCE) == QUEST_STATUS_INCOMPLETE)
                     {
                         sLog->outInfo(LOG_FILTER_TSCR, "[x] %s (rewarded)", player->GetName());
-                        player->CompleteQuest(QUEST_DEFENDING_HORDE);
+                        player->CompleteQuest(QUEST_DEFENDING_ALLIANCE);
                     } else
-                        sLog->outInfo(LOG_FILTER_TSCR, "[ ] %s (did not have quest %d at evade)", player->GetName(), QUEST_DEFENDING_HORDE);
+                        sLog->outInfo(LOG_FILTER_TSCR, "[ ] %s (did not have quest %d at evade)", player->GetName(), QUEST_DEFENDING_ALLIANCE);
                 }
             } else
                 sLog->outInfo(LOG_FILTER_TSCR, "PvP Boss %s (%d) was protected but did not qualify for Defender Credit (Anti-Farm Rule)", me->GetName(), me->GetEntry());
@@ -153,7 +115,6 @@ public:
                 if (me->HasAura(appliedScaling))
                     me->RemoveAura(appliedScaling);
 
-            Talk(1);
             ScriptedAI::EnterEvadeMode();
         }
 
@@ -161,7 +122,7 @@ public:
         {
             if (notifyCooldown == 0)
             {
-                sWorld->SendWorldText(11002, "|TInterface\\Icons\\achievement_leader_cairne-bloodhoof.blp:24|t Cairne Bluthuf: Für die Ehre!", 0, 0);
+                sWorld->SendWorldText(11002, "|TInterface\\Icons\\achievement_leader_prophet_velen.blp:24|t Prohpet Velen: Schützt die Exodar!", 0, 0);
                 notifyCooldown = NOTIFY_COOLDOWN;
             }
             Talk(0);
@@ -239,26 +200,26 @@ public:
             {
                 switch (eventId)
                 {
-                    case SPELL_BERSERKER_CHARGE:
-                        if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
-                            DoCast(target, SPELL_BERSERKER_CHARGE);
-                        events.ScheduleEvent(SPELL_BERSERKER_CHARGE, 25000);
+                    case SPELL_HOLY_BLAST:
+                        if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 60.0f, true))
+                            DoCast(target, SPELL_HOLY_BLAST);
+                        events.ScheduleEvent(SPELL_HOLY_BLAST, urand(7000, 11000));
                         break;
-                    case SPELL_UPPERCUT:
-                        DoCastVictim(SPELL_UPPERCUT);
-                        events.ScheduleEvent(SPELL_UPPERCUT, 20000);
+                    case SPELL_HOLY_NOVA:
+                        DoCast(me, SPELL_HOLY_NOVA);
+                        events.ScheduleEvent(SPELL_HOLY_NOVA, urand(12000, 17000));
                         break;
-                    case SPELL_THUNDERCLAP:
-                        DoCastVictim(SPELL_THUNDERCLAP);
-                        events.ScheduleEvent(SPELL_THUNDERCLAP, 15000);
+                    case SPELL_HOLY_SMITE:
+                        DoCastVictim(SPELL_HOLY_SMITE);
+                        events.ScheduleEvent(SPELL_HOLY_SMITE, urand(8000, 12000));
                         break;
-                    case SPELL_MORTAL_STRIKE:
-                        DoCastVictim(SPELL_MORTAL_STRIKE);
-                        events.ScheduleEvent(SPELL_MORTAL_STRIKE, 15000);
+                    case SPELL_PRAYER_OF_HEALING:
+                        DoCast(me, SPELL_PRAYER_OF_HEALING);
+                        events.ScheduleEvent(SPELL_PRAYER_OF_HEALING, urand(15000, 22000));
                         break;
-                    case SPELL_CLEAVE:
-                        DoCastVictim(SPELL_CLEAVE);
-                        events.ScheduleEvent(SPELL_CLEAVE, 7000);
+                    case SPELL_STAFF_STRIKE:
+                        DoCastVictim(SPELL_STAFF_STRIKE);
+                        events.ScheduleEvent(SPELL_STAFF_STRIKE, urand(5000, 8000));
                         break;
                 }
             }
@@ -267,9 +228,14 @@ public:
         }
     };
 
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_prophet_velenAI(creature);
+    }
+
 };
 
-void AddSC_thunder_bluff()
+void AddSC_exodar()
 {
-    new npc_cairne_bloodhoof();
+    new npc_prophet_velen();
 }
