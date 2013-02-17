@@ -845,8 +845,6 @@ class npc_mole_machine_trigger : public CreatureScript
         {
             npc_mole_machine_triggerAI(Creature* creature) : ScriptedAI(creature), _summons(me)
             {
-                SetCombatMovement(false);
-
                 me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_PACIFIED);
                 me->SetVisible(false);
             }           
@@ -929,8 +927,6 @@ class npc_devouring_flame : public CreatureScript
         {
             npc_devouring_flameAI(Creature* creature) : ScriptedAI(creature)
             {
-                SetCombatMovement(false);
-
                 me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_PACIFIED);
                 me->SetDisplayId(me->GetCreatureTemplate()->Modelid2);
             }

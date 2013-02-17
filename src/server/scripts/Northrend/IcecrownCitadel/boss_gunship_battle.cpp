@@ -1169,8 +1169,6 @@ class npc_gunship_skybreaker : public CreatureScript
         {
             npc_gunship_skybreakerAI(Creature *creature) : ScriptedAI(creature), _instance(creature->GetInstanceScript())
             {
-                SetCombatMovement(false);
-
                 Reset();
             }
 
@@ -1228,8 +1226,6 @@ class npc_gunship_orgrimmar : public CreatureScript
         {
             npc_gunship_orgrimmarAI(Creature *creature) : ScriptedAI(creature), _instance(creature->GetInstanceScript())
             {
-                SetCombatMovement(false);
-
                 Reset();
             }
 

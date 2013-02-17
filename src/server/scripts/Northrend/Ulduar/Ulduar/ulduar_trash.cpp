@@ -548,10 +548,7 @@ class npc_salvagebot_sawblade : public CreatureScript
 
         struct npc_salvagebot_sawbladeAI: public ScriptedAI
         {
-            npc_salvagebot_sawbladeAI(Creature* creature) : ScriptedAI(creature)
-            {
-                SetCombatMovement(false);
-            }
+            npc_salvagebot_sawbladeAI(Creature* creature) : ScriptedAI(creature) {}
 
             void UpdateAI(uint32 const diff)
             {
@@ -2369,10 +2366,7 @@ class npc_ice_turret: public CreatureScript
 
         struct npc_ice_turretAI: public ScriptedAI
         {
-            npc_ice_turretAI(Creature* creature) : ScriptedAI(creature)
-            {
-                SetCombatMovement(false);
-            }
+            npc_ice_turretAI(Creature* creature) : ScriptedAI(creature) {}
 
             void Reset()
             {

@@ -300,10 +300,7 @@ class npc_iron_roots : public CreatureScript
 
         struct npc_iron_rootsAI : public ScriptedAI
         {
-            npc_iron_rootsAI(Creature* creature) : ScriptedAI(creature)
-            {
-                SetCombatMovement(false);
-            }
+            npc_iron_rootsAI(Creature* creature) : ScriptedAI(creature) {}
 
             void InitializeAI()
             {
@@ -1695,10 +1692,7 @@ class npc_sun_beam : public CreatureScript
 
         struct npc_sun_beamAI : public ScriptedAI
         {
-            npc_sun_beamAI(Creature* creature) : ScriptedAI(creature)
-            {
-                SetCombatMovement(false);
-            }
+            npc_sun_beamAI(Creature* creature) : ScriptedAI(creature) {}
 
             void InitializeAI()
             {
@@ -1732,8 +1726,6 @@ class npc_healthy_spore : public CreatureScript
         {
             npc_healthy_sporeAI(Creature* creature) : ScriptedAI(creature)
             {
-                SetCombatMovement(false);
-
                 me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_IMMUNE_TO_PC);
             }
 
@@ -1783,10 +1775,7 @@ class npc_eonars_gift : public CreatureScript
 
         struct npc_eonars_giftAI : public ScriptedAI
         {
-            npc_eonars_giftAI(Creature* creature) : ScriptedAI(creature)
-            {
-                SetCombatMovement(false);
-            }
+            npc_eonars_giftAI(Creature* creature) : ScriptedAI(creature) {}
 
             void Reset()
             {
@@ -1843,10 +1832,7 @@ class npc_nature_bomb : public CreatureScript
 
         struct npc_nature_bombAI : public ScriptedAI
         {
-            npc_nature_bombAI(Creature* creature) : ScriptedAI(creature)
-            {
-                SetCombatMovement(false);
-            }
+            npc_nature_bombAI(Creature* creature) : ScriptedAI(creature) {}
 
             void Reset()
             {
@@ -1892,10 +1878,7 @@ class npc_unstable_sun_beam : public CreatureScript
 
         struct npc_unstable_sun_beamAI : public ScriptedAI
         {
-            npc_unstable_sun_beamAI(Creature* creature) : ScriptedAI(creature)
-            {
-                SetCombatMovement(false);
-            }
+            npc_unstable_sun_beamAI(Creature* creature) : ScriptedAI(creature) {}
 
             void Reset()
             {

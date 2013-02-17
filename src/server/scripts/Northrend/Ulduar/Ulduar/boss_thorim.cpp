@@ -1397,8 +1397,6 @@ class npc_runic_smash : public CreatureScript
         {
             npc_runic_smashAI(Creature* creature) : ScriptedAI(creature)
             {
-                SetCombatMovement(false);
-
                 me->SetReactState(REACT_PASSIVE);
                 me->SetDisplayId(me->GetCreatureTemplate()->Modelid2);
                 me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);

@@ -1257,10 +1257,7 @@ class npc_thorims_hammer : public CreatureScript
 
         struct npc_thorims_hammerAI : public ScriptedAI
         {
-            npc_thorims_hammerAI(Creature* creature) : ScriptedAI(creature)
-            {
-                SetCombatMovement(false);
-            }
+            npc_thorims_hammerAI(Creature* creature) : ScriptedAI(creature) {}
 
             void Reset()
             {
@@ -1501,10 +1498,7 @@ class npc_freyas_ward : public CreatureScript
 
         struct npc_freyas_wardAI : public ScriptedAI
         {
-            npc_freyas_wardAI(Creature* creature) : ScriptedAI(creature)
-            {
-                SetCombatMovement(false);
-            }
+            npc_freyas_wardAI(Creature* creature) : ScriptedAI(creature) {}
 
             void InitializeAI()
             {

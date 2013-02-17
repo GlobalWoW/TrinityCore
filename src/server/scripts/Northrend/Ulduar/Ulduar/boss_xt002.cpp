@@ -532,8 +532,6 @@ class mob_xt002_heart : public CreatureScript
         {
             mob_xt002_heartAI(Creature* creature) : ScriptedAI(creature)
             {
-                SetCombatMovement(false);
-
                 _instance = creature->GetInstanceScript();
                 me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE | UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_NOT_SELECTABLE);
                 me->SetReactState(REACT_PASSIVE);
@@ -843,8 +841,6 @@ class mob_void_zone : public CreatureScript
         {
             mob_void_zoneAI(Creature* creature) : ScriptedAI(creature)
             {
-                SetCombatMovement(false);
-
                 me->SetReactState(REACT_PASSIVE);
             }
 

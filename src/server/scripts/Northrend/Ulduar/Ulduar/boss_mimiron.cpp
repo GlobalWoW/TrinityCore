@@ -1158,10 +1158,7 @@ class npc_proximity_mine : public CreatureScript
 
         struct npc_proximity_mineAI : public ScriptedAI
         {
-            npc_proximity_mineAI(Creature* creature) : ScriptedAI(creature)
-            {
-                SetCombatMovement(false);
-            }
+            npc_proximity_mineAI(Creature* creature) : ScriptedAI(creature) {}
 
             void InitializeAI()
             {
@@ -1261,10 +1258,7 @@ class boss_vx_001 : public CreatureScript
 
         struct boss_vx_001AI : public ScriptedAI
         {
-            boss_vx_001AI(Creature* creature) : ScriptedAI(creature)
-            {
-                SetCombatMovement(false);
-            }
+            boss_vx_001AI(Creature* creature) : ScriptedAI(creature) {}
 
             void InitializeAI()
             {
@@ -1604,10 +1598,7 @@ class npc_rocket_strike : public CreatureScript
 
         struct npc_rocket_strikeAI : public ScriptedAI
         {
-            npc_rocket_strikeAI(Creature* creature) : ScriptedAI(creature)
-            {
-                SetCombatMovement(false);
-            }
+            npc_rocket_strikeAI(Creature* creature) : ScriptedAI(creature) {}
 
             void InitializeAI()
             {
@@ -1946,8 +1937,6 @@ class npc_magnetic_core : public CreatureScript
         {
             npc_magnetic_coreAI(Creature* creature) : ScriptedAI(creature)
             {
-                SetCombatMovement(false);
-
                 me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_PACIFIED);
                 me->DespawnOrUnsummon(21*IN_MILLISECONDS);
                 if (Creature* AerialUnit = me->FindNearestCreature(NPC_AERIAL_COMMAND_UNIT, 100.0f, true))
@@ -2313,10 +2302,7 @@ class npc_frost_bomb : public CreatureScript
 
         struct npc_frost_bombAI : public ScriptedAI
         {
-            npc_frost_bombAI(Creature* creature) : ScriptedAI(creature)
-            {
-                SetCombatMovement(false);
-            }
+            npc_frost_bombAI(Creature* creature) : ScriptedAI(creature) {}
 
             void InitializeAI()
             {

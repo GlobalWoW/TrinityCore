@@ -982,7 +982,6 @@ class npc_algalon_asteroid_target : public CreatureScript
         {
             npc_algalon_asteroid_targetAI(Creature* creature) : ScriptedAI(creature)
             {
-            SetCombatMovement(false);
             }
 
             void Reset()
