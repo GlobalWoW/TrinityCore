@@ -3212,24 +3212,6 @@ void Spell::EffectWeaponDmg(SpellEffIndex effIndex)
 
     switch (m_spellInfo->SpellFamilyName)
     {
-        case SPELLFAMILY_GENERIC:
-        {
-            switch (m_spellInfo->Id)
-            {
-                case 69055:     // Saber Lash
-                case 70814:     // Saber Lash
-                {
-                    uint32 count = 0;
-                    for (std::list<TargetInfo>::iterator ihit = m_UniqueTargetInfo.begin(); ihit != m_UniqueTargetInfo.end(); ++ihit)
-                        if (ihit->effectMask & (1 << effIndex))
-                            ++count;
-
-                    totalDamagePercentMod /= count;
-                    break;
-                }
-            }
-            break;
-        }
         case SPELLFAMILY_WARRIOR:
         {
             // Devastate (player ones)
@@ -3920,7 +3902,7 @@ void Spell::EffectScriptEffect(SpellEffIndex effIndex)
 
                     unitTarget->CastSpell(unitTarget, iTmpSpellId, true);
                     Creature* npc = unitTarget->ToCreature();
-                    npc->LoadEquipment(npc->GetEquipmentId());
+                    npc->LoadEquipment();
                     return;
                 }
                 // Emblazon Runeblade
@@ -4936,7 +4918,8 @@ void Spell::EffectCharge(SpellEffIndex /*effIndex*/)
 
     if (effectHandleMode == SPELL_EFFECT_HANDLE_LAUNCH_TARGET)
     {
-        if (m_preGeneratedPath.GetPathType() & PATHFIND_NOPATH)
+        // Spell is not using explicit target - no generated path
+        if (m_preGeneratedPath.GetPathType() == PATHFIND_BLANK)
         {
             Position pos;
             unitTarget->GetContactPoint(m_caster, pos.m_positionX, pos.m_positionY, pos.m_positionZ);

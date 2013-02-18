@@ -1165,9 +1165,9 @@ class npc_gunship_skybreaker : public CreatureScript
     public:
         npc_gunship_skybreaker() : CreatureScript("npc_gunship_skybreaker") { }
 
-        struct npc_gunship_skybreakerAI : public Scripted_NoMovementAI
+        struct npc_gunship_skybreakerAI : public ScriptedAI
         {
-            npc_gunship_skybreakerAI(Creature *creature) : Scripted_NoMovementAI(creature), _instance(creature->GetInstanceScript())
+            npc_gunship_skybreakerAI(Creature *creature) : ScriptedAI(creature), _instance(creature->GetInstanceScript())
             {
                 Reset();
             }
@@ -1222,9 +1222,9 @@ class npc_gunship_orgrimmar : public CreatureScript
     public:
         npc_gunship_orgrimmar() : CreatureScript("npc_gunship_orgrimmar") { }
 
-        struct npc_gunship_orgrimmarAI : public Scripted_NoMovementAI
+        struct npc_gunship_orgrimmarAI : public ScriptedAI
         {
-            npc_gunship_orgrimmarAI(Creature *creature) : Scripted_NoMovementAI(creature), _instance(creature->GetInstanceScript())
+            npc_gunship_orgrimmarAI(Creature *creature) : ScriptedAI(creature), _instance(creature->GetInstanceScript())
             {
                 Reset();
             }
@@ -1280,10 +1280,12 @@ class npc_korkron_axethrower_rifleman : public CreatureScript
     public:
         npc_korkron_axethrower_rifleman() : CreatureScript("npc_korkron_axethrower_rifleman") { }
 
-        struct npc_korkron_axethrower_riflemanAI : public Scripted_NoMovementAI
+        struct npc_korkron_axethrower_riflemanAI : public ScriptedAI
         {
-            npc_korkron_axethrower_riflemanAI(Creature *creature) : Scripted_NoMovementAI(creature),_instance(creature->GetInstanceScript())
+            npc_korkron_axethrower_riflemanAI(Creature *creature) : ScriptedAI(creature),_instance(creature->GetInstanceScript())
             {
+                SetCombatMovement(false);
+
                 Reset();
             }
 
@@ -1642,10 +1644,12 @@ class npc_gunship_mage : public CreatureScript
     public:
         npc_gunship_mage() : CreatureScript("npc_gunship_mage") { }
 
-        struct npc_gunship_mageAI : public Scripted_NoMovementAI
+        struct npc_gunship_mageAI : public ScriptedAI
         {
-            npc_gunship_mageAI(Creature *creature) : Scripted_NoMovementAI(creature),_instance(creature->GetInstanceScript())
+            npc_gunship_mageAI(Creature *creature) : ScriptedAI(creature),_instance(creature->GetInstanceScript())
             {
+                SetCombatMovement(false);
+
                 Reset();
             }
 
@@ -1809,10 +1813,12 @@ class npc_mortar_soldier_or_rocketeer : public CreatureScript
     public:
         npc_mortar_soldier_or_rocketeer() : CreatureScript("npc_mortar_soldier_or_rocketeer") { }
 
-        struct npc_mortar_soldier_or_rocketeerAI : public Scripted_NoMovementAI
+        struct npc_mortar_soldier_or_rocketeerAI : public ScriptedAI
         {
-            npc_mortar_soldier_or_rocketeerAI(Creature *creature) : Scripted_NoMovementAI(creature),_instance(creature->GetInstanceScript())
+            npc_mortar_soldier_or_rocketeerAI(Creature *creature) : ScriptedAI(creature),_instance(creature->GetInstanceScript())
             {
+                SetCombatMovement(false);
+
                 Reset();
             }
 
@@ -2354,10 +2360,12 @@ class npc_gunship_portal : public CreatureScript
     public:
         npc_gunship_portal() : CreatureScript("npc_gunship_portal") { }
 
-        struct npc_gunship_portalAI : public Scripted_NoMovementAI
+        struct npc_gunship_portalAI : public ScriptedAI
         {
-            npc_gunship_portalAI(Creature *creature) : Scripted_NoMovementAI(creature),_instance(creature->GetInstanceScript())
+            npc_gunship_portalAI(Creature *creature) : ScriptedAI(creature),_instance(creature->GetInstanceScript())
             {
+                SetCombatMovement(false);
+
                 Reset();
             }
 
@@ -2406,10 +2414,11 @@ class npc_gunship_trigger : public CreatureScript
     public:
         npc_gunship_trigger() : CreatureScript("npc_gunship_trigger") { }
 
-        struct npc_gunship_triggerAI : public Scripted_NoMovementAI
+        struct npc_gunship_triggerAI : public ScriptedAI
         {
-            npc_gunship_triggerAI(Creature *creature) : Scripted_NoMovementAI(creature),_instance(creature->GetInstanceScript())
+            npc_gunship_triggerAI(Creature *creature) : ScriptedAI(creature),_instance(creature->GetInstanceScript())
             {
+                SetCombatMovement(false);
 
                 Reset();
             }
