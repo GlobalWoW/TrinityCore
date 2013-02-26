@@ -79,6 +79,11 @@
 #include "WorldPacket.h"
 #include "WorldSession.h"
 
+//Bot mod
+#include "Config.h"
+#include "bp_ai.h"
+#include "bp_mgr.h"
+
 #define ZONE_UPDATE_INTERVAL (1*IN_MILLISECONDS)
 
 #define PLAYER_SKILL_INDEX(x)       (PLAYER_SKILL_INFO_1_1 + ((x)*3))
@@ -521,6 +526,18 @@ inline void KillRewarder::_RewardXP(Player* player, float rate)
         for (Unit::AuraEffectList::const_iterator i = auras.begin(); i != auras.end(); ++i)
             AddPct(xp, (*i)->GetAmount());
 
+        //npcbot 4.2.2.1. Apply NpcBot XP reduction
+        if (player->HaveBot() && player->GetNpcBotsCount() > 1)
+        {
+            if (uint8 xp_rate = player->GetNpcBotXpReduction())
+            {
+                int32 ratePct = 100 - (player->GetNpcBotsCount() - 1) * xp_rate;
+                ratePct = std::max<int32>(ratePct, 10); // minimum
+                //ratePct = std::min<int32>(ratePct, 100); // maximum // dead code
+                xp = xp * ratePct / 100;
+            }
+        }
+
         // 4.2.3. Give XP to player.
         player->GiveXP(xp, _victim, _groupRate);
         if (Pet* pet = player->GetPet())
@@ -858,6 +875,32 @@ Player::Player(WorldSession* session): Unit(true)
 
     m_ChampioningFaction = 0;
 
+    ///////////////////// Bot System ////////////////////////
+    //Playerbot
+    m_playerbotAI = NULL;
+    m_playerbotMgr = NULL;
+    //Npcbot
+    m_botTimer = 500;
+    m_bot = NULL;
+    m_botTankGuid = 0;
+    m_enableNpcBots = ConfigMgr::GetBoolDefault("Bot.EnableNpcBots", true);
+    m_followdist = ConfigMgr::GetIntDefault("Bot.BaseFollowDistance", 30);
+    m_maxNpcBots = std::min<uint8>(ConfigMgr::GetIntDefault("Bot.MaxNpcBots", 1), MAX_NPCBOTS);
+    uint8 maxcbots = ConfigMgr::GetIntDefault("Bot.MaxNpcBotsPerClass", 1);
+    m_maxClassNpcBots = maxcbots > 0 ? maxcbots : MAX_NPCBOTS;
+    m_xpReductionNpcBots = std::min<uint8>(ConfigMgr::GetIntDefault("Bot.XpReductionPercent", 0), 100);
+    m_enableAllNpcBots = ConfigMgr::GetBoolDefault("Bot.AllowAllClasses", false);
+    m_enableNpcBotsArenas = ConfigMgr::GetBoolDefault("Bot.EnableInArenas", true);
+    m_enableNpcBotsBGs = ConfigMgr::GetBoolDefault("Bot.EnableInBGs", true);
+    m_enableNpcBotsDungeons = ConfigMgr::GetBoolDefault("Bot.EnableInDungeons", true);
+    m_enableNpcBotsRaids = ConfigMgr::GetBoolDefault("Bot.EnableInRaids", true);
+    m_limitNpcBotsDungeons = ConfigMgr::GetBoolDefault("Bot.InstanceLimit.Dungeons", false);
+    m_limitNpcBotsRaids = ConfigMgr::GetBoolDefault("Bot.InstanceLimit.Raids", false);
+    m_NpcBotsCost = ConfigMgr::GetIntDefault("Bot.Cost", 0);
+    for (uint8 i = 0; i != GetMaxNpcBots(); ++i)
+        m_botmap[i] = new NpcBotMap();
+    ///////////////////// End Bot System ////////////////////////
+
     for (uint8 i = 0; i < MAX_POWERS; ++i)
         m_powerFraction[i] = 0;
 
@@ -909,6 +952,22 @@ Player::~Player()
     delete m_runes;
     delete m_achievementMgr;
     delete m_reputationMgr;
+
+    //Playerbot mod: delete mgr/ai
+    if (m_playerbotAI)
+    {
+        delete m_playerbotAI;
+        m_playerbotAI = NULL;
+    }
+    else if (m_playerbotMgr)
+    {
+        delete m_playerbotMgr;
+        m_playerbotMgr = NULL;
+    }
+
+    //Npcbot mod: delete botmap
+    for (uint8 i = 0; i != GetMaxNpcBots(); ++i)
+        delete m_botmap[i];
 
     sWorld->DecreasePlayerCount();
 }
@@ -1822,6 +1881,23 @@ void Player::Update(uint32 p_time)
     //because we don't want player's ghost teleported from graveyard
     if (IsHasDelayedTeleport() && isAlive())
         TeleportTo(m_teleport_dest, m_teleport_options);
+
+    //Playerbot mod: Update
+    if (m_playerbotAI)
+        m_playerbotAI->UpdateAI(p_time);
+    //else if (m_playerbotMgr)
+    //    m_playerbotMgr->Update(p_time);
+
+    //NpcBot mod: Update
+    if (m_botTimer > 0)
+    {
+        if (p_time >= m_botTimer)
+            m_botTimer = 0;
+        else
+            m_botTimer -= p_time;
+    }
+    else
+        RefreshBot(p_time);
 }
 
 void Player::setDeathState(DeathState s)
@@ -2075,6 +2151,19 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
         SendTransferAborted(mapid, TRANSFER_ABORT_MAP_NOT_ALLOWED);
         return false;
     }
+
+    //Playerbot mod: tell bots to stop following master
+    //so they don't try to follow the master after he teleports
+    //TODO: this should be deleted after pointed movement implementation
+    if (m_playerbotMgr != NULL)
+        m_playerbotMgr->Stay();
+
+    //Npcbot mod: prevent crash on InstanceMap::DestroyInstance()... Unit::RemoveFromWorld()
+    //if last player being kicked out of instance while having npcbots
+    //we must remove creature Before it will be removed in Map::UnloadAll()
+    if (GetMapId() != mapid)
+        for (uint8 i = 0; i != GetMaxNpcBots(); ++i)
+            RemoveBot(m_botmap[i]->m_guid);
 
     // preparing unsummon pet if lost (we must get pet before teleportation or will not find it later)
     Pet* pet = GetPet();
@@ -2433,6 +2522,681 @@ void Player::RemoveFromWorld()
             SetViewpoint(viewpoint, false);
         }
     }
+}
+
+void Player::RefreshBot(uint32 diff)
+{
+    if (m_botTimer > 0) return;
+    m_botTimer = 100 + isInFlight()*3000;//x2 ms //temp hack
+    if (!HaveBot()) return;
+
+    //addition for revive timer (maybe we should check whole party?)
+    bool partyInCombat = isInCombat();
+    if (!partyInCombat)
+    {
+        for (uint8 i = 0; i != GetMaxNpcBots(); ++i)
+        {
+            if (Creature* bot = m_botmap[i]->m_creature)
+            {
+                if (bot->isInCombat())
+                {
+                    partyInCombat = true;
+                    break;
+                }
+                else if (Creature* pet = bot->GetBotsPet())
+                {
+                    if (pet->isInCombat())
+                    {
+                        partyInCombat = true;
+                        break;
+                    }
+                }
+            }
+        }
+    }
+
+    for (uint8 i = 0; i != GetMaxNpcBots(); ++i)
+    {
+        uint64 guid = m_botmap[i]->m_guid;
+        m_bot = m_botmap[i]->m_creature;
+        if (!m_bot || !m_bot->IsInWorld())
+            continue;
+        //BOT REVIVE SUPPORT
+        //Do not allow bot to be revived if master is in battle
+        if (!partyInCombat)
+        {
+            if (m_botmap[i]->m_reviveTimer > diff)
+            {
+                if (!isInCombat())
+                    m_botmap[i]->m_reviveTimer -= diff;
+            }
+            else if (m_botmap[i]->m_reviveTimer > 0)
+                m_botmap[i]->m_reviveTimer = 0;
+        }
+        if ((m_bot->isDead() || !m_bot->isAlive()) && isAlive() && !isInCombat() && !InArena() && !isInFlight() && 
+            !HasFlag(UNIT_FIELD_FLAGS_2, UNIT_FLAG2_FEIGN_DEATH) && 
+            m_botmap[i]->m_reviveTimer == 0 && 
+            !HasInvisibilityAura() && !HasStealthAura())
+        {
+            CreateBot(0, 0, 0, false, true);//revive
+            continue;
+        }
+        //BOT MUST DIE SUPPORT
+        if (isInFlight() || !GetGroup() || !GetGroup()->IsMember(m_bot->GetGUID()))//even if bot is dead
+        {
+            RemoveBot(guid, !isInFlight());
+            continue;
+        }
+        //TELEPORT/OUTRUN SUPPORT
+        if (!isInFlight() && isAlive() && (m_bot->isAlive() || m_bot->GetMapId() != GetMapId()))
+        {
+            float maxdist;
+            if (GetMap()->IsDungeon())
+                maxdist = sWorld->GetMaxVisibleDistanceInInstances();
+            else if (GetMap()->IsBattlegroundOrArena())
+                maxdist = sWorld->GetMaxVisibleDistanceInBGArenas();
+            else
+                maxdist = sWorld->GetMaxVisibleDistanceOnContinents();
+
+            maxdist += 20.0f; //allow player to recall it by moving back
+
+            if (abs(m_bot->GetPositionX() - GetPositionX()) > maxdist ||
+                abs(m_bot->GetPositionY() - GetPositionY()) > maxdist ||
+                m_bot->GetMapId() != GetMapId() || RestrictBots())
+            {
+                RemoveBot(guid);
+                continue;
+            }
+        }
+        m_bot = NULL;
+    }//end for botmap
+    //BOT CREATION/RECREATION SUPPORT
+    if (!isInFlight() && isAlive() && !HasUnitMovementFlag(MOVEMENTFLAG_ONTRANSPORT) && GetBotMustBeCreated() && !RestrictBots())
+        for (uint8 pos = 0; pos != GetMaxNpcBots(); ++pos)
+            if (m_botmap[pos]->m_entry != 0 && m_botmap[pos]->m_guid == 0)
+                CreateBot(m_botmap[pos]->m_entry, m_botmap[pos]->m_race, m_botmap[pos]->m_class, m_botmap[pos]->tank);
+}
+
+void Player::SetBotMustBeCreated(uint32 m_entry, uint8 m_race, uint8 m_class, bool istank)
+{
+    if (m_enableNpcBots == false)
+    {
+        ChatHandler ch(GetSession());
+        ch.SendSysMessage("NpcBot system currently disabled. Please contact your administration.");
+        ClearBotMustBeCreated(0, 0, true);
+        return;
+    }
+    for (uint8 pos = 0; pos != GetMaxNpcBots(); ++pos)
+    {
+        if (m_botmap[pos]->m_entry == 0)
+        {
+            m_botmap[pos]->m_guid = 0;//we need it to make sure Player::CreateBot will find this slot
+            m_botmap[pos]->m_entry = m_entry;
+            m_botmap[pos]->m_race = m_race;
+            m_botmap[pos]->m_class = m_class;
+            m_botmap[pos]->tank = istank;
+            break;
+        }
+    }
+}
+
+bool Player::GetBotMustBeCreated()
+{
+    for (uint8 pos = 0; pos != GetMaxNpcBots(); ++pos)
+    {
+        if (m_botmap[pos]->m_entry != 0 && 
+            (m_botmap[pos]->m_guid == 0 || !sObjectAccessor->FindUnit(m_botmap[pos]->m_guid)))
+        {
+            m_botmap[pos]->m_guid = 0;
+            return true;
+        }
+    }
+    return false;
+}
+
+void Player::ClearBotMustBeCreated(uint64 guidOrSlot, bool guid, bool fully)
+{
+    for (uint8 pos = 0; pos != GetMaxNpcBots(); ++pos)
+    {
+        if ((guid == true && m_botmap[pos]->m_guid == guidOrSlot) || 
+            (guid == false && pos == guidOrSlot) || 
+            fully)
+        {
+            m_botmap[pos]->m_guid = 0;
+            m_botmap[pos]->m_entry = 0;
+            m_botmap[pos]->m_race = 0;
+            m_botmap[pos]->m_class = 0;
+            m_botmap[pos]->m_creature = NULL;
+            m_botmap[pos]->tank = false;
+            if (!fully)
+                break;
+        }
+    }
+}
+
+void Player::RemoveBot(uint64 guid, bool final, bool eraseFromDB)
+{
+    if (guid == 0) return;
+    for (uint8 i = 0; i != GetMaxNpcBots(); ++i)
+    {
+        if (m_botmap[i]->m_guid == guid)
+        {
+            m_bot = m_botmap[i]->m_creature;
+            break;
+        }
+    }
+    if (!m_bot)
+        m_bot = sObjectAccessor->GetObjectInWorld(guid, (Creature*)NULL);
+    if (m_bot)
+    {
+        //do not disband group unless not in dungeon or forced or on logout (Check WorldSession::LogoutPlayer())
+        Group* gr = GetGroup();
+        if (gr && gr->IsMember(guid))
+        {
+            if (gr->GetMembersCount() > 2 || /*!GetMap()->Instanceable() || */(final && eraseFromDB))
+                gr->RemoveMember(guid);
+            else //just cleanup
+            {
+                PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_GROUP_MEMBER);
+                stmt->setUInt32(0, GUID_LOPART(guid));
+                CharacterDatabase.Execute(stmt);
+            }
+        }
+
+        m_bot->SetBotsPetDied();
+        m_bot->SetCharmerGUID(0);
+        //m_bot->SetBotOwner(NULL);
+        m_bot->SetIAmABot(false);
+        SetMinion((Minion*)m_bot, false);
+        m_bot->CleanupsBeforeDelete();
+        m_bot->AddObjectToRemoveList();
+
+        if (final)//on logout or by command
+        {
+            ClearBotMustBeCreated(guid);
+            if (eraseFromDB)//by command
+                CharacterDatabase.PExecute("DELETE FROM `character_npcbot` WHERE `owner` = '%u' AND `entry` = '%u'", GetGUIDLow(), m_bot->GetEntry());
+        }
+        else
+        {
+            for (uint8 pos = 0; pos != GetMaxNpcBots(); ++pos)
+            {
+                if (m_botmap[pos]->m_guid == guid)
+                {
+                    m_botmap[pos]->m_guid = 0;//reset guid so it can be set during recreation
+                    m_botmap[pos]->m_creature = NULL;
+                }
+            }
+        }
+        m_bot = NULL;
+    }
+}
+
+void Player::CreateBot(uint32 botentry, uint8 botrace, uint8 botclass, bool istank, bool revive)
+{
+    if (IsBeingTeleported() || isInFlight()) return; //don't create bot yet
+    if (isDead() && !revive) return; //not to revive by command so abort
+    if (isInCombat()) return;
+
+    if (m_bot != NULL && revive)
+    {
+        m_bot->SetHealth(uint32(float(m_bot->GetCreateHealth()) * 0.15f));//15% of base health
+        if (m_bot->getPowerType() == POWER_MANA)
+            m_bot->SetPower(POWER_MANA, m_bot->GetCreateMana());
+        m_bot->setDeathState(ALIVE);
+        m_bot->SetBotCommandState(COMMAND_FOLLOW, true);
+        return;
+    }
+    if (m_enableNpcBots == false && revive == false)
+    {
+        ChatHandler ch(GetSession());
+        ch.SendSysMessage("NpcBot system currently disabled. Please contact administration.");
+        for (uint8 pos = 0; pos != GetMaxNpcBots(); ++pos)
+            if (m_botmap[pos]->m_entry == botentry)
+                ClearBotMustBeCreated(pos, false);
+        return;
+    }
+    if (!botentry || !botrace || !botclass)
+    {
+        sLog->outError(LOG_FILTER_PLAYER, "ERROR! CreateBot(): player %s (%u) trying to create bot with entry = %u, race = %u, class = %u, ignored", GetName().c_str(), GetGUIDLow(), botentry, botrace, botclass);
+        for (uint8 pos = 0; pos != GetMaxNpcBots(); ++pos)
+            if (m_botmap[pos]->m_entry == botentry)
+                ClearBotMustBeCreated(pos, false);
+        return;
+    }
+    //npcbot counter is already increased in SetBotMustBeCreated()
+    if (GetNpcBotsCount() > GetMaxNpcBots())
+    {
+        ChatHandler ch(GetSession());
+        for (uint8 pos = 0; pos != GetMaxNpcBots(); ++pos)
+            if (m_botmap[pos]->m_entry == botentry)
+                ClearBotMustBeCreated(pos, false);
+        ch.PSendSysMessage("Youre exceed max npcbots");
+        ch.SetSentErrorMessage(true);
+        return;
+    }
+    //instance limit check
+    if ((m_limitNpcBotsDungeons && GetMap()->IsNonRaidDungeon()) || (m_limitNpcBotsRaids && GetMap()->IsRaid()))
+    {
+        InstanceMap* map = (InstanceMap*)GetMap();
+        uint32 count = 0;
+        Map::PlayerList const& plMap = map->GetPlayers();
+        for (Map::PlayerList::const_iterator itr = plMap.begin(); itr != plMap.end(); ++itr)
+            if (Player* player = itr->getSource())
+                count += (1 + player->GetNpcBotsCount());
+
+        //check "more" cuz current bot is queued and we are to choose to remove it or not
+        if (count > map->GetMaxPlayers())
+        {
+            ChatHandler ch(GetSession());
+            for (uint8 pos = 0; pos != GetMaxNpcBots(); ++pos)
+                if (m_botmap[pos]->m_entry == botentry)
+                    ClearBotMustBeCreated(pos, false);
+            ch.PSendSysMessage("Instance players limit exceed");
+            ch.SetSentErrorMessage(true);
+            return;
+        }
+    }
+    if (GetGroup() && GetGroup()->isRaidGroup() && GetGroup()->IsFull())
+    {
+        ChatHandler ch(GetSession());
+        ch.PSendSysMessage("Your group is Full!");
+        ch.SetSentErrorMessage(true);
+        return;
+    }
+    for (uint8 pos = 0; pos != GetMaxNpcBots(); ++pos)
+        if (m_botmap[pos]->m_entry == botentry)
+            if (m_botmap[pos]->m_reviveTimer != 0)
+                return;
+
+    m_bot = SummonCreature(botentry, *this);
+
+    //check if we have free slot
+    bool _set = false;
+    for (uint8 pos = 0; pos != GetMaxNpcBots(); ++pos)
+    {
+        if (m_botmap[pos]->m_entry == botentry && m_botmap[pos]->m_guid == 0)
+        {
+            m_botmap[pos]->m_guid = m_bot->GetGUID();
+            m_botmap[pos]->m_creature = m_bot;//this will save some time but we need guid as well
+            m_botmap[pos]->tank = istank;
+            _set = true;
+            break;
+        }
+    }
+    if (!_set)
+    {
+        sLog->outError(LOG_FILTER_PLAYER, "character %s (%u) is failed to create npcbot! Removing all bots", GetName().c_str(), GetGUIDLow());
+
+        m_bot->CombatStop();
+        m_bot->CleanupsBeforeDelete();
+        m_bot->AddObjectToRemoveList();
+        for (uint8 pos = 0; pos != GetMaxNpcBots(); ++pos)
+            RemoveBot(m_botmap[pos]->m_guid, true);
+        ClearBotMustBeCreated(0, false, true);
+        return;
+    }
+
+    m_bot->SetBotOwner(this);
+    m_bot->SetUInt64Value(UNIT_FIELD_CREATEDBY, GetGUID());
+    SetMinion((Minion*)m_bot, true);
+    m_bot->CombatStop();
+    m_bot->DeleteThreatList();
+    m_bot->AddUnitTypeMask(UNIT_MASK_MINION);
+
+    m_bot->SetByteValue(UNIT_FIELD_BYTES_0, 0, botrace);
+    m_bot->setFaction(getFaction());
+    m_bot->SetLevel(getLevel());
+    m_bot->SetBotClass(botclass);
+    m_bot->AIM_Initialize();
+    m_bot->InitBotAI();
+    m_bot->SetBotCommandState(COMMAND_FOLLOW, true);
+
+    //entry is unique for each master's bot so clean it up just in case 
+    CharacterDatabase.PExecute("DELETE FROM `character_npcbot` WHERE `owner` = '%u' AND `entry` = '%u'", GetGUIDLow(), botentry);
+    //add the new entry
+    CharacterDatabase.PExecute("INSERT INTO `character_npcbot` (owner,entry,race,class,istank) VALUES ('%u','%u','%u','%u','%u')", GetGUIDLow(), m_bot->GetEntry(), botrace, botclass, uint8(istank));
+    //If we have a group, just add bot
+    if (Group* gr = GetGroup())
+    {
+        if (!gr->IsFull())
+        {
+            if (!gr->AddMember((Player*)m_bot))
+                RemoveBot(m_bot->GetGUID(), true);
+        }
+        else if (!gr->isRaidGroup()) //non-raid group is full
+        {
+            gr->ConvertToRaid();
+            if (!gr->AddMember((Player*)m_bot))
+                RemoveBot(m_bot->GetGUID(), true);
+        }
+        else //raid group is full
+            RemoveBot(m_bot->GetGUID(), true);
+    }
+    else
+    {
+        gr = new Group;
+        if (!gr->Create(this))
+        {
+            delete gr;
+            return;
+        }
+        sGroupMgr->AddGroup(gr);
+        if (!gr->AddMember((Player*)m_bot))
+            RemoveBot(m_bot->GetGUID(), true);
+    }
+
+    if (Group* gr = GetGroup())
+    {
+        Group::MemberSlotList const a = gr->GetMemberSlots();
+        //try to remove 'absent' bots
+        for (Group::member_citerator itr = a.begin(); itr != a.end(); ++itr)
+        {
+            if (itr->guid == 0)
+                continue;
+            if (IS_PLAYER_GUID(itr->guid))
+                continue;
+            if (!sObjectAccessor->FindUnit(itr->guid))
+                gr->RemoveMember(itr->guid);
+        }
+    }
+
+} //end Player::CreateBot
+
+uint8 Player::GetNpcBotsCount() const
+{
+    uint8 bots = 0;
+    for (uint8 pos = 0; pos != GetMaxNpcBots(); ++pos)
+        if (m_botmap[pos]->m_entry != 0)
+            ++bots;
+    return bots;
+}
+
+uint8 Player::GetMaxNpcBots() const
+{
+    return (GetSession()->GetSecurity() == SEC_PLAYER) ?  m_maxNpcBots : MAX_NPCBOTS;
+}
+
+bool Player::HaveBot() const
+{
+    for (uint8 i = 0; i != GetMaxNpcBots(); ++i)
+        if (m_botmap[i]->m_entry != 0)
+            return true;
+    return false;
+}
+
+void Player::SendBotCommandState(Creature* cre, CommandStates state)
+{
+    if (!cre) return;
+    for (uint8 i = 0; i != GetMaxNpcBots(); ++i)
+        if (m_botmap[i]->m_creature == cre)
+            cre->SetBotCommandState(state, true);
+}
+//finds bot's slot into master's botmap
+uint8 Player::GetNpcBotSlot(uint64 guid) const
+{
+    if (guid)
+        for (uint8 i = 0; i != GetMaxNpcBots(); ++i)
+            if (m_botmap[i]->m_guid == guid)
+                return i;
+    return 0;
+}
+
+void Player::SetBotTank(uint64 guid)
+{
+    m_botTankGuid = guid;
+    if (guid == 0 || !IS_CREATURE_GUID(guid))
+    {
+        for (uint8 i = 0; i != GetMaxNpcBots(); ++i)
+        {
+            if (m_botmap[i]->tank == true)
+            {
+                CharacterDatabase.PExecute("UPDATE `character_npcbot` SET `istank` = '0' WHERE `owner` = '%u' AND `entry` = '%u'", GetGUIDLow(), m_botmap[i]->m_entry);
+                m_botmap[i]->tank = false;
+            }
+        }
+        return;
+    }
+    for (uint8 i = 0; i != GetMaxNpcBots(); ++i)
+    {
+        if (m_botmap[i]->tank == true && m_botmap[i]->m_guid != guid)
+            CharacterDatabase.PExecute("UPDATE `character_npcbot` SET `istank` = '0' WHERE `owner` = '%u' AND `entry` = '%u'", GetGUIDLow(), m_botmap[i]->m_entry);
+        m_botmap[i]->tank = false;
+        if (m_botmap[i]->m_guid == guid)
+        {
+            m_botmap[i]->tank = true;
+            CharacterDatabase.PExecute("UPDATE `character_npcbot` SET `istank` = '1' WHERE `owner` = '%u' AND `entry` = '%u'", GetGUIDLow(), m_botmap[i]->m_entry);
+        }
+    }
+}
+
+Unit* Player::GetBotTank(uint32 entry)
+{
+    if (!entry) return NULL;
+
+    for (uint8 i = 0; i != GetMaxNpcBots(); ++i)
+        if (m_botmap[i]->m_entry == entry && m_botmap[i]->tank == true)
+            return m_botmap[i]->m_creature;
+
+    return NULL;
+}
+
+void Player::SetNpcBotDied(uint64 guid)
+{
+    if (!guid) return;
+    for (uint8 pos = 0; pos != GetMaxNpcBots(); ++pos)
+        if (m_botmap[pos]->m_guid == guid)
+        {
+            m_botmap[pos]->m_reviveTimer = 15000;
+            break;
+        }
+}
+
+bool Player::RestrictBots() const
+{
+    return
+        (!m_enableNpcBotsBGs && GetMap()->IsBattleground()) ||
+        (!m_enableNpcBotsArenas && GetMap()->IsBattleArena()) ||
+        (!m_enableNpcBotsDungeons && GetMap()->IsNonRaidDungeon()) ||
+        (!m_enableNpcBotsRaids && GetMap()->IsRaid());
+}
+
+uint32 Player::GetNpcBotCost() const
+{
+    return m_NpcBotsCost ? uint32((m_NpcBotsCost / 80.f) * getLevel()) : 0;
+}
+
+std::string Player::GetNpcBotCostStr() const
+{
+    std::ostringstream money;
+
+    if (uint32 cost = GetNpcBotCost())
+    {
+        uint32 gold = uint32(cost / 10000);
+        cost -= (gold * 10000);
+        uint32 silver = uint32(cost / 100);
+        cost -= (silver * 100);
+
+        if (gold != 0)
+            money << gold << " |TInterface\\Icons\\INV_Misc_Coin_01:8|t";
+        if (silver != 0)
+            money << silver << " |TInterface\\Icons\\INV_Misc_Coin_03:8|t";
+        money << cost << " |TInterface\\Icons\\INV_Misc_Coin_05:8|t";
+    }
+    return money.str();
+}
+
+//NPCbot base setup
+void Player::CreateNPCBot(uint8 bot_class)
+{
+    //check if we have too many bots of that class
+    if (HaveBot())
+    {
+        uint8 count = 0;
+        for (uint8 i = 0; i != GetMaxNpcBots(); ++i)
+            if (m_botmap[i]->m_class == bot_class)
+                ++count;
+        if (count >= m_maxClassNpcBots)
+        {
+            ChatHandler ch(GetSession());
+            ch.PSendSysMessage("You cannot have more bots of that class! Max: %u", m_maxClassNpcBots);
+            ch.SetSentErrorMessage(true);
+            return;
+        }
+    }
+
+    //check if not allowed class is chosen
+    bool allow = m_enableAllNpcBots;
+    if (!allow && 
+        (bot_class != CLASS_WARRIOR &&
+        bot_class != CLASS_PALADIN &&
+        bot_class != CLASS_PRIEST &&
+        bot_class != CLASS_MAGE &&
+        bot_class != CLASS_DRUID &&
+        bot_class != CLASS_WARLOCK &&
+        bot_class != CLASS_ROGUE))
+    {
+        ChatHandler ch(GetSession());
+        const char* bclass;
+        switch (bot_class)
+        {
+            case CLASS_DEATH_KNIGHT: bclass = "DeathKnight"; break;
+            case CLASS_SHAMAN: bclass = "Shaman"; break;
+            case CLASS_HUNTER: bclass = "Hunter"; break;
+            default: bclass = "Unknown Class"; break;
+        }
+        sLog->outError(LOG_FILTER_PLAYER, "Player::CreateNPCBot(): Character %u tried to create npcbot of class %s, which is not allowed on your server!", GetGUIDLow(), bclass);
+        ch.PSendSysMessage("You've tried to create npcbot of class %s, which is not allowed on this server!", bclass);
+        ch.SetSentErrorMessage(true);
+        return;
+    }
+
+    //check if player cannot afford a bot
+    uint32 cost = GetNpcBotCost();
+    if (GetMoney() < cost)
+    {
+        ChatHandler ch(GetSession());
+        std::string str = "You don't have enough money (";
+        str += GetNpcBotCostStr();
+        str += ")!";
+        ch.SendSysMessage(str.c_str());
+        ch.SetSentErrorMessage(true);
+        return;
+    }
+
+    QueryResult result;
+
+    //maybe we should remove this check? ;Ü
+    switch (getRace())
+    {
+    case RACE_NONE: case RACE_HUMAN: case RACE_DWARF: case RACE_NIGHTELF: case RACE_GNOME: case RACE_DRAENEI:
+        if (bot_class == CLASS_ROGUE) result = WorldDatabase.PQuery("SELECT entry,trainer_race FROM creature_template WHERE scriptname='rogue_bot' and trainer_class=%u and trainer_race IN(1,3,4,7,11)", bot_class);
+        else if (bot_class == CLASS_PRIEST) result = WorldDatabase.PQuery("SELECT entry,trainer_race FROM creature_template WHERE scriptname='priest_bot' and trainer_class=%u and trainer_race IN(1,3,4,7,11)", bot_class);
+        else if (bot_class == CLASS_DRUID) result = WorldDatabase.PQuery("SELECT entry,trainer_race FROM creature_template WHERE scriptname='druid_bot' and trainer_class=%u and trainer_race IN(1,3,4,7,11)", bot_class);
+        else if (bot_class == CLASS_SHAMAN) result = WorldDatabase.PQuery("SELECT entry,trainer_race FROM creature_template WHERE scriptname='shaman_bot' and trainer_class=%u and trainer_race IN(1,3,4,7,11)", bot_class);
+        else if (bot_class == CLASS_MAGE) result = WorldDatabase.PQuery("SELECT entry,trainer_race FROM creature_template WHERE scriptname='mage_bot' and trainer_class=%u and trainer_race IN(1,3,4,7,11)", bot_class);
+        else if (bot_class == CLASS_WARLOCK) result = WorldDatabase.PQuery("SELECT entry,trainer_race FROM creature_template WHERE scriptname='warlock_bot' and trainer_class=%u and trainer_race IN(1,3,4,7,11)", bot_class);
+        else if (bot_class == CLASS_WARRIOR) result = WorldDatabase.PQuery("SELECT entry,trainer_race FROM creature_template WHERE scriptname='warrior_bot' and trainer_class=%u and trainer_race IN(1,3,4,7,11)", bot_class);
+        else if (bot_class == CLASS_PALADIN) result = WorldDatabase.PQuery("SELECT entry,trainer_race FROM creature_template WHERE scriptname='paladin_bot' and trainer_class=%u and trainer_race IN(1,3,4,7,11)", bot_class);
+        else if (bot_class == CLASS_HUNTER) result = WorldDatabase.PQuery("SELECT entry,trainer_race FROM creature_template WHERE scriptname='hunter_bot' and trainer_class=%u and trainer_race IN(1,3,4,7,11)", bot_class);
+        else result = WorldDatabase.PQuery("SELECT entry,trainer_race FROM creature_template WHERE scriptname='script_bot' and trainer_class=%u and trainer_race IN(1,3,4,7,11)", bot_class);
+        break;
+
+    case RACE_ORC: case RACE_UNDEAD_PLAYER: case RACE_TAUREN: case RACE_TROLL: case RACE_BLOODELF:
+        if (bot_class == CLASS_ROGUE) result = WorldDatabase.PQuery("SELECT entry,trainer_race FROM creature_template WHERE scriptname='rogue_bot' and trainer_class=%u and trainer_race IN(2,5,6,8,10)", bot_class);
+        else if (bot_class == CLASS_PRIEST) result = WorldDatabase.PQuery("SELECT entry,trainer_race FROM creature_template WHERE scriptname='priest_bot' and trainer_class=%u and trainer_race IN(2,5,6,8,10)", bot_class);
+        else if (bot_class == CLASS_SHAMAN) result = WorldDatabase.PQuery("SELECT entry,trainer_race FROM creature_template WHERE scriptname='shaman_bot' and trainer_class=%u and trainer_race IN(2,5,6,8,10)", bot_class);
+        else if (bot_class == CLASS_MAGE) result = WorldDatabase.PQuery("SELECT entry,trainer_race FROM creature_template WHERE scriptname='mage_bot' and trainer_class=%u and trainer_race IN(2,5,6,8,10)", bot_class);
+        else if (bot_class == CLASS_WARLOCK) result = WorldDatabase.PQuery("SELECT entry,trainer_race FROM creature_template WHERE scriptname='warlock_bot' and trainer_class=%u and trainer_race IN(2,5,6,8,10)", bot_class);
+        else if (bot_class == CLASS_WARRIOR) result = WorldDatabase.PQuery("SELECT entry,trainer_race FROM creature_template WHERE scriptname='warrior_bot' and trainer_class=%u and trainer_race IN(2,5,6,8,10)", bot_class);
+        else if (bot_class == CLASS_DRUID) result = WorldDatabase.PQuery("SELECT entry,trainer_race FROM creature_template WHERE scriptname='druid_bot' and trainer_class=%u and trainer_race IN(2,5,6,8,10)", bot_class);
+        else if (bot_class == CLASS_PALADIN) result = WorldDatabase.PQuery("SELECT entry,trainer_race FROM creature_template WHERE scriptname='paladin_bot' and trainer_class=%u and trainer_race IN(2,5,6,8,10)", bot_class);
+        else if (bot_class == CLASS_HUNTER) result = WorldDatabase.PQuery("SELECT entry,trainer_race FROM creature_template WHERE scriptname='hunter_bot' and trainer_class=%u and trainer_race IN(2,5,6,8,10)", bot_class);
+        else result = WorldDatabase.PQuery("SELECT entry,trainer_race FROM creature_template WHERE scriptname='script_bot' and trainer_class=%u and trainer_race IN(2,5,6,8,10)", bot_class);
+        break;
+    }
+
+    uint32 entry = 0;
+    uint32 bot_race = 0;
+
+    //find a bot to add
+    //first check randomly selected bot, second check any bot we can add
+    if (result)
+    {
+        std::set<std::pair<uint32, uint8>> npcBotsData;
+        do
+        {
+            Field* fields = result->Fetch();
+            uint32 temp_entry = fields[0].GetUInt32();
+            uint32 temp_race = fields[1].GetUInt8();
+            npcBotsData.insert(std::make_pair<uint32, uint8>(temp_entry, temp_race));
+        } while (result->NextRow());
+
+        uint32 m_rand = urand(1, uint32(result->GetRowCount()));
+        uint32 tmp_rand = 1;
+        std::set<std::pair<uint32, uint8>>::const_iterator itr = npcBotsData.begin();
+        bool haveSameBot = false;
+        bool moveback = false;
+        bool forcedCheck = false;
+        bool secondCheck = false;
+        while (true)
+        {
+            if (itr == npcBotsData.end()) //end of list is reached (selected bot is checked)
+            {
+                moveback = true;
+                --itr; //tmp_rand is not needed anymore
+                continue;
+            }
+            if (moveback && itr == npcBotsData.begin()) //search is finished, nothing found
+                break;
+            if (tmp_rand == m_rand || haveSameBot)
+            {
+                bool canAdd = true;
+                for (uint8 i = 0; i != GetMaxNpcBots(); ++i)
+                {
+                    if (m_botmap[i]->m_entry == (*itr).first)
+                    {
+                        haveSameBot = true;
+                        canAdd = false;
+                        if (!secondCheck)
+                            forcedCheck = true;
+                        secondCheck = true;
+                        break;
+                    }
+                }
+                if (canAdd)
+                {
+                    entry = (*itr).first;
+                    bot_race = (*itr).second;
+                    break;
+                }
+                if (forcedCheck)
+                {
+                    itr = npcBotsData.begin(); //reset searcher pos
+                    forcedCheck = false;
+                    continue;
+                }
+            }
+            //move through
+            if (moveback)
+                --itr;
+            else
+            {
+                ++itr;
+                ++tmp_rand;
+            }
+        }
+    }
+    if (!entry || !bot_race)
+    {
+        ChatHandler ch(GetSession());
+        ch.SendSysMessage("No more bots of this class available");
+        ch.SetSentErrorMessage(true);
+        return;
+    }
+    SetBotMustBeCreated(entry, bot_race, bot_class);
+    if (cost)
+        ModifyMoney(-(int32(cost)));
 }
 
 void Player::RegenerateAll()
@@ -2910,6 +3674,73 @@ void Player::RemoveFromGroup(Group* group, uint64 guid, RemoveMethod method /* =
 {
     if (group)
     {
+        uint8 players = 0;
+        Group::MemberSlotList const& members = group->GetMemberSlots();
+        for (Group::member_citerator itr = members.begin(); itr!= members.end(); ++itr)
+        {
+            if (Player* pl = sObjectAccessor->FindPlayer(itr->guid))
+                if (!pl->IsPlayerBot())
+                    ++players;
+        }
+        if (Player* player = sObjectAccessor->FindPlayer(guid))
+        {
+            //first remove npcbots so group will be disbanded if only 1 player
+            if (player->HaveBot())
+                for (uint8 i = 0; i != player->GetMaxNpcBots(); ++i)
+                    player->RemoveBot(player->GetBotMap(i)->m_guid, players <= 1);
+            group = player->GetGroup();
+            if (!group)
+                return; //group has been disbanded
+            //second remove playerbots (temp)
+            // if player is bot remove it by master
+            // if only one player logout bots
+            // in other cases uninvite bots and player and reinvite them into new group
+            if (player->IsPlayerBot())
+            {
+                group->RemoveMember(guid, method, kicker, reason);
+                group = NULL;
+                player->GetSession()->m_master->GetPlayerbotMgr()->LogoutPlayerBot(guid, false);
+                //bot will be removed from group and logged out so NULL pointer
+                return;
+            }
+            else if (player->HavePBot())
+            {
+                PlayerbotMgr* mgr = player->GetPlayerbotMgr();
+                if (players <= 1)
+                {
+                    mgr->LogoutAllBots();
+                    //group is no more
+                    return;
+                }
+                else
+                {
+                    std::set<Player*> botSet;
+                    for (PlayerBotMap::const_iterator it = mgr->GetPlayerBotsBegin(); it != mgr->GetPlayerBotsEnd(); ++it)
+                        if (it->second && it->second->GetGroup() && it->second->GetGroup() == group)
+                            botSet.insert(it->second);
+                    //remove all player's bots from this group
+                    mgr->RemoveAllBotsFromGroup(false);
+                    //check if group is disbanded (players > 1 but bot can be a leader)
+                    group = player->GetGroup();
+                    if (group)
+                    {
+                        group->RemoveMember(guid, method, kicker, reason);
+                        group = NULL;
+                    }
+                    for (std::set<Player*>::const_iterator itr = botSet.begin(); itr != botSet.end(); ++itr)
+                    {
+                        if ((*itr)->GetPlayerbotAI())
+                            (*itr)->GetPlayerbotAI()->InviteToMastersGroup();
+                    }
+                    //player is uninvited, group is recreated, nothing else is needed
+                    return;
+                }
+            }
+
+            group = player->GetGroup();
+            if (!group)
+                return; //group has been disbanded
+        }
         group->RemoveMember(guid, method, kicker, reason);
         group = NULL;
     }
@@ -3092,6 +3923,9 @@ void Player::GiveLevel(uint8 level)
             }
 
     sScriptMgr->OnPlayerLevelChanged(this, oldLevel);
+
+    if (m_playerbotAI)
+        m_playerbotAI->GiveLevel(level);
 }
 
 void Player::InitTalentForLevel()
@@ -4955,6 +5789,9 @@ void Player::DeleteFromDB(uint64 playerguid, uint32 accountId, bool updateRealmC
             trans->Append(stmt);
 
             CharacterDatabase.CommitTransaction(trans);
+            //npcbot - erase npcbots
+            CharacterDatabase.PExecute("DELETE FROM `character_npcbot` WHERE `owner` = '%u'", guid);
+            //end npcbot
             break;
         }
         // The character gets unlinked from the account, the name gets freed up and appears as deleted ingame
