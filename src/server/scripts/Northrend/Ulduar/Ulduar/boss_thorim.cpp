@@ -676,6 +676,7 @@ class boss_thorim : public CreatureScript
                 me->SetFacingToObject(who);
             }
 
+<<<<<<< HEAD
             void EnterEvadeMode()
             {
                 if (!_EnterEvadeMode())
@@ -687,6 +688,9 @@ class boss_thorim : public CreatureScript
             }
 
             void UpdateAI(const uint32 diff)
+=======
+            void UpdateAI(uint32 diff)
+>>>>>>> af4ac778d7f47e4ab20c042009cb8bbd9c41d94b
             {
                 if (!UpdateVictim())
                     return;

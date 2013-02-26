@@ -207,7 +207,7 @@ public:
             }
         }
 
-        void UpdateAI(const uint32 diff)
+        void UpdateAI(uint32 diff)
         {
             // World Notify Cooldown
             if (notifyCooldown >= diff)
