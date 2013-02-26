@@ -194,7 +194,7 @@ class npc_flash_freeze : public CreatureScript
                 _checkDespawnTimer = 1*IN_MILLISECONDS;
             }
 
-            void UpdateAI(uint32 const diff)
+            void UpdateAI(uint32 diff)
             {
                 if ((me->getVictim() && me->getVictim()->GetGUID() != _targetGUID) || (_instance && _instance->GetBossState(BOSS_HODIR) != IN_PROGRESS))
                     me->DespawnOrUnsummon();
@@ -417,7 +417,7 @@ class boss_hodir : public CreatureScript
                 }
             }
 
-            void UpdateAI(uint32 const diff)
+            void UpdateAI(uint32 diff)
             {
                 if (!UpdateVictim())
                     return;
@@ -501,7 +501,7 @@ class boss_hodir : public CreatureScript
                 DoMeleeAttackIfReady();
             }
 
-            void DoAction(int32 const action)
+            void DoAction(int32 action)
             {
                 switch (action)
                 {
@@ -572,7 +572,7 @@ class npc_icicle : public CreatureScript
                 _icicleTimer = 2.5*IN_MILLISECONDS;
             }
 
-            void UpdateAI(uint32 const diff)
+            void UpdateAI(uint32 diff)
             {
                 if (_icicleTimer <= diff)
                 {
@@ -621,7 +621,7 @@ class npc_snowpacked_icicle : public CreatureScript
                 _despawnTimer = 12*IN_MILLISECONDS;
             }
 
-            void UpdateAI(uint32 const diff)
+            void UpdateAI(uint32 diff)
             {
                 if (_despawnTimer <= diff)
                 {
@@ -664,7 +664,7 @@ class npc_hodir_priest : public CreatureScript
                 AttackStartCaster(who, 20.0f);
             }
 
-            void UpdateAI(uint32 const diff)
+            void UpdateAI(uint32 diff)
             {
                 if (!UpdateVictim() || me->HasUnitState(UNIT_STATE_STUNNED) || me->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_STUNNED))
                     return;
@@ -743,7 +743,7 @@ class npc_hodir_shaman : public CreatureScript
                 AttackStartCaster(who, 20.0f);
             }
 
-            void UpdateAI(uint32 const diff)
+            void UpdateAI(uint32 diff)
             {
                 if (!UpdateVictim() || me->HasUnitState(UNIT_STATE_STUNNED) || me->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_STUNNED))
                     return;
@@ -819,7 +819,7 @@ class npc_hodir_druid : public CreatureScript
                 AttackStartCaster(who, 20.0f);
             }
 
-            void UpdateAI(uint32 const diff)
+            void UpdateAI(uint32 diff)
             {
                 if (!UpdateVictim() || me->HasUnitState(UNIT_STATE_STUNNED) || me->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_STUNNED))
                     return;
@@ -903,7 +903,7 @@ class npc_hodir_mage : public CreatureScript
                     _summons.Despawn(summoned);
             }
 
-            void UpdateAI(uint32 const diff)
+            void UpdateAI(uint32 diff)
             {
                 if (!UpdateVictim() || me->HasUnitState(UNIT_STATE_STUNNED) || me->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_STUNNED))
                     return;

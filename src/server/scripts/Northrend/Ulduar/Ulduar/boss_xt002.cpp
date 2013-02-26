@@ -240,7 +240,7 @@ class boss_xt002 : public CreatureScript
                 instance->DoStartTimedAchievement(ACHIEVEMENT_TIMED_TYPE_EVENT, ACHIEV_MUST_DECONSTRUCT_FASTER);
             }
 
-            void DoAction(const int32 action)
+            void DoAction(int32 action)
             {
                 switch (action)
                 {
@@ -275,6 +275,7 @@ class boss_xt002 : public CreatureScript
                     ExposeHeart();
             }
 
+<<<<<<< HEAD
             uint32 GetData(uint32 type) const
             {
                 switch (type)
@@ -308,6 +309,9 @@ class boss_xt002 : public CreatureScript
             }
 
             void UpdateAI(const uint32 diff)
+=======
+            void UpdateAI(uint32 diff)
+>>>>>>> af4ac778d7f47e4ab20c042009cb8bbd9c41d94b
             {
                 if (!UpdateVictim() || !CheckInRoom())
                     return;
@@ -538,7 +542,13 @@ class mob_xt002_heart : public CreatureScript
                 me->SetVisible(false);
             }
 
+<<<<<<< HEAD
             void DamageTaken(Unit* /*pDone*/, uint32 &damage)
+=======
+            void UpdateAI(uint32 /*diff*/) { }
+
+            void JustDied(Unit* /*killer*/)
+>>>>>>> af4ac778d7f47e4ab20c042009cb8bbd9c41d94b
             {
                 Creature* xt002 = ObjectAccessor::GetCreature(*me, _instance->GetData64(BOSS_XT002));
                 if (!xt002 || !xt002->AI())
@@ -584,7 +594,7 @@ class mob_scrapbot : public CreatureScript
                     me->GetMotionMaster()->MoveFollow(pXT002, 0.0f, 0.0f);
             }
 
-            void UpdateAI(const uint32 diff)
+            void UpdateAI(uint32 diff)
             {
                 if (_instance && _instance->GetBossState(BOSS_XT002) != IN_PROGRESS)
                     me->DespawnOrUnsummon();
@@ -646,7 +656,7 @@ class mob_pummeller : public CreatureScript
                 me->SetInCombatWithZone();
             }
 
-            void UpdateAI(const uint32 diff)
+            void UpdateAI(uint32 diff)
             {
                 if (_instance && _instance->GetBossState(BOSS_XT002) != IN_PROGRESS)
                     me->DespawnOrUnsummon();
@@ -766,7 +776,7 @@ class mob_boombot : public CreatureScript
                 }
             }
 
-            void UpdateAI(uint32 const /*diff*/)
+            void UpdateAI(uint32 /*diff*/)
             {
                 if (_instance && _instance->GetBossState(BOSS_XT002) != IN_PROGRESS)
                     me->DespawnOrUnsummon();
@@ -803,7 +813,7 @@ class mob_life_spark : public CreatureScript
                 _shockTimer = 0; // first one is immediate.
             }
 
-            void UpdateAI(const uint32 diff)
+            void UpdateAI(uint32 diff)
             {
                 if (!UpdateVictim())
                     return;

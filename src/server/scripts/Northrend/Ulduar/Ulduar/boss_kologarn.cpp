@@ -356,6 +356,7 @@ class boss_kologarn : public CreatureScript
                 }
             }
 
+<<<<<<< HEAD
             uint32 GetData(uint32 type) const
             {
                 switch (type)
@@ -374,6 +375,9 @@ class boss_kologarn : public CreatureScript
             }
 
             void UpdateAI(uint32 const diff)
+=======
+            void UpdateAI(uint32 diff)
+>>>>>>> af4ac778d7f47e4ab20c042009cb8bbd9c41d94b
             {
                 if (!UpdateVictim())
                     return;

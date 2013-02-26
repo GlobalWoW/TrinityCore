@@ -257,9 +257,29 @@ class boss_ignis : public CreatureScript
                     default:
                         break;
                 }
+<<<<<<< HEAD
+=======
+
+                summon->AI()->AttackStart(me->getVictim());
+                summon->AI()->DoZoneInCombat();
+                summons.Summon(summon);
             }
 
-            void UpdateAI(const uint32 diff)
+            void DoAction(int32 action)
+            {
+                if (action != ACTION_REMOVE_BUFF)
+                    return;
+
+                me->RemoveAuraFromStack(SPELL_STRENGHT);
+                // Shattered Achievement
+                time_t secondKill = sWorld->GetGameTime();
+                if ((secondKill - _firstConstructKill) < 5)
+                    _shattered = true;
+                _firstConstructKill = secondKill;
+>>>>>>> af4ac778d7f47e4ab20c042009cb8bbd9c41d94b
+            }
+
+            void UpdateAI(uint32 diff)
             {
                 if (!UpdateVictim())
                     return;
@@ -410,7 +430,7 @@ class npc_iron_construct : public CreatureScript
                 }
             }
 
-            void UpdateAI(const uint32 /*uiDiff*/)
+            void UpdateAI(uint32 /*uiDiff*/)
             {
                 if (!UpdateVictim())
                     return;
@@ -483,7 +503,7 @@ class npc_scorch_ground : public CreatureScript
                 _heatTimer = 0;
             }
 
-            void UpdateAI(const uint32 uiDiff)
+            void UpdateAI(uint32 uiDiff)
             {
                 if (_heat)
                 {
